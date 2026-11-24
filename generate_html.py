@@ -480,6 +480,148 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   }
   .btn-primary-green:hover { background: #047857; }
 
+  .nav-tab.guide-tab { color: #7dd3fc; }
+  .nav-tab.guide-tab:hover { color: #ffffff; background: rgba(56,189,248,.22); }
+  .nav-tab.guide-tab.active { background: #ffffff !important; color: #0f172a !important; }
+
+  /* Plain-language narrative & guide styles */
+  .story-box {
+    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+    border: 1px solid #bae6fd; border-left: 4px solid #0284c7;
+    border-radius: 9px; padding: 10px 12px; font-size: 12px; color: var(--ink-2); line-height: 1.5;
+  }
+  .story-box .st-hd {
+    font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+    color: #0369a1; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center;
+  }
+  .story-box strong { color: var(--ink); }
+  .help-q {
+    display: inline-grid; place-items: center; width: 15px; height: 15px; border-radius: 50%;
+    background: #e2e8f0; color: #334155; font-size: 10px; font-weight: 800; cursor: help;
+    margin-left: 4px; vertical-align: middle; line-height: 1;
+  }
+  .help-q:hover { background: var(--accent); color: #fff; }
+  .guide-link-inline {
+    border: none; background: none; color: var(--accent-dark); font-size: 10.5px; font-weight: 700;
+    cursor: pointer; text-decoration: underline; padding: 0;
+  }
+
+  /* VIEW 4: GUÍA / MANUAL NARRATIVO */
+  #view-guide {
+    flex-direction: column; overflow-y: auto; padding: 18px 22px 36px; gap: 16px; background: var(--bg);
+  }
+  .guide-shell { max-width: 1180px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+  .guide-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0369a1 100%);
+    color: #fff; border-radius: 14px; padding: 22px 24px;
+    display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap;
+    box-shadow: var(--shadow);
+  }
+  .guide-hero h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .guide-hero p { font-size: 13.5px; color: #dbeafe; max-width: 720px; line-height: 1.5; }
+  .guide-sec-title { font-size: 16px; font-weight: 800; color: var(--ink); margin-bottom: 4px; letter-spacing: -0.01em; }
+  .guide-sec-sub { font-size: 12.5px; color: var(--muted); margin-bottom: 12px; }
+  .persona-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+  .persona-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 15px 16px;
+    display: flex; flex-direction: column; gap: 9px; box-shadow: var(--shadow-sm);
+  }
+  .persona-tag {
+    display: inline-flex; align-items: center; gap: 6px; width: fit-content;
+    font-size: 10.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+    padding: 3px 9px; border-radius: 999px;
+  }
+  .persona-card h3 { font-size: 15px; font-weight: 800; color: var(--ink); }
+  .persona-card p { font-size: 12.5px; color: var(--ink-2); line-height: 1.5; }
+  .persona-steps { padding-left: 16px; font-size: 12px; color: var(--ink-2); line-height: 1.55; display: flex; flex-direction: column; gap: 3px; }
+  .persona-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 6px; }
+
+  .glossary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 11px; }
+  .gloss-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 11px; padding: 13px 14px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .gloss-card .gc-term { font-size: 13.5px; font-weight: 800; color: var(--ink); display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+  .gloss-card .gc-plain { font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+  .gloss-card .gc-ex { font-size: 11px; color: var(--muted); background: var(--surface-2); border-radius: 7px; padding: 6px 8px; border: 1px solid var(--border); line-height: 1.4; }
+
+  .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 11px; }
+  .step-card {
+    background: #fff; border: 1px solid var(--border); border-radius: 11px; padding: 13px 14px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .step-badge {
+    width: 26px; height: 26px; border-radius: 8px; background: var(--accent); color: #fff;
+    font-size: 12.5px; font-weight: 800; display: grid; place-items: center;
+  }
+  .step-card h4 { font-size: 13px; font-weight: 800; color: var(--ink); }
+  .step-card p { font-size: 12px; color: var(--ink-2); line-height: 1.45; }
+
+  /* ===== ACCESSIBILITY & VOICE INCLUSION ===== */
+  body.a11y-large { font-size: 112%; }
+  body.a11y-large .story-box, body.a11y-large .eco-summary, body.a11y-large .eco-rec-box,
+  body.a11y-large .gloss-card .gc-plain, body.a11y-large .persona-card p { font-size: 14px; line-height: 1.6; }
+  body.a11y-contrast { --bg: #ffffff; --surface-2: #f8fafc; --border: #94a3b8; --border-strong: #475569; --muted: #334155; }
+
+  .voice-btn {
+    border: 1px solid rgba(255,255,255,.24); background: rgba(255,255,255,.1); color: #fff;
+    height: 32px; padding: 0 9px; border-radius: 8px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700;
+    transition: all .15s; white-space: nowrap;
+  }
+  .voice-btn:hover { background: rgba(255,255,255,.22); }
+  .voice-btn.active { background: #ef4444; border-color: #fca5a5; animation: micPulse 1.2s ease-in-out infinite; }
+  .voice-btn.speaking { background: #0284c7; border-color: #7dd3fc; }
+  .voice-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  @keyframes micPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.55); } 50% { box-shadow: 0 0 0 7px rgba(239,68,68,0); } }
+
+  .mic-inline-btn {
+    position: absolute; right: 26px; top: 50%; transform: translateY(-50%);
+    border: none; background: transparent; color: var(--accent-dark); cursor: pointer;
+    width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+  }
+  .mic-inline-btn:hover { background: var(--accent-soft); }
+  .mic-inline-btn.listening { background: #ef4444; color: #fff; animation: micPulse 1.2s ease-in-out infinite; }
+  .mic-inline-btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+
+  .btn-speak-sm {
+    border: 1px solid #0284c7; background: #e0f2fe; color: #0369a1;
+    font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 7px;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+  }
+  .btn-speak-sm:hover { background: #0284c7; color: #fff; }
+  .btn-speak-sm.speaking { background: #dc2626; border-color: #dc2626; color: #fff; }
+  .btn-speak-sm svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.1; }
+
+  /* Live Visual Closed-Caption Bar (Accessible for Deaf / Hard-of-Hearing & Voice Dictation) */
+  #a11y-caption-bar {
+    position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%);
+    width: min(740px, calc(100vw - 24px));
+    background: rgba(15, 23, 42, 0.96); color: #ffffff;
+    border: 2px solid #38bdf8; border-radius: 12px;
+    padding: 11px 14px; box-shadow: var(--shadow-lg);
+    display: none; align-items: center; justify-content: space-between; gap: 12px;
+    z-index: 250;
+  }
+  #a11y-caption-bar.open { display: flex; }
+  .cap-left { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+  .cap-tag { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: #7dd3fc; display: flex; align-items: center; gap: 6px; }
+  .cap-dot { width: 8px; height: 8px; border-radius: 50%; background: #38bdf8; }
+  .cap-dot.mic { background: #ef4444; }
+  .cap-text { font-size: 13px; line-height: 1.4; color: #f8fafc; font-weight: 500; }
+  .cap-stop {
+    border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.12); color: #fff;
+    font-size: 11.5px; font-weight: 700; padding: 6px 11px; border-radius: 7px; cursor: pointer; flex-shrink: 0;
+  }
+  .cap-stop:hover { background: #ef4444; border-color: #ef4444; }
+
+  .a11y-panel-guide {
+    background: linear-gradient(135deg, #ecfeff 0%, #f0f9ff 100%);
+    border: 1.5px solid #7dd3fc; border-radius: 12px; padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .a11y-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
   @media (max-width: 1160px) {
     .verified-chip { display: none; }
     .brand-text p { display: none; }
@@ -489,9 +631,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     .app { height: auto; min-height: 100vh; width: 100%; }
     header.topbar { height: auto; padding: 9px 10px; flex-wrap: wrap; gap: 7px; width: 100%; }
     .brand { flex: 1 1 0; min-width: 0; }
-    .nav-tabs { order: 3; width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .nav-tab { justify-content: center; padding: 7px 4px; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .nav-tabs { order: 3; width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .nav-tab { justify-content: center; padding: 7px 3px; font-size: 10.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .nav-tab svg { display: none; }
+    .nav-tab span.tab-long { display: none; }
+    .nav-tab span.tab-short { display: inline !important; }
     .btn-excel-hero { padding: 6px 9px; font-size: 11px; flex-shrink: 0; }
     .btn-excel-hero span.xl-long { display: none; }
     #view-map { flex-direction: column; overflow: visible; width: 100%; }
@@ -512,7 +656,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     .kpi-mini .val { font-size: 15px; }
     .exp-modes { grid-template-columns: 1fr; }
     .nat-grid-2 { grid-template-columns: 1fr; }
-    #view-table, #view-national { padding: 10px 10px 26px; overflow: visible; width: 100%; }
+    #view-table, #view-national, #view-guide { padding: 12px 10px 28px; overflow: visible; width: 100%; }
     .table-scroll { max-height: 62vh; }
   }
   @media (max-width: 480px) {
@@ -536,27 +680,35 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     <nav class="nav-tabs" role="tablist">
       <button class="nav-tab active" data-view="map">
         <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
-        Mapa Municipal
+        <span>Mapa<span class="tab-long"> Municipal</span></span>
       </button>
       <button class="nav-tab" data-view="table">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-        Explorador &amp; Ranking
+        <span>Ranking<span class="tab-long"> &amp; Tabla</span></span>
       </button>
       <button class="nav-tab" data-view="national">
         <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        Panorama Nacional
+        <span>Nacional<span class="tab-long"> (SIT)</span></span>
+      </button>
+      <button class="nav-tab guide-tab" data-view="guide" title="Manual paso a paso y significado sencillo de cada dato">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span><span class="tab-long">Cómo interpretar</span><span class="tab-short" style="display:none">Guía</span></span>
       </button>
     </nav>
 
     <div class="header-right">
+      <button class="voice-btn" id="btn-voice-mic" title="Dictado por voz: di un municipio o comando (ej. 'Cobán' o 'comparar Guatemala con Jalapa')">
+        <svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        <span class="xl-long">Dictar</span>
+      </button>
+      <button class="voice-btn" id="btn-voice-read" title="Leer en voz alta la vista actual con subtítulos visibles en pantalla">
+        <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        <span class="xl-long">Escuchar</span>
+      </button>
       <button class="btn-excel-hero" id="btn-open-excel-modal">
         <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         <span><span class="xl-long">Descargar </span>Excel (.xlsx)</span>
       </button>
-      <span class="verified-chip" title="Conciliación 0 error con archivo oficial SIT + KMZ 2026">
-        <span class="verified-dot"></span>
-        SIT Oficial · 0 error
-      </span>
     </div>
   </header>
 
@@ -592,7 +744,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         <div class="tb-group">
           <div class="search-wrap">
             <span class="search-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
-            <input id="map-search" class="search-input" type="text" autocomplete="off" placeholder="Buscar municipio o depto..." />
+            <input id="map-search" class="search-input" style="padding-right:52px;" type="text" autocomplete="off" placeholder="Buscar o dictar municipio..." />
+            <button id="search-mic" class="mic-inline-btn" title="Buscar por dictado de voz"><svg viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg></button>
             <button id="search-clear" class="search-clear" title="Limpiar">✕</button>
             <div id="search-results" class="search-results"></div>
           </div>
@@ -808,6 +961,205 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       </div>
     </div>
   </section>
+
+  <!-- VIEW 4: GUÍA Y MANUAL NARRATIVO -->
+  <section id="view-guide" class="view-container">
+    <div class="guide-shell">
+      <div class="guide-hero">
+        <div>
+          <h2>Cómo leer e interpretar este mapa (Guía inclusiva y sin tecnicismos)</h2>
+          <p>
+            Los datos oficiales de telecomunicaciones de Guatemala suelen venir en tablas gigantescas de Excel con miles de filas. Esta herramienta transforma esos archivos oficiales de la <strong>SIT (2014–2026)</strong> y el mapa oficial de <strong>27,352 comunidades (KMZ 2026)</strong> en un mapa interactivo y accesible —con lectura en voz alta, subtítulos visuales en vivo y dictado por voz— para que cualquier persona pueda entenderlo en segundos.
+          </p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn-primary-green" id="guide-speak-btn" style="background:#0284c7;">🔊 Escuchar esta guía</button>
+          <button class="btn-primary-green" id="guide-goto-map" style="background:#38bdf8;color:#0f172a;">Volver al Mapa →</button>
+        </div>
+      </div>
+
+      <!-- Panel de Inclusión y Accesibilidad (Personas sordas, sordomudas, baja visión o movilidad reducida) -->
+      <div class="a11y-panel-guide">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div class="guide-sec-title" style="margin-bottom:2px;">Accesibilidad e Inclusión: Voz, Subtítulos y Comunicación Asistida</div>
+            <div style="font-size:12px;color:var(--ink-2);line-height:1.45;">
+              Diseñado para incluir a <strong>personas sordas, sordomudas / no verbales, con baja visión o que prefieren navegar sin teclear</strong>: toda información hablada muestra subtítulos de alto contraste en pantalla y cualquier persona puede tanto dictar por voz como hacer que la plataforma hable por ella en voz alta.
+            </div>
+          </div>
+        </div>
+        <div class="a11y-controls-row">
+          <button class="btn-speak-sm" id="guide-a11y-mic">🎙️ Probar Dictado por Voz</button>
+          <button class="btn-speak-sm" id="guide-a11y-tts">🔊 Probar Lectura con Subtítulos</button>
+          <button class="btn-sm" id="btn-a11y-large">A+ Texto grande</button>
+          <button class="btn-sm" id="btn-a11y-contrast">◐ Alto contraste</button>
+          <select id="a11y-rate" class="ctrl-select" style="height:29px;font-size:11.5px;" title="Velocidad de lectura en voz alta">
+            <option value="0.85">Velocidad: Pausada (0.85x)</option>
+            <option value="1" selected>Velocidad: Normal (1.0x)</option>
+            <option value="1.2">Velocidad: Rápida (1.2x)</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:9px;margin-top:2px;">
+          <div class="gloss-card" style="padding:10px 12px;">
+            <div class="gc-term" style="font-size:12.5px;">Para personas sordomudas / no verbales</div>
+            <div class="gc-plain" style="font-size:11.5px;">Puedes seleccionar cualquier municipio con un toque y presionar <strong>"Escuchar"</strong> para que la aplicación <strong>narre en voz alta los datos ante un grupo o jurado</strong>, mostrando simultáneamente <strong>subtítulos grandes en pantalla</strong> sin depender de hablar ni oír.</div>
+          </div>
+          <div class="gloss-card" style="padding:10px 12px;">
+            <div class="gc-term" style="font-size:12.5px;">Para personas sordas o con hipoacusia</div>
+            <div class="gc-plain" style="font-size:11.5px;">Toda la plataforma es <strong>100% visual</strong>: semáforos de color, texto en español sencillo ("En palabras sencillas"), íconos <code>?</code> explicativos y barra de <strong>subtítulos sincronizados</strong> cuando la narración está activa.</div>
+          </div>
+          <div class="gloss-card" style="padding:10px 12px;">
+            <div class="gc-term" style="font-size:12.5px;">Dictado por voz inteligente (Español)</div>
+            <div class="gc-plain" style="font-size:11.5px;">Toca el micrófono <strong>Dictar</strong> y di un municipio (ej. <em>"Cobán"</em>), un departamento (<em>"Petén"</em>), o una orden como <em>"Comparar Guatemala con Jalapa"</em>, <em>"Semáforo"</em> o <em>"Descargar Excel"</em>.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. Recorridos según perfil -->
+      <div>
+        <div class="guide-sec-title">1. Dime qué quieres lograr y te digo exactamente qué mirar</div>
+        <div class="guide-sec-sub">Elige tu objetivo o prueba directamente los ejemplos reales con un clic:</div>
+        <div class="persona-grid">
+          <div class="persona-card">
+            <span class="persona-tag" style="background:var(--accent-soft);color:var(--accent-dark);">Emprendedor / Empresa</span>
+            <h3>"Quiero abrir un negocio, tienda u oficina y necesito buen internet"</h3>
+            <p>Te conviene un municipio con infraestructura ya madura, muchas antenas activas y respaldo de líneas fijas para que tu operación no se caiga.</p>
+            <ol class="persona-steps">
+              <li>Escribe el municipio en <strong>Buscar municipio o depto</strong>.</li>
+              <li>Mira el <strong>Semáforo ISI</strong>: <strong>Rojo (≥ 75)</strong> o <strong>Ámbar (45–74)</strong> indican buena infraestructura ya instalada.</li>
+              <li>Revisa <strong>Operadores de Líneas Fijas</strong> para ver qué empresas tienen cableado ahí.</li>
+            </ol>
+            <div class="persona-actions">
+              <button class="btn-sm" data-demo-muni="301">Probar: Antigua Guatemala →</button>
+              <button class="btn-sm" data-demo-muni="1601">Probar: Cobán →</button>
+            </div>
+          </div>
+
+          <div class="persona-card">
+            <span class="persona-tag" style="background:var(--emerald-soft);color:#065f46;">Proveedor ISP / Inversión</span>
+            <h3>"Busco municipios poco saturados donde llevar internet o crecer"</h3>
+            <p>Te interesan zonas con muchas aldeas/caseríos pero pocas antenas o sin competencia en telefonía/internet fijo ("océano azul").</p>
+            <ol class="persona-steps">
+              <li>En el selector de indicador elige <strong>Índice de Saturación Económica (ISI)</strong>.</li>
+              <li>Explora los municipios pintados en <strong>Verde (&lt; 45)</strong>: tienen menor saturación.</li>
+              <li>Revisa el <strong>Crecimiento a 3 años</strong> y si tiene <strong>0 líneas fijas</strong> (hay 31 municipios así en 2026-S1).</li>
+            </ol>
+            <div class="persona-actions">
+              <button class="btn-sm green" data-demo-muni="514">Probar: Sipacate (0 fijas, +657%) →</button>
+              <button class="btn-sm" id="guide-demo-zerofx">Ver los 31 sin líneas fijas →</button>
+            </div>
+          </div>
+
+          <div class="persona-card">
+            <span class="persona-tag" style="background:var(--purple-soft);color:var(--purple);">Ciudadano / Investigador / Alcaldía</span>
+            <h3>"Quiero conocer mi municipio, compararlo y bajar un informe"</h3>
+            <p>Puedes revisar el historial completo de los últimos 10 años, ver las aldeas en el mapa y descargar un archivo de Excel con tablas y mapa listo para imprimir.</p>
+            <ol class="persona-steps">
+              <li>Haz clic en tu municipio sobre el mapa (o búscalo arriba).</li>
+              <li>Presiona <strong>Comparar</strong> y toca un segundo municipio para verlos lado a lado.</li>
+              <li>Presiona <strong>Descargar Excel (.xlsx)</strong> para guardar tablas + hoja de mapa visual.</li>
+            </ol>
+            <div class="persona-actions">
+              <button class="btn-sm purple" id="guide-demo-cmp">Ver comparación: Guatemala vs Jalapa →</button>
+              <button class="btn-sm green" id="guide-demo-xlsx">Abrir descargas Excel →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Diccionario sin tecnicismos -->
+      <div>
+        <div class="guide-sec-title">2. ¿Qué significa cada palabra y cada número?</div>
+        <div class="guide-sec-sub">Explicación en español cotidiano de todos los indicadores oficiales que verás en pantalla:</div>
+        <div class="glossary-grid">
+          <div class="gloss-card">
+            <div class="gc-term">Radiobases <span class="pill">Antenas celulares</span></div>
+            <div class="gc-plain">Son las torres o antenas que dan señal a los teléfonos celulares en un municipio. Mientras más radiobases hay, mayor es la capacidad de la red móvil.</div>
+            <div class="gc-ex"><strong>Ejemplo real (2026-S1):</strong> Guatemala tiene 3,842 radiobases; el municipio típico (mediana nacional) tiene 48.</div>
+          </div>
+
+          <div class="gloss-card">
+            <div class="gc-term">Líneas Fijas <span class="pill" style="background:var(--teal-soft);color:#0f766e;">Red por cable</span></div>
+            <div class="gc-plain">Son las líneas telefónicas fijas instaladas en hogares, negocios y oficinas, separadas por empresa (TELGUA, COMCEL, Cablenet, Claro, etc.).</div>
+            <div class="gc-ex"><strong>Cómo leerlo:</strong> Si un municipio tiene 0 líneas fijas, sus habitantes dependen casi totalmente de telefonía celular o enlaces inalámbricos.</div>
+          </div>
+
+          <div class="gloss-card">
+            <div class="gc-term">Lugares Poblados <span class="pill ine">KMZ 2026</span></div>
+            <div class="gc-plain">Son todas las ciudades, pueblos, aldeas, caseríos, colonias y fincas registradas oficialmente con su punto GPS dentro de cada municipio (27,352 en todo el país).</div>
+            <div class="gc-ex"><strong>Para qué sirve:</strong> Al tocar un municipio, puedes ver exactamente dónde están sus aldeas en el mapa y cuántas comunidades comparten las antenas disponibles.</div>
+          </div>
+
+          <div class="gloss-card">
+            <div class="gc-term">Lugares / Radiobase <span class="pill warn">Brecha rural</span></div>
+            <div class="gc-plain">Divide el número de comunidades entre las antenas del municipio. Responde: <em>"¿cuántas comunidades dependen de una sola antena?"</em></div>
+            <div class="gc-ex"><strong>Cómo leerlo:</strong> Menos de 0.5 = cobertura muy densa (urbano). Más de 1.8 = muchas comunidades por cada antena (oportunidad de expansión).</div>
+          </div>
+
+          <div class="gloss-card">
+            <div class="gc-term">Semáforo ISI (0 a 100) <span class="pill ok">Decisión rápida</span></div>
+            <div class="gc-plain">Resume en una sola nota qué tan saturada o cubierta está la infraestructura del municipio comparándolo contra los otros 339 municipios del país:</div>
+            <div class="gc-ex">
+              <strong>Verde (0–44):</strong> Baja saturación / alta oportunidad.<br>
+              <strong>Ámbar (45–74):</strong> Mercado en consolidación.<br>
+              <strong>Rojo (75–100):</strong> Alta saturación / plaza muy madura.
+            </div>
+          </div>
+
+          <div class="gloss-card">
+            <div class="gc-term">Concentración HHI <span class="pill ine">Competencia</span></div>
+            <div class="gc-plain">Mide si en las líneas fijas compiten varias empresas o manda solo una. Es el indicador oficial que usan reguladores económicos internacionales (DOJ/FTC).</div>
+            <div class="gc-ex"><strong>Cómo leerlo:</strong> 10,000 = 1 solo operador controla el 100%. Debajo de 1,800 = mercado competitivo. En Guatemala la mayoría supera 9,000.</div>
+          </div>
+
+          <div class="gloss-card">
+            <div class="gc-term">Crecimiento 3 años <span class="pill ok">Tendencia</span></div>
+            <div class="gc-plain">Compara las radiobases de 2023-S1 contra 2026-S1 para ver si el municipio está recibiendo inversión nueva o si se quedó estancado.</div>
+            <div class="gc-ex"><strong>Referencia real:</strong> La mitad de los municipios creció +50% o más en 3 años. Arriba de +65% indica expansión muy acelerada.</div>
+          </div>
+
+          <div class="gloss-card">
+            <div class="gc-term">Panorama Nacional <span class="pill ine">Solo país</span></div>
+            <div class="gc-plain">Datos como usuarios celulares (21.5 millones), banda ancha fija (BAF), smartphones (ETM) y tarifas solo los publica la SIT a nivel de todo el país.</div>
+            <div class="gc-ex"><strong>Transparencia:</strong> Por eso los mostramos aparte en <em>Panorama Nacional</em> y nunca inventamos estimaciones por municipio.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Manual paso a paso de uso -->
+      <div>
+        <div class="guide-sec-title">3. Manual rápido: ¿Cómo buscar y usar cada botón?</div>
+        <div class="guide-sec-sub">Cinco acciones básicas para sacarle todo el provecho desde computadora o teléfono:</div>
+        <div class="steps-grid">
+          <div class="step-card">
+            <span class="step-badge">1</span>
+            <h4>Buscar un lugar</h4>
+            <p>Usa la caja <strong>"Buscar municipio o depto"</strong> arriba a la izquierda (no importa si pones tildes). Al elegir un resultado, el mapa se acerca automáticamente y abre su ficha.</p>
+          </div>
+          <div class="step-card">
+            <span class="step-badge">2</span>
+            <h4>Cambiar qué pinta el mapa</h4>
+            <p>Usa el selector de indicador para cambiar entre <strong>Semáforo ISI</strong>, <strong>Radiobases</strong>, <strong>Líneas fijas</strong>, <strong>Brecha</strong> o un operador específico (TELGUA, COMCEL, Cablenet, Claro...).</p>
+          </div>
+          <div class="step-card">
+            <span class="step-badge">3</span>
+            <h4>Ver la historia en movimiento</h4>
+            <p>Mueve la barra de años o presiona el botón azul <strong>▶</strong> para ver cómo cambiaron las antenas semestre por semestre desde 2016 hasta 2026. Si un municipio aparece rayado en gris, significa que la SIT no publicó ese dato ese año.</p>
+          </div>
+          <div class="step-card">
+            <span class="step-badge">4</span>
+            <h4>Ubicar aldeas y comparar</h4>
+            <p>Dentro de un municipio, toca <strong>Lugares GPS</strong> para ver sus aldeas y caseríos sobre el mapa. O toca <strong>Comparar</strong> y luego otro municipio para ver ambos lado a lado.</p>
+          </div>
+          <div class="step-card">
+            <span class="step-badge">5</span>
+            <h4>Descargar Excel con mapa</h4>
+            <p>Presiona el botón verde <strong>Descargar Excel (.xlsx)</strong> arriba a la derecha. Puedes bajar solo un municipio, un departamento entero, una comparación (2 a 5 municipios) o todo el país — cada archivo trae sus tablas y una hoja <strong>Mapa_Visual</strong>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </div>
 
 <!-- MODAL: CENTRO DE DESCARGAS EXCEL (.xlsx) -->
@@ -852,6 +1204,15 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 </div>
 
 <div id="map-tooltip"></div>
+
+<!-- Live Accessible Closed-Caption & Voice Feedback Bar -->
+<div id="a11y-caption-bar" role="status" aria-live="polite">
+  <div class="cap-left">
+    <div class="cap-tag"><span class="cap-dot" id="cap-dot"></span><span id="cap-mode-label">Lectura con subtítulos</span></div>
+    <div class="cap-text" id="cap-text"></div>
+  </div>
+  <button class="cap-stop" id="cap-stop-btn">Detener</button>
+</div>
 
 <script>
 const SIT = __SIT_DATA_PAYLOAD__;
@@ -1937,12 +2298,42 @@ const SIT = __SIT_DATA_PAYLOAD__;
       const rbSeries = SIT.meta.periods_rb.map(per => m.rb[per] ? m.rb[per].v : null);
       const fxSeries = SIT.meta.periods_fx.map(per => m.fx[per] ? m.fx[per].t : null);
 
+      // Plain-Spanish narrative strictly derived from this municipality's official numbers
+      const topOp = (() => {
+        if (!fxRec || fxRec.t === 0) return null;
+        let best = null;
+        SIT.meta.op_names.forEach((n, i) => { const v = fxRec.v[i]; if (v > 0 && (!best || v > best.v)) best = { n, v, pct: (v / fxRec.t * 100).toFixed(1) }; });
+        return best;
+      })();
+      const rbCount26 = m.rb['2026-S1']?.v ?? 0;
+      const fxCount26 = m.fx['2026-S1']?.t ?? 0;
+      const lpCount = m.lp_sum.tot;
+      const storyLine1 = `<strong>${esc(m.nom)}</strong> cuenta con <strong>${fmtInt(rbCount26)} antenas celulares</strong> para dar cobertura a <strong>${fmtInt(lpCount)} comunidades registradas</strong>${m.eco.lp_rb ? ` (${fmtDec(m.eco.lp_rb, 2)} comunidades por antena)` : ''}.`;
+      const storyLine2 = fxCount26 === 0
+        ? `En red fija reporta <strong>0 líneas</strong> en 2026-S1 (depende casi por completo de señal móvil o enlaces inalámbricos).`
+        : `En red fija suma <strong>${fmtInt(fxCount26)} líneas</strong>${topOp ? `, encabezadas por <strong>${esc(topOp.n)} (${topOp.pct}%)</strong>` : ''}.`;
+      const storyLine3 = m.eco.g3y !== null
+        ? `En los últimos 3 años sus antenas crecieron <strong>${m.eco.g3y >= 0 ? '+' : ''}${m.eco.g3y}%</strong> (${m.eco.g3y >= 65 ? 'expansión muy acelerada' : (m.eco.g3y >= 50 ? 'por encima de la mediana nacional de +50%' : 'crecimiento moderado frente a la mediana nacional de +50%')}).`
+        : '';
+
       tabBody = `
+        <!-- Plain-Spanish Narrative Card -->
+        <div class="story-box">
+          <div class="st-hd">
+            <span>En palabras sencillas</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="btn-speak-sm" id="btn-muni-speak" style="padding:2px 7px;font-size:10.5px;">🔊 Escuchar</button>
+              <button class="guide-link-inline" id="btn-muni-open-guide">Guía</button>
+            </div>
+          </div>
+          <div>${storyLine1} ${storyLine2} ${storyLine3}</div>
+        </div>
+
         <!-- Hero Economic Saturation & Recommendation Card -->
         <div class="eco-card tier-${m.eco.tier}">
           <div class="eco-top">
             <div>
-              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);">Índice de Saturación Económica (ISI)</div>
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);">Índice de Saturación Económica (ISI)<span class="help-q" title="Nota de 0 a 100 que resume qué tan cubierta está la infraestructura del municipio: Verde (0-44) = alta oportunidad; Ámbar (45-74) = consolidación; Rojo (75-100) = plaza muy madura y saturada.">?</span></div>
               <div class="eco-score-wrap num">
                 <span class="eco-score">${fmtDec(m.eco.isi, 1)}</span>
                 <span style="font-size:12px;color:var(--muted);font-weight:700;">/ 100</span>
@@ -1960,19 +2351,19 @@ const SIT = __SIT_DATA_PAYLOAD__;
             <div class="eco-rec-box"><strong>Si evalúas invertir en ISP / telecom:</strong> ${esc(rec.forTelco)}</div>
           </div>
           <div class="eco-pillars-mini num">
-            <div class="eco-p-item"><div class="pl">Concentración HHI</div><div class="pv">${m.eco.hhi !== null ? fmtInt(Math.round(m.eco.hhi)) : 'Sin red fija'}</div></div>
-            <div class="eco-p-item"><div class="pl">Crecimiento RB (3 años)</div><div class="pv">${m.eco.g3y !== null ? (m.eco.g3y >= 0 ? '+' : '') + m.eco.g3y + '%' : '—'}</div></div>
+            <div class="eco-p-item"><div class="pl">Concentración HHI<span class="help-q" title="Mide si compiten varias empresas en líneas fijas (0 a 10,000). Cerca de 10,000 = manda un solo operador; debajo de 1,800 = mercado competitivo.">?</span></div><div class="pv">${m.eco.hhi !== null ? fmtInt(Math.round(m.eco.hhi)) : 'Sin red fija'}</div></div>
+            <div class="eco-p-item"><div class="pl">Crecimiento RB (3 años)<span class="help-q" title="Porcentaje en que aumentaron las antenas celulares entre 2023-S1 y 2026-S1. Mediana nacional: +50%.">?</span></div><div class="pv">${m.eco.g3y !== null ? (m.eco.g3y >= 0 ? '+' : '') + m.eco.g3y + '%' : '—'}</div></div>
           </div>
         </div>
 
         <div class="stat-grid-2">
           <div class="stat-box">
-            <div class="s-lbl"><span>Radiobases</span><span>${pRb}</span></div>
+            <div class="s-lbl"><span>Radiobases<span class="help-q" title="Torres o antenas celulares activas reportadas oficialmente ante la SIT.">?</span></span><span>${pRb}</span></div>
             <div class="s-val num">${rbRec ? fmtInt(rbRec.v) : 'Sin dato'}</div>
             <div class="s-meta">${rbRec ? `Ranking <strong>#${rbRank}</strong> / ${rbScored.length}` : 'No publicado'}${prevRb ? `<br>${deltaHtml(rbRec?.v, prevRb.v, SIT.meta.periods_rb[rbIdx-1])}` : ''}</div>
           </div>
           <div class="stat-box">
-            <div class="s-lbl"><span>Líneas Fijas</span><span>${pFx}</span></div>
+            <div class="s-lbl"><span>Líneas Fijas<span class="help-q" title="Conexiones telefónicas fijas por cable o fibra reportadas por operador.">?</span></span><span>${pFx}</span></div>
             <div class="s-val num">${fxRec ? fmtInt(fxRec.t) : 'Sin dato'}</div>
             <div class="s-meta">${fxRec ? `Ranking <strong>#${fxRank}</strong> / 340` : '—'}${prevFx ? `<br>${deltaHtml(fxRec?.t, prevFx.t, SIT.meta.periods_fx[fxIdx-1])}` : ''}</div>
           </div>
@@ -2078,6 +2469,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
     document.getElementById('btn-focus-muni').onclick = () => zoomToBBox(m.bb, 1.3);
     document.getElementById('btn-close-muni').onclick = () => { state.selectedMuniId = null; layerLp.innerHTML = ''; updateMapColors(); renderInspector(); };
     document.getElementById('btn-start-compare').onclick = () => { state.compareMode = true; state.compareMuniId = null; updateCompareBanner(); };
+    const guideInlineBtn = document.getElementById('btn-muni-open-guide');
+    if (guideInlineBtn) guideInlineBtn.onclick = () => switchView('guide');
+    const speakMuniBtn = document.getElementById('btn-muni-speak');
+    if (speakMuniBtn) speakMuniBtn.onclick = () => speakCurrentContext();
 
     if (state.muniSubTab === 'lp') {
       function populateLPList() {
@@ -2863,6 +3258,300 @@ const SIT = __SIT_DATA_PAYLOAD__;
   }
   document.querySelectorAll('.nav-tab').forEach(btn => btn.onclick = () => switchView(btn.dataset.view));
 
+  // ===== GUIDE VIEW INTERACTIVE DEMO BUTTONS =====
+  document.getElementById('guide-goto-map').onclick = () => switchView('map');
+  document.querySelectorAll('[data-demo-muni]').forEach(btn => {
+    btn.onclick = () => {
+      metricSel.value = 'isi'; state.metric = 'isi'; stopPlay(); syncSliderToMetric();
+      selectAndFocusMuni(parseInt(btn.dataset.demoMuni, 10));
+    };
+  });
+  document.getElementById('guide-demo-zerofx').onclick = () => {
+    switchView('table');
+    document.getElementById('tbl-tier').value = '0';
+    state.tblSort = { col: 'fx', dir: 1 };
+    renderTable();
+  };
+  document.getElementById('guide-demo-cmp').onclick = () => {
+    switchView('map');
+    metricSel.value = 'isi'; state.metric = 'isi'; stopPlay(); syncSliderToMetric();
+    state.selectedMuniId = 101; state.compareMuniId = 2101; state.compareMode = false;
+    resetZoom(); updateMapColors(); renderInspector();
+  };
+  document.getElementById('guide-demo-xlsx').onclick = () => openExcelModal('compare');
+
+  // ===== VOICE DICTATION (SPEECH-TO-TEXT) + TEXT-TO-SPEECH WITH LIVE CAPTIONS =====
+  const capBar = document.getElementById('a11y-caption-bar');
+  const capDot = document.getElementById('cap-dot');
+  const capLabel = document.getElementById('cap-mode-label');
+  const capText = document.getElementById('cap-text');
+  const capStopBtn = document.getElementById('cap-stop-btn');
+  const btnVoiceMic = document.getElementById('btn-voice-mic');
+  const btnSearchMic = document.getElementById('search-mic');
+  const btnVoiceRead = document.getElementById('btn-voice-read');
+  const rateSel = document.getElementById('a11y-rate');
+
+  let activeRecog = null;
+  let isSpeaking = false;
+  let captionTimer = null;
+
+  function showCaption(modeLabel, text, isMic=false) {
+    capLabel.textContent = modeLabel;
+    capText.textContent = text;
+    capDot.classList.toggle('mic', isMic);
+    capBar.classList.add('open');
+  }
+  function stopAllVoice() {
+    if (captionTimer) { clearTimeout(captionTimer); captionTimer = null; }
+    if (window.speechSynthesis) { try { window.speechSynthesis.cancel(); } catch(e) {} }
+    if (activeRecog) { try { activeRecog.stop(); } catch(e) {} activeRecog = null; }
+    isSpeaking = false;
+    btnVoiceMic.classList.remove('active');
+    btnSearchMic.classList.remove('listening');
+    btnVoiceRead.classList.remove('speaking');
+    capBar.classList.remove('open');
+  }
+  capStopBtn.onclick = stopAllVoice;
+
+  function pickSpanishVoice() {
+    if (!window.speechSynthesis) return null;
+    const vs = window.speechSynthesis.getVoices() || [];
+    return vs.find(v => /es[-_]GT/i.test(v.lang))
+      || vs.find(v => /es[-_](419|MX|US|CO|CR)/i.test(v.lang))
+      || vs.find(v => /^es/i.test(v.lang))
+      || null;
+  }
+
+  function speakSentences(sentences, title='Lectura con subtítulos') {
+    stopAllVoice();
+    if (!sentences.length) return;
+    isSpeaking = true;
+    btnVoiceRead.classList.add('speaking');
+    const rate = parseFloat(rateSel?.value || '1');
+
+    if (!window.speechSynthesis) {
+      // Visual-only caption fallback if browser has no TTS
+      let i = 0;
+      function nextCap() {
+        if (!isSpeaking || i >= sentences.length) { stopAllVoice(); return; }
+        showCaption(title + ' (solo subtítulos)', sentences[i], false);
+        i++;
+        captionTimer = setTimeout(nextCap, 4200);
+      }
+      nextCap();
+      return;
+    }
+
+    let idx = 0;
+    function speakNext() {
+      if (!isSpeaking || idx >= sentences.length) { stopAllVoice(); return; }
+      const txt = sentences[idx];
+      showCaption(title, txt, false);
+      const utt = new SpeechSynthesisUtterance(txt);
+      const voice = pickSpanishVoice();
+      if (voice) utt.voice = voice;
+      utt.lang = voice?.lang || 'es-GT';
+      utt.rate = rate;
+      utt.onend = () => { idx++; speakNext(); };
+      utt.onerror = () => { idx++; speakNext(); };
+      window.speechSynthesis.speak(utt);
+    }
+    speakNext();
+  }
+
+  function buildMuniSpeech(m) {
+    const rec = getEcoRecommendation(m);
+    const rb = m.rb['2026-S1']?.v ?? 0;
+    const fx = m.fx['2026-S1']?.t ?? 0;
+    const lp = m.lp_sum.tot;
+    const s = [
+      `Resumen oficial de ${m.nom}, departamento de ${m.dep}.`,
+      `En el primer semestre de 2026 registra ${fmtInt(rb)} antenas celulares o radiobases para dar cobertura a ${fmtInt(lp)} comunidades registradas en el mapa oficial.`,
+      fx === 0
+        ? `En telefonía fija reporta cero líneas activas, por lo que depende principalmente de señal móvil o enlaces inalámbricos.`
+        : `En telefonía fija suma ${fmtInt(fx)} líneas oficiales entre los operadores activos.`,
+      m.eco.g3y !== null ? `En los últimos tres años sus antenas crecieron ${m.eco.g3y >= 0 ? 'más ' : ''}${m.eco.g3y} por ciento.` : '',
+      `Su Índice de Saturación Económica es de ${fmtDec(m.eco.isi, 1)} sobre 100, clasificado como ${rec.badge}.`,
+      `Para empresas o comercios: ${rec.forBiz}`,
+      `Para proveedores de internet o inversión en telecomunicaciones: ${rec.forTelco}`
+    ].filter(Boolean);
+    return s;
+  }
+
+  function speakCurrentContext() {
+    if (isSpeaking) { stopAllVoice(); return; }
+    if (state.view === 'guide') {
+      speakSentences([
+        'Bienvenido a la guía inclusiva del Observatorio Geoespacial de la Superintendencia de Telecomunicaciones de Guatemala.',
+        'Esta herramienta reúne los datos oficiales de los 340 municipios y 27 mil 352 comunidades de Guatemala en un mapa fácil de entender.',
+        'Las radiobases son las antenas celulares que brindan señal móvil. Las líneas fijas son conexiones por cable o fibra de operadores como TELGUA, COMCEL, Cablenet y Claro.',
+        'El Semáforo Económico ISI califica a cada municipio de cero a cien: verde significa baja saturación y gran oportunidad para llevar internet; ámbar indica mercado en consolidación; y rojo indica plaza madura con alta infraestructura instalada.',
+        'Puedes tocar cualquier municipio en el mapa, presionar Dictar para buscar usando tu voz, o descargar un archivo de Excel con tablas y mapa visual incluido.'
+      ], 'Guía en voz alta con subtítulos');
+      return;
+    }
+    if (state.selectedMuniId && state.compareMuniId) {
+      const m1 = muniById.get(state.selectedMuniId), m2 = muniById.get(state.compareMuniId);
+      speakSentences([
+        `Comparación entre ${m1.nom} y ${m2.nom} con datos oficiales del primer semestre de 2026.`,
+        `${m1.nom} tiene un Índice de Saturación de ${fmtDec(m1.eco.isi,1)} sobre 100, con ${fmtInt(m1.rb['2026-S1']?.v)} radiobases y ${fmtInt(m1.fx['2026-S1']?.t)} líneas fijas.`,
+        `${m2.nom} tiene un Índice de Saturación de ${fmtDec(m2.eco.isi,1)} sobre 100, con ${fmtInt(m2.rb['2026-S1']?.v)} radiobases y ${fmtInt(m2.fx['2026-S1']?.t)} líneas fijas.`
+      ], `Comparación ${m1.nom} vs ${m2.nom}`);
+      return;
+    }
+    if (state.selectedMuniId) {
+      const m = muniById.get(state.selectedMuniId);
+      speakSentences(buildMuniSpeech(m), `Narrativa · ${m.nom}`);
+      return;
+    }
+    if (state.selectedDeptoId) {
+      const d = deptoById.get(state.selectedDeptoId);
+      const dm = munisByDepto.get(d.id);
+      speakSentences([
+        `Departamento de ${d.nom}, integrado por ${dm.length} municipios.`,
+        `En 2026 registra ${fmtInt(d.rb['2026-S1']?.v)} radiobases y ${fmtInt(d.fx['2026-S1']?.t)} líneas fijas oficiales.`,
+        `Toca cualquiera de sus municipios para escuchar su recomendación económica detallada.`
+      ], `Departamento · ${d.nom}`);
+      return;
+    }
+    speakSentences([
+      'Observatorio Geoespacial de Guatemala con datos oficiales de la SIT hasta el primer semestre de 2026.',
+      'A nivel nacional existen 29 mil 186 radiobases, 2 millones 105 mil 12 líneas fijas y 27 mil 352 lugares poblados geolocalizados en los 340 municipios.',
+      'Según el Semáforo Económico, 139 municipios presentan baja saturación con alta oportunidad de expansión, 161 están en consolidación y 40 son plazas maduras de alta saturación.',
+      'Toca cualquier municipio en el mapa o usa el botón Dictar para explorar un lugar específico.'
+    ], 'Resumen Nacional con subtítulos');
+  }
+
+  function findBestEntity(phrase) {
+    const np = norm(phrase);
+    if (!np) return null;
+    // Exact muni match first
+    for (const m of SIT.munis) if (norm(m.nom) === np) return { type: 'muni', item: m };
+    // Exact depto match
+    for (const d of SIT.deptos) if (norm(d.nom) === np) return { type: 'depto', item: d };
+    // Contains muni (longest name match wins)
+    const muniHits = SIT.munis.filter(m => np.includes(norm(m.nom)) || norm(m.nom).includes(np))
+      .sort((a,b) => b.nom.length - a.nom.length);
+    if (muniHits.length) return { type: 'muni', item: muniHits[0] };
+    const depHits = SIT.deptos.filter(d => np.includes(norm(d.nom)) || norm(d.nom).includes(np))
+      .sort((a,b) => b.nom.length - a.nom.length);
+    if (depHits.length) return { type: 'depto', item: depHits[0] };
+    return null;
+  }
+
+  function handleVoiceTranscript(raw) {
+    const t = norm(raw);
+    if (!t) return;
+    // 1. Comparison command: "comparar X con Y" or "X versus Y"
+    const cmpMatch = t.match(/(?:comparar|compara)?\s*(.+?)\s+(?:con|contra|versus|vs|y)\s+(.+)/);
+    if (cmpMatch && (t.includes('compar') || t.includes('versus') || t.includes('vs') || t.includes('contra'))) {
+      const a = findBestEntity(cmpMatch[1]), b = findBestEntity(cmpMatch[2]);
+      if (a?.type === 'muni' && b?.type === 'muni' && a.item.id !== b.item.id) {
+        switchView('map');
+        state.selectedMuniId = a.item.id; state.compareMuniId = b.item.id; state.compareMode = false;
+        resetZoom(); updateMapColors(); renderInspector();
+        showCaption('Dictado reconocido', `Comparando ${a.item.nom} vs ${b.item.nom}`, false);
+        captionTimer = setTimeout(() => { if (!isSpeaking) capBar.classList.remove('open'); }, 4000);
+        return;
+      }
+    }
+    // 2. Navigation / action commands
+    if (t.includes('guia') || t.includes('manual') || t.includes('ayuda') || t.includes('como interpretar')) { switchView('guide'); showCaption('Dictado reconocido', 'Abriendo guía de interpretación', false); return; }
+    if (t.includes('excel') || t.includes('descargar')) { openExcelModal(); showCaption('Dictado reconocido', 'Abriendo centro de descargas Excel (.xlsx)', false); return; }
+    if (t.includes('tabla') || t.includes('ranking')) { switchView('table'); showCaption('Dictado reconocido', 'Abriendo explorador y ranking', false); return; }
+    if (t.includes('nacional')) { switchView('national'); showCaption('Dictado reconocido', 'Abriendo panorama nacional', false); return; }
+    if (t.includes('semaforo') || t.includes('saturacion') || t.includes('isi')) {
+      switchView('map'); metricSel.value = 'isi'; state.metric = 'isi'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
+      showCaption('Dictado reconocido', 'Mostrando mapa de Semáforo Económico ISI', false); return;
+    }
+    if (t.includes('radiobase') || t.includes('antena')) {
+      switchView('map'); metricSel.value = 'rb'; state.metric = 'rb'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
+      showCaption('Dictado reconocido', 'Mostrando mapa de Radiobases', false); return;
+    }
+    if (t.includes('linea') && t.includes('fija')) {
+      switchView('map'); metricSel.value = 'fx_total'; state.metric = 'fx_total'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
+      showCaption('Dictado reconocido', 'Mostrando mapa de Líneas Fijas', false); return;
+    }
+    // 3. Direct municipality or department lookup
+    const hit = findBestEntity(t);
+    if (hit) {
+      if (hit.type === 'muni') {
+        searchInput.value = hit.item.nom; searchClear.style.display = 'block';
+        selectAndFocusMuni(hit.item.id);
+        speakSentences(buildMuniSpeech(hit.item), `Dictado: ${hit.item.nom}`);
+      } else {
+        switchView('map');
+        document.getElementById('depto-filter').value = hit.item.id;
+        state.deptoFilter = hit.item.id; state.selectedMuniId = null; state.selectedDeptoId = hit.item.id;
+        layerLp.innerHTML = ''; zoomToBBox(hit.item.bb, 0.22); updateMapColors(); renderInspector();
+        showCaption('Dictado reconocido', `Enfocando departamento de ${hit.item.nom}`, false);
+      }
+    } else {
+      searchInput.value = raw; renderSearch(raw);
+      showCaption('Dictado escuchado', `"${raw}" — selecciona una coincidencia en el buscador.`, false);
+      captionTimer = setTimeout(() => { if (!isSpeaking) capBar.classList.remove('open'); }, 4500);
+    }
+  }
+
+  function toggleVoiceDictation() {
+    if (activeRecog) { stopAllVoice(); return; }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      showCaption('Dictado por voz no disponible en este navegador', 'Usa Google Chrome, Edge o Safari reciente (en HTTPS) para dictar con micrófono, o escribe en el buscador y usa "Escuchar".', true);
+      captionTimer = setTimeout(() => capBar.classList.remove('open'), 6500);
+      return;
+    }
+    stopAllVoice();
+    const recog = new SR();
+    recog.lang = 'es-GT';
+    recog.interimResults = true;
+    recog.maxAlternatives = 1;
+    activeRecog = recog;
+    btnVoiceMic.classList.add('active');
+    btnSearchMic.classList.add('listening');
+    showCaption('Escuchando dictado por voz (es-GT)...', 'Di el nombre de un municipio (ej. "Cobán"), "Comparar Guatemala con Jalapa", "Semáforo" o "Descargar Excel"...', true);
+
+    let finalTxt = '';
+    recog.onresult = (e) => {
+      let interim = '';
+      for (let i = e.resultIndex; i < e.results.length; i++) {
+        if (e.results[i].isFinal) finalTxt += e.results[i][0].transcript;
+        else interim += e.results[i][0].transcript;
+      }
+      showCaption('Transcripción en vivo', (finalTxt + ' ' + interim).trim(), true);
+    };
+    recog.onerror = (e) => {
+      const msg = e.error === 'not-allowed' ? 'Permiso de micrófono denegado. Habilítalo en el candado del navegador.' : `No se pudo escuchar (${e.error}). Intenta de nuevo.`;
+      stopAllVoice();
+      showCaption('Dictado por voz', msg, true);
+      captionTimer = setTimeout(() => capBar.classList.remove('open'), 5000);
+    };
+    recog.onend = () => {
+      const heard = finalTxt.trim();
+      activeRecog = null;
+      btnVoiceMic.classList.remove('active');
+      btnSearchMic.classList.remove('listening');
+      if (heard) handleVoiceTranscript(heard);
+      else capBar.classList.remove('open');
+    };
+    try { recog.start(); } catch (err) { stopAllVoice(); }
+  }
+
+  btnVoiceMic.onclick = toggleVoiceDictation;
+  btnSearchMic.onclick = toggleVoiceDictation;
+  btnVoiceRead.onclick = speakCurrentContext;
+  document.getElementById('guide-speak-btn').onclick = () => { state.view = 'guide'; speakCurrentContext(); };
+  document.getElementById('guide-a11y-mic').onclick = toggleVoiceDictation;
+  document.getElementById('guide-a11y-tts').onclick = () => { state.view = 'guide'; speakCurrentContext(); };
+  document.getElementById('btn-a11y-large').onclick = function() {
+    document.body.classList.toggle('a11y-large');
+    this.classList.toggle('green', document.body.classList.contains('a11y-large'));
+  };
+  document.getElementById('btn-a11y-contrast').onclick = function() {
+    document.body.classList.toggle('a11y-contrast');
+    this.classList.toggle('green', document.body.classList.contains('a11y-contrast'));
+  };
+
   // Optional URL hash helper for direct municipality deep-linking (e.g. #muni=1601 or #metric=isi)
   initMap();
   const hash = location.hash || '';
@@ -2872,6 +3561,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
   renderInspector();
   initTableView();
   initNationalView();
+  if (hash.includes('view=guide')) switchView('guide');
   const cmpMatch = hash.match(/cmp=(\d+),(\d+)/);
   const mMatch = hash.match(/muni=(\d+)/);
   if (cmpMatch) {
