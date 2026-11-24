@@ -3752,15 +3752,53 @@ const SIT = {"meta":{"source_file":"Copia de 04NOV2026 - SIT Consolidado Histori
     captionTimer = setTimeout(() => { if (!isSpeaking) capBar.classList.remove('open'); }, 5500);
   }
 
-  function toggleVoiceDictation() {
+  let micPermissionGranted = false;
+
+  async function requestMicrophonePermission() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      return { ok: true, skipped: true }; // fallback directly to SpeechRecognition if mediaDevices unavailable
+    }
+    try {
+      showCaption('Permiso de micrófono requerido', 'Acepta la ventana del navegador ("Permitir micrófono") para activar el dictado por voz...', true);
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Release stream immediately so SpeechRecognition can capture audio cleanly
+      stream.getTracks().forEach(track => track.stop());
+      micPermissionGranted = true;
+      return { ok: true };
+    } catch (err) {
+      micPermissionGranted = false;
+      const isFileProto = location.protocol === 'file:';
+      const msg = isFileProto
+        ? 'El navegador bloquea el micrófono en archivos locales (file://). Ábrelo desde el enlace HTTPS: https://jaredr0.github.io/mapaton-SIT/'
+        : (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
+            ? 'Permiso de micrófono denegado. Toca el ícono del candado junto a la URL, permite el micrófono y vuelve a presionar Dictar.'
+            : (err.name === 'NotFoundError'
+                ? 'No se detectó ningún micrófono conectado en este dispositivo.'
+                : `No se pudo activar el micrófono (${err.name || err.message}).`));
+      return { ok: false, msg };
+    }
+  }
+
+  async function toggleVoiceDictation() {
     if (activeRecog) { stopAllVoice(); return; }
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      showCaption('Web Speech API no disponible en este navegador', 'Abre el enlace en Chrome, Safari o Edge (HTTPS) para dictar con micrófono, o escribe tu frase en el buscador y presiona Enter.', true);
+      showCaption('Web Speech API no disponible en este navegador', 'Abre el enlace HTTPS en Google Chrome, Safari o Edge para dictar por voz, o escribe tu frase en el buscador y presiona Enter.', true);
       captionTimer = setTimeout(() => capBar.classList.remove('open'), 6500);
       return;
     }
     stopAllVoice();
+
+    // Explicitly ask the browser for microphone permission before starting SpeechRecognition
+    if (!micPermissionGranted) {
+      const perm = await requestMicrophonePermission();
+      if (!perm.ok) {
+        showCaption('Permiso de micrófono necesario', perm.msg, true);
+        captionTimer = setTimeout(() => capBar.classList.remove('open'), 7500);
+        return;
+      }
+    }
+
     const recog = new SR();
     recog.lang = 'es-GT';
     recog.continuous = false;
@@ -3769,7 +3807,7 @@ const SIT = {"meta":{"source_file":"Copia de 04NOV2026 - SIT Consolidado Histori
     activeRecog = recog;
     btnVoiceMic.classList.add('active');
     btnSearchMic.classList.add('listening');
-    showCaption('Escuchando dictado (Web Speech API · es-GT)...', 'Prueba decir: "Dame los datos de Petén", "Cuántas radiobases tiene Cobán", "Comparar Guatemala con Jalapa" o "Descargar Excel de Petén".', true);
+    showCaption('Micrófono activo · Escuchando (es-GT)...', 'Prueba decir: "Dame los datos de Petén", "Cuántas radiobases tiene Cobán", "Comparar Guatemala con Jalapa" o "Descargar Excel de Petén".', true);
 
     let finalTxt = '';
     let lastInterim = '';
@@ -3784,8 +3822,9 @@ const SIT = {"meta":{"source_file":"Copia de 04NOV2026 - SIT Consolidado Histori
       if (live) showCaption('Escuchando en vivo...', `"${live}"`, true);
     };
     recog.onerror = (e) => {
-      const msg = e.error === 'not-allowed'
-        ? 'Permiso de micrófono bloqueado. Habilítalo en el ícono de candado junto a la URL (HTTPS).'
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') micPermissionGranted = false;
+      const msg = (e.error === 'not-allowed' || e.error === 'service-not-allowed')
+        ? 'Permiso de micrófono bloqueado. Habilítalo en el ícono de candado junto a la URL (HTTPS) y recarga.'
         : (e.error === 'no-speech' ? 'No se detectó voz. Toca Dictar de nuevo y habla cerca del micrófono.' : `Error de micrófono (${e.error}).`);
       stopAllVoice();
       showCaption('Dictado por voz', msg, true);
