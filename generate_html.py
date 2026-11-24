@@ -958,8 +958,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       return out;
     }
 
-    function buildSheetXML(rows, headerRowIdx = 0) {
-      // Compute column widths
+    function buildSheetXML(rows, headerRowIdx = 0, hasDrawing = false) {
       const colWidths = [];
       for (const r of rows) {
         r.forEach((cell, cIdx) => {
@@ -995,30 +994,73 @@ const SIT = __SIT_DATA_PAYLOAD__;
       const autoFilter = (rows.length > headerRowIdx + 1 && headerRowIdx >= 0)
         ? `<autoFilter ref="A${headerRowIdx+1}:${colLetter(maxCols-1)}${rows.length}"/>`
         : '';
+      const drawingTag = hasDrawing ? `<drawing r:id="rId1"/>` : '';
 
       return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
   ${colsXml}
   <sheetData>${rowXmls.join('')}</sheetData>
   ${autoFilter}
+  ${drawingTag}
 </worksheet>`;
     }
 
+    function buildDrawingXML(imgIdx, widthPx, heightPx, startRow = 2, startCol = 0) {
+      // 1 px = 9525 EMU at 96 DPI; scale cleanly to ~880px display width in Excel
+      const scale = 880 / Math.max(1, widthPx);
+      const cx = Math.round(widthPx * scale * 9525);
+      const cy = Math.round(heightPx * scale * 9525);
+      return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">
+  <xdr:oneCellAnchor>
+    <xdr:from><xdr:col>${startCol}</xdr:col><xdr:colOff>95250</xdr:colOff><xdr:row>${startRow}</xdr:row><xdr:rowOff>95250</xdr:rowOff></xdr:from>
+    <xdr:ext cx="${cx}" cy="${cy}"/>
+    <xdr:pic>
+      <xdr:nvPicPr>
+        <xdr:cNvPr id="${imgIdx + 1}" name="MapaSIT_${imgIdx}"/>
+        <xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr>
+      </xdr:nvPicPr>
+      <xdr:blipFill>
+        <a:blip xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:embed="rId1"/>
+        <a:stretch><a:fillRect/></a:stretch>
+      </xdr:blipFill>
+      <xdr:spPr>
+        <a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm>
+        <a:prstGeom prst="rect"><a:avLst/></a:prstGeom>
+      </xdr:spPr>
+    </xdr:pic>
+    <xdr:clientData/>
+  </xdr:oneCellAnchor>
+</xdr:wsDr>`;
+    }
+
     function createXLSXBlob(sheets) {
-      // sheets: [{name, rows, headerRowIdx}]
       const safeSheets = sheets.map((s, idx) => ({
         name: s.name.replace(/[\\/*?:[\]]/g, '').slice(0, 31) || `Hoja${idx+1}`,
         rows: s.rows,
-        headerRowIdx: s.headerRowIdx ?? 0
+        headerRowIdx: s.headerRowIdx ?? 0,
+        image: s.image || null
       }));
+
+      const drawingOverrides = [];
+      let drawCount = 0;
+      safeSheets.forEach((s) => {
+        if (s.image) {
+          drawCount++;
+          s._drawIdx = drawCount;
+          drawingOverrides.push(`<Override PartName="/xl/drawings/drawing${drawCount}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>`);
+        }
+      });
 
       const contentTypes = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
   <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
   <Default Extension="xml" ContentType="application/xml"/>
+  ${drawCount > 0 ? '<Default Extension="png" ContentType="image/png"/>' : ''}
   <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
   <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
   ${safeSheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}
+  ${drawingOverrides.join('')}
 </Types>`;
 
       const rootRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -1039,7 +1081,6 @@ const SIT = __SIT_DATA_PAYLOAD__;
   <Relationship Id="rId${safeSheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
 </Relationships>`;
 
-      // Styles: 0=default text, 1=navy bold header, 2=integer #,##0, 3=decimal #,##0.00
       const stylesXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
   <fonts count="2">
@@ -1072,7 +1113,22 @@ const SIT = __SIT_DATA_PAYLOAD__;
         { name: 'xl/styles.xml', bytes: enc.encode(stylesXml) },
       ];
       safeSheets.forEach((s, i) => {
-        files.push({ name: `xl/worksheets/sheet${i+1}.xml`, bytes: enc.encode(buildSheetXML(s.rows, s.headerRowIdx)) });
+        files.push({ name: `xl/worksheets/sheet${i+1}.xml`, bytes: enc.encode(buildSheetXML(s.rows, s.headerRowIdx, !!s.image)) });
+        if (s.image) {
+          const dIdx = s._drawIdx;
+          const sheetRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing${dIdx}.xml"/>
+</Relationships>`;
+          const drawRels = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/image${dIdx}.png"/>
+</Relationships>`;
+          files.push({ name: `xl/worksheets/_rels/sheet${i+1}.xml.rels`, bytes: enc.encode(sheetRels) });
+          files.push({ name: `xl/drawings/drawing${dIdx}.xml`, bytes: enc.encode(buildDrawingXML(dIdx, s.image.widthPx, s.image.heightPx, s.image.startRow ?? 2, s.image.startCol ?? 0)) });
+          files.push({ name: `xl/drawings/_rels/drawing${dIdx}.xml.rels`, bytes: enc.encode(drawRels) });
+          files.push({ name: `xl/media/image${dIdx}.png`, bytes: s.image.bytes });
+        }
       });
 
       return new Blob([makeZip(files)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -1779,6 +1835,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
         <p style="font-size:11.5px;color:var(--ink-2);line-height:1.45;">
           Combina <strong>cobertura móvil por comunidad</strong>, <strong>penetración fija</strong>, <strong>escala de red</strong> y el <strong>Índice HHI de competencia</strong> (metodología OCDE + DOJ/FTC) para detectar plazas saturadas frente a oportunidades de expansión.
         </p>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">
+          <button class="btn-sm" id="btn-quick-zerofx">31 munis con 0 líneas fijas</button>
+          <button class="btn-sm" id="btn-quick-boom">Top crecimiento RB (3 años)</button>
+        </div>
       </div>
 
       <div class="card">
@@ -1809,6 +1869,18 @@ const SIT = __SIT_DATA_PAYLOAD__;
     `;
     document.getElementById('btn-view-isi-map').onclick = () => {
       metricSel.value = 'isi'; state.metric = 'isi'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
+    };
+    document.getElementById('btn-quick-zerofx').onclick = () => {
+      switchView('table');
+      document.getElementById('tbl-tier').value = '0';
+      state.tblSort = { col: 'fx', dir: 1 };
+      renderTable();
+    };
+    document.getElementById('btn-quick-boom').onclick = () => {
+      switchView('table');
+      document.getElementById('tbl-tier').value = '';
+      state.tblSort = { col: 'g3y', dir: -1 };
+      renderTable();
     };
     container.querySelectorAll('.rank-item[data-muni]').forEach(el => el.onclick = () => selectAndFocusMuni(parseInt(el.dataset.muni, 10)));
     container.querySelectorAll('button[data-depto]').forEach(el => el.onclick = () => {
@@ -2050,7 +2122,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
           <span style="font-weight:800;font-size:15px;color:#6d28d9;">● ${esc(m2.nom)}</span>
         </div>
         <div class="ins-actions">
-          <button class="btn-sm green" id="btn-xlsx-cmp">⬇ Descargar Excel Comparación (.xlsx)</button>
+          <button class="btn-sm green" id="btn-xlsx-cmp">⬇ Excel con Mapa (.xlsx)</button>
+          <button class="btn-sm" id="btn-share-cmp">Copiar enlace</button>
         </div>
       </div>
 
@@ -2089,6 +2162,12 @@ const SIT = __SIT_DATA_PAYLOAD__;
     `;
     document.getElementById('btn-exit-cmp').onclick = () => { state.compareMode = false; state.compareMuniId = null; updateMapColors(); renderInspector(); };
     document.getElementById('btn-xlsx-cmp').onclick = () => exportCompareXLSX([m1.id, m2.id]);
+    document.getElementById('btn-share-cmp').onclick = function() {
+      const url = `${location.origin}${location.pathname}#metric=${state.metric}&cmp=${m1.id},${m2.id}`;
+      navigator.clipboard?.writeText(url);
+      this.textContent = 'Enlace copiado ✓';
+      setTimeout(() => { this.textContent = 'Copiar enlace'; }, 1800);
+    };
   }
 
   function renderDeptoInspector(container, dep) {
@@ -2134,9 +2213,281 @@ const SIT = __SIT_DATA_PAYLOAD__;
     container.querySelectorAll('.rank-item[data-muni]').forEach(el => el.onclick = () => selectAndFocusMuni(parseInt(el.dataset.muni, 10)));
   }
 
-  // ===== CATEGORICAL EXCEL (.XLSX) BUILDERS =====
-  function exportMuniXLSX(m) {
+  // ===== OFFSCREEN CANVAS CARTOGRAPHIC MAP RENDERER FOR EXCEL (.XLSX) =====
+  const CMP_MAP_COLORS = ['#f59e0b', '#7c3aed', '#0284c7', '#10b981', '#e11d48'];
+
+  async function renderExportMapPNG(spec) {
+    // spec: { mode: 'muni'|'depto'|'compare'|'national', muni, depto, munis, period }
+    const W = 1280, H = 860;
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // Clean editorial background
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 0, W, H);
+
+    // Top dark institutional header bar
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(0, 0, W, 86);
+    ctx.fillStyle = '#0284c7';
+    ctx.fillRect(0, 86, W, 4);
+
+    let title = 'Mapa Oficial SIT Guatemala', subtitle = 'Datos Oficiales SIT (2014–2026) + Lugares Poblados KMZ 2026';
+    if (spec.mode === 'muni') {
+      title = `${spec.muni.nom} (${spec.muni.dep}) · Mapa Municipal y Lugares Poblados`;
+      subtitle = `INE ${String(spec.muni.id).padStart(4,'0')} · Índice ISI ${fmtDec(spec.muni.eco.isi,1)}/100 · ${fmtInt(spec.muni.lp_sum.tot)} lugares poblados GPS`;
+    } else if (spec.mode === 'depto') {
+      title = `Departamento de ${spec.depto.nom} · Semáforo Económico ISI (${spec.period})`;
+      subtitle = `${munisByDepto.get(spec.depto.id).length} municipios · Radiobases, Líneas Fijas e Índice de Saturación Económica`;
+    } else if (spec.mode === 'compare') {
+      title = `Comparación Territorial: ${spec.munis.map(m => m.nom).join(' vs ')}`;
+      subtitle = `Corte 2026-S1 · Ubicación geográfica, Índice ISI (OCDE + HHI) e infraestructura oficial SIT`;
+    } else {
+      title = `Guatemala (340 Municipios) · Índice de Saturación Económica ISI (${spec.period})`;
+      subtitle = `139 Baja Saturación (Oportunidad) · 161 En Consolidación · 40 Alta Saturación (Polo Maduro)`;
+    }
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(title, 30, 42);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.font = '500 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(subtitle, 30, 68);
+
+    // Map viewport region on left (x: 24..810, y: 110..816)
+    const mapX = 24, mapY = 110, mapW = 786, mapH = 706;
+    ctx.fillStyle = '#edf4fa';
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1.5;
+    ctx.fillRect(mapX, mapY, mapW, mapH);
+    ctx.strokeRect(mapX, mapY, mapW, mapH);
+
+    // Determine bounding box in SVG coordinates
+    let bb = [0, 0, SIT.meta.svg_w, SIT.meta.svg_h];
+    if (spec.mode === 'muni') {
+      const [x1,y1,x2,y2] = spec.muni.bb;
+      const bw = Math.max(45, x2 - x1), bh = Math.max(45, y2 - y1);
+      bb = [x1 - bw * 0.65, y1 - bh * 0.65, x2 + bw * 0.65, y2 + bh * 0.65];
+    } else if (spec.mode === 'depto') {
+      const [x1,y1,x2,y2] = spec.depto.bb;
+      const bw = Math.max(55, x2 - x1), bh = Math.max(55, y2 - y1);
+      bb = [x1 - bw * 0.22, y1 - bh * 0.22, x2 + bw * 0.22, y2 + bh * 0.22];
+    }
+
+    const bbW = bb[2] - bb[0], bbH = bb[3] - bb[1];
+    const pad = 22;
+    const sc = Math.min((mapW - 2*pad) / bbW, (mapH - 2*pad) / bbH);
+    const offX = mapX + (mapW - bbW * sc) / 2 - bb[0] * sc;
+    const offY = mapY + (mapH - bbH * sc) / 2 - bb[1] * sc;
+    const isiScale = computeScale('isi', '2026-S1');
+    const cmpMap = new Map();
+    if (spec.mode === 'compare') spec.munis.forEach((m, i) => cmpMap.set(m.id, { idx: i, col: CMP_MAP_COLORS[i % CMP_MAP_COLORS.length] }));
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(mapX + 1, mapY + 1, mapW - 2, mapH - 2);
+    ctx.clip();
+    ctx.translate(offX, offY);
+    ctx.scale(sc, sc);
+
+    // Draw all 340 municipalities
+    for (const m of SIT.munis) {
+      const path = new Path2D(m.d);
+      if (spec.mode === 'muni') {
+        ctx.fillStyle = m.id === spec.muni.id ? '#fef3c7' : (m.did === spec.muni.did ? '#e2e8f0' : '#f1f5f9');
+      } else if (spec.mode === 'depto') {
+        ctx.fillStyle = m.did === spec.depto.id ? isiScale.colorOf(m.eco.isi) : '#e2e8f0';
+      } else if (spec.mode === 'compare') {
+        ctx.fillStyle = cmpMap.has(m.id) ? cmpMap.get(m.id).col : '#e2e8f0';
+      } else {
+        ctx.fillStyle = isiScale.colorOf(m.eco.isi);
+      }
+      ctx.fill(path);
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = Math.max(0.35, 0.7 / sc);
+      ctx.stroke(path);
+    }
+
+    // Lakes
+    for (const lk of SIT.lakes) {
+      const path = new Path2D(lk.d);
+      ctx.fillStyle = '#7dd3fc'; ctx.fill(path);
+      ctx.strokeStyle = '#0284c7'; ctx.lineWidth = Math.max(0.4, 0.7 / sc); ctx.stroke(path);
+    }
+
+    // Department borders
+    for (const d of SIT.deptos) {
+      const path = new Path2D(d.d);
+      ctx.strokeStyle = (spec.mode === 'depto' && d.id === spec.depto.id) ? '#0f172a' : 'rgba(30,41,59,0.45)';
+      ctx.lineWidth = ((spec.mode === 'depto' && d.id === spec.depto.id) ? 2.2 : 1.0) / sc;
+      ctx.stroke(path);
+    }
+
+    // Mode-specific highlights
+    if (spec.mode === 'muni') {
+      const mp = new Path2D(spec.muni.d);
+      ctx.strokeStyle = '#d97706'; ctx.lineWidth = 3.2 / sc; ctx.stroke(mp);
+      // Plot Lugares Poblados GPS points inside selected muni
+      const pts = SIT.lp[String(spec.muni.id)] || [];
+      for (const pt of pts) {
+        const [px, py] = projLonLat(pt[0], pt[1]);
+        ctx.beginPath();
+        ctx.arc(px, py, (pt[4] === 0 ? 4.8 : (pt[4] === 1 ? 3.5 : 2.5)) / sc, 0, Math.PI * 2);
+        ctx.fillStyle = LP_GRP_COLORS[pt[4]];
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 0.8 / sc; ctx.stroke();
+      }
+    } else if (spec.mode === 'depto') {
+      ctx.textAlign = 'center';
+      ctx.font = `bold ${Math.max(8, 11 / sc)}px -apple-system, sans-serif`;
+      for (const m of munisByDepto.get(spec.depto.id)) {
+        ctx.lineWidth = 3 / sc; ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+        ctx.strokeText(m.nom, m.c[0], m.c[1]);
+        ctx.fillStyle = '#0f172a'; ctx.fillText(m.nom, m.c[0], m.c[1]);
+      }
+    } else if (spec.mode === 'compare') {
+      for (const m of spec.munis) {
+        const mp = new Path2D(m.d);
+        ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.4 / sc; ctx.stroke(mp);
+      }
+      // Numbered pins on compared municipalities
+      spec.munis.forEach((m, i) => {
+        const col = CMP_MAP_COLORS[i % CMP_MAP_COLORS.length];
+        const r = 13 / sc;
+        ctx.beginPath(); ctx.arc(m.c[0], m.c[1], r, 0, Math.PI * 2);
+        ctx.fillStyle = col; ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5 / sc; ctx.stroke();
+        ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = `bold ${14 / sc}px -apple-system, sans-serif`;
+        ctx.fillText(String(i + 1), m.c[0], m.c[1]);
+      });
+    } else {
+      // National: crisp department labels
+      ctx.textAlign = 'center';
+      ctx.font = `bold ${9.5 / sc}px -apple-system, sans-serif`;
+      for (const d of SIT.deptos) {
+        const nudge = DEPTO_LABEL_NUDGE[d.id] || [0,0];
+        ctx.lineWidth = 2.8 / sc; ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+        ctx.strokeText(d.nom.toUpperCase(), d.c[0] + nudge[0], d.c[1] + nudge[1]);
+        ctx.fillStyle = '#0f172a'; ctx.fillText(d.nom.toUpperCase(), d.c[0] + nudge[0], d.c[1] + nudge[1]);
+      }
+    }
+    ctx.restore();
+
+    // Right Legend & Summary Panel (x: 828..1256, y: 110..816)
+    const rx = 828, ry = 110, rw = 428, rh = 706;
+    ctx.fillStyle = '#ffffff'; ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1.5;
+    ctx.fillRect(rx, ry, rw, rh); ctx.strokeRect(rx, ry, rw, rh);
+
+    let cy = ry + 34;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+
+    if (spec.mode === 'compare') {
+      ctx.fillStyle = '#0f172a'; ctx.font = 'bold 18px -apple-system, sans-serif';
+      ctx.fillText('Municipios Comparados (2026-S1)', rx + 20, cy);
+      cy += 24;
+      spec.munis.forEach((m, i) => {
+        const col = CMP_MAP_COLORS[i % CMP_MAP_COLORS.length];
+        const rec = getEcoRecommendation(m);
+        ctx.fillStyle = '#f8fafc'; ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
+        ctx.fillRect(rx + 18, cy, rw - 36, 108); ctx.strokeRect(rx + 18, cy, rw - 36, 108);
+        ctx.fillStyle = col;
+        ctx.fillRect(rx + 18, cy, 8, 108);
+        ctx.beginPath(); ctx.arc(rx + 42, cy + 22, 12, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ffffff'; ctx.font = 'bold 13px -apple-system, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(String(i + 1), rx + 42, cy + 27);
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#0f172a'; ctx.font = 'bold 16px -apple-system, sans-serif';
+        ctx.fillText(`${m.nom} (${m.dep})`, rx + 62, cy + 27);
+        ctx.fillStyle = '#334155'; ctx.font = '600 13px -apple-system, sans-serif';
+        ctx.fillText(`ISI: ${fmtDec(m.eco.isi,1)} / 100 · ${rec.shortLabel}`, rx + 36, cy + 54);
+        ctx.fillStyle = '#475569'; ctx.font = '500 12.5px -apple-system, sans-serif';
+        ctx.fillText(`Radiobases: ${fmtInt(m.rb['2026-S1']?.v)}   ·   Líneas Fijas: ${fmtInt(m.fx['2026-S1']?.t)}`, rx + 36, cy + 76);
+        ctx.fillText(`Lug. Poblados: ${fmtInt(m.lp_sum.tot)}   ·   Crec. 3a: ${m.eco.g3y!==null?(m.eco.g3y>=0?'+':'')+m.eco.g3y+'%':'—'}`, rx + 36, cy + 96);
+        cy += 120;
+      });
+    } else if (spec.mode === 'muni') {
+      const m = spec.muni, rec = getEcoRecommendation(m);
+      // Mini locator map of Guatemala
+      const lmX = rx + 24, lmY = cy - 10, lmW = rw - 48, lmH = 260;
+      ctx.fillStyle = '#f1f5f9'; ctx.fillRect(lmX, lmY, lmW, lmH);
+      const lsc = Math.min((lmW - 20) / SIT.meta.svg_w, (lmH - 20) / SIT.meta.svg_h);
+      const loX = lmX + (lmW - SIT.meta.svg_w * lsc) / 2, loY = lmY + (lmH - SIT.meta.svg_h * lsc) / 2;
+      ctx.save(); ctx.translate(loX, loY); ctx.scale(lsc, lsc);
+      for (const d of SIT.deptos) { const p = new Path2D(d.d); ctx.fillStyle = d.id === m.did ? '#bae6fd' : '#e2e8f0'; ctx.fill(p); ctx.strokeStyle='#fff'; ctx.lineWidth=1/lsc; ctx.stroke(p); }
+      const mp = new Path2D(m.d); ctx.fillStyle = '#f59e0b'; ctx.fill(mp);
+      ctx.restore();
+      cy = lmY + lmH + 28;
+      ctx.fillStyle = '#0f172a'; ctx.font = 'bold 18px -apple-system, sans-serif';
+      ctx.fillText('Indicadores Oficiales (2026-S1)', rx + 20, cy); cy += 26;
+      const lines = [
+        `Semáforo ISI: ${fmtDec(m.eco.isi,1)} / 100 (${rec.shortLabel})`,
+        `Radiobases en operación: ${fmtInt(m.rb['2026-S1']?.v)}`,
+        `Líneas fijas totales: ${fmtInt(m.fx['2026-S1']?.t)}`,
+        `Lugares poblados (KMZ 2026): ${fmtInt(m.lp_sum.tot)}`,
+        `Concentración HHI fija: ${m.eco.hhi!==null?fmtInt(Math.round(m.eco.hhi)):'Sin líneas fijas'}`,
+        `Crecimiento RB (3 años): ${m.eco.g3y!==null?(m.eco.g3y>=0?'+':'')+m.eco.g3y+'%':'—'}`,
+        `GPS Cabecera: ${m.gps[1].toFixed(4)}° N, ${Math.abs(m.gps[0]).toFixed(4)}° W`
+      ];
+      ctx.font = '600 13.5px -apple-system, sans-serif'; ctx.fillStyle = '#334155';
+      for (const ln of lines) { ctx.fillText(ln, rx + 20, cy); cy += 26; }
+      cy += 10;
+      ctx.fillStyle = '#0f172a'; ctx.font = 'bold 14px -apple-system, sans-serif';
+      ctx.fillText('Leyenda Puntos GPS (Lugares Poblados):', rx + 20, cy); cy += 22;
+      const glbls = ['Cabecera/Urbano', 'Aldea', 'Caserío', 'Colonia', 'Finca', 'Otro'];
+      glbls.forEach((g, gi) => {
+        const gx = rx + 24 + (gi % 2) * 190, gy = cy + Math.floor(gi / 2) * 24;
+        ctx.beginPath(); ctx.arc(gx, gy - 4, 5, 0, Math.PI * 2); ctx.fillStyle = LP_GRP_COLORS[gi]; ctx.fill();
+        ctx.fillStyle = '#475569'; ctx.font = '500 12.5px -apple-system, sans-serif'; ctx.fillText(g, gx + 12, gy);
+      });
+    } else {
+      // Depto or National ISI Legend
+      const scope = spec.mode === 'depto' ? munisByDepto.get(spec.depto.id) : SIT.munis;
+      const t0 = scope.filter(m=>m.eco.tier===0).length, t1 = scope.filter(m=>m.eco.tier===1).length, t2 = scope.filter(m=>m.eco.tier===2).length;
+      ctx.fillStyle = '#0f172a'; ctx.font = 'bold 18px -apple-system, sans-serif';
+      ctx.fillText('Semáforo Económico ISI (0–100)', rx + 20, cy); cy += 28;
+      const tiers = [
+        { col: '#dc2626', t: `Alta Saturación (≥ 75): ${t2} munis`, s: 'Infraestructura madura y muy cubierta' },
+        { col: '#fbbf24', t: `En Consolidación (45–74): ${t1} munis`, s: 'Demanda activa con espacio de mejora' },
+        { col: '#10b981', t: `Baja Saturación (< 45): ${t0} munis`, s: 'Alta brecha / oportunidad de expansión' },
+      ];
+      for (const tr of tiers) {
+        ctx.fillStyle = tr.col; ctx.fillRect(rx + 20, cy - 14, 16, 16);
+        ctx.fillStyle = '#0f172a'; ctx.font = 'bold 14px -apple-system, sans-serif'; ctx.fillText(tr.t, rx + 44, cy);
+        ctx.fillStyle = '#64748b'; ctx.font = '500 12px -apple-system, sans-serif'; ctx.fillText(tr.s, rx + 44, cy + 18);
+        cy += 48;
+      }
+      cy += 16;
+      const rbSum = scope.reduce((s,m)=>s+(m.rb[spec.period]?.v||0),0);
+      const fxSum = scope.reduce((s,m)=>s+(m.fx[spec.period]?.t||0),0);
+      const lpSum = scope.reduce((s,m)=>s+m.lp_sum.tot,0);
+      ctx.fillStyle = '#0f172a'; ctx.font = 'bold 16px -apple-system, sans-serif';
+      ctx.fillText(`Resumen Oficial (${spec.period})`, rx + 20, cy); cy += 26;
+      ctx.fillStyle = '#334155'; ctx.font = '600 13.5px -apple-system, sans-serif';
+      ctx.fillText(`Municipios incluidos: ${scope.length}`, rx + 20, cy); cy += 25;
+      ctx.fillText(`Radiobases en operación: ${fmtInt(rbSum)}`, rx + 20, cy); cy += 25;
+      ctx.fillText(`Líneas fijas totales: ${fmtInt(fxSum)}`, rx + 20, cy); cy += 25;
+      ctx.fillText(`Lugares poblados (KMZ 2026): ${fmtInt(lpSum)}`, rx + 20, cy); cy += 25;
+    }
+
+    // Footer attribution
+    ctx.fillStyle = '#64748b'; ctx.font = '500 11.5px -apple-system, sans-serif';
+    ctx.fillText('Fuente: SIT Guatemala (Boletines Oficiales 2014–2026) · KMZ Lugares Poblados 2026 · Metodología ISI (OCDE) + HHI (DOJ/FTC)', 24, H - 16);
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const buf = await blob.arrayBuffer();
+    return { bytes: new Uint8Array(buf), widthPx: W, heightPx: H, startRow: 2, startCol: 0 };
+  }
+
+  // ===== CATEGORICAL EXCEL (.XLSX) BUILDERS (WITH EMBEDDED VISUAL MAP!) =====
+  async function exportMuniXLSX(m) {
     const rec = getEcoRecommendation(m);
+    const mapImg = await renderExportMapPNG({ mode: 'muni', muni: m, period: '2026-S1' });
+    const sMap = [
+      ['Mapa Geoespacial Oficial · ' + m.nom + ' (' + m.dep + ')'],
+      ['Generado automáticamente desde datos oficiales SIT 2014–2026 + KMZ Lugares Poblados 2026.']
+    ];
     const s1 = [
       ['Campo', 'Valor Oficial', 'Fuente / Detalle'],
       ['Código INE', String(m.id).padStart(4,'0'), 'División Político-Administrativa'],
@@ -2174,14 +2525,20 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
     XLSXWriter.downloadXLSX(`SIT_Municipio_${m.dep}_${m.nom}.xlsx`.replace(/\s+/g,'_'), [
       { name: 'Resumen_y_Recomendacion', rows: s1 },
+      { name: 'Mapa_Visual', rows: sMap, headerRowIdx: 0, image: mapImg },
       { name: 'Serie_Historica_SIT', rows: s2 },
       { name: 'Lugares_Poblados_2026', rows: s3 },
     ]);
   }
 
-  function exportDeptoXLSX(did, period='2026-S1') {
+  async function exportDeptoXLSX(did, period='2026-S1') {
     const dep = deptoById.get(did);
     const depMunis = munisByDepto.get(did);
+    const mapImg = await renderExportMapPNG({ mode: 'depto', depto: dep, period });
+    const sMap = [
+      ['Mapa Departamental · ' + dep.nom + ' (' + period + ')'],
+      ['Semáforo Económico ISI (0–100) con los ' + depMunis.length + ' municipios oficiales.']
+    ];
     const avgIsi = Math.round((depMunis.reduce((s,m)=>s+m.eco.isi,0)/depMunis.length)*10)/10;
     const s1 = [
       ['Indicador Departamental', 'Valor', 'Detalle'],
@@ -2216,14 +2573,20 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
     XLSXWriter.downloadXLSX(`SIT_Departamento_${dep.nom}_${period}.xlsx`.replace(/\s+/g,'_'), [
       { name: 'Resumen_Departamento', rows: s1 },
+      { name: 'Mapa_Visual', rows: sMap, headerRowIdx: 0, image: mapImg },
       { name: 'Municipios_Detalle', rows: s2 },
       { name: 'Historico_Depto', rows: s3 },
     ]);
   }
 
-  function exportCompareXLSX(muniIds) {
+  async function exportCompareXLSX(muniIds) {
     const munis = muniIds.map(id => muniById.get(id)).filter(Boolean);
     if (munis.length < 2) return;
+    const mapImg = await renderExportMapPNG({ mode: 'compare', munis, period: '2026-S1' });
+    const sMap = [
+      ['Mapa Comparativo · ' + munis.map(m => m.nom).join(' vs ')],
+      ['Ubicación en Guatemala e indicadores oficiales SIT 2026-S1 + Índice ISI.']
+    ];
     const hdr = ['Indicador', ...munis.map(m => `${m.nom} (${m.dep})`)];
     const s1 = [
       hdr,
@@ -2253,13 +2616,19 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
     XLSXWriter.downloadXLSX(`SIT_Comparacion_${munis.map(m=>m.nom).join('_vs_')}.xlsx`.replace(/\s+/g,'_').slice(0,80), [
       { name: 'Comparativo_Directo', rows: s1 },
+      { name: 'Mapa_Visual', rows: sMap, headerRowIdx: 0, image: mapImg },
       { name: 'Historico_Radiobases', rows: s2 },
       { name: 'Historico_Lineas_Fijas', rows: s3 },
     ]);
   }
 
-  function exportNationalXLSX(period='2026-S1', customList=null) {
+  async function exportNationalXLSX(period='2026-S1', customList=null) {
     const list = customList || SIT.munis;
+    const mapImg = await renderExportMapPNG({ mode: 'national', period });
+    const sMap = [
+      ['Mapa Nacional de Guatemala (340 Municipios) · Corte ' + period],
+      ['Coloreado según el Índice de Saturación Económica ISI (0–100).']
+    ];
     const s1 = [['INE','Departamento','Municipio','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados 2026','Lug./RB','Área km²','Lat GPS','Lon GPS','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP']];
     for (const m of list) {
       const fx = m.fx[period], rec = getEcoRecommendation(m);
@@ -2280,6 +2649,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     ];
     XLSXWriter.downloadXLSX(`SIT_Guatemala_${list.length}_Municipios_${period}.xlsx`, [
       { name: 'Municipios_Consolidado', rows: s1 },
+      { name: 'Mapa_Visual', rows: sMap, headerRowIdx: 0, image: mapImg },
       { name: 'Metodologia_ISI_HHI', rows: s2 },
     ]);
   }
@@ -2306,14 +2676,14 @@ const SIT = __SIT_DATA_PAYLOAD__;
     if (state.expMode === 'muni') {
       const defId = state.selectedMuniId || 101;
       expConfigArea.innerHTML = `<div class="exp-field"><label>Selecciona el municipio a exportar:</label><select id="exp-muni-sel">${sortedMunisAlpha.map(m => `<option value="${m.id}" ${m.id===defId?'selected':''}>${esc(m.nom)} (${esc(m.dep)}) — ISI ${fmtDec(m.eco.isi,1)}</option>`).join('')}</select></div>`;
-      expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Resumen_y_Recomendacion</code> (KPIs, GPS, ISI, HHI, Semáforo y recomendación)<br>2. <code>Serie_Historica_SIT</code> (Radiobases 2016–2026 + 9 Operadores Fijos 2022–2026 + PDF)<br>3. <code>Lugares_Poblados_2026</code> (Todas las aldeas, caseríos y sitios GPS del municipio)`;
+      expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Resumen_y_Recomendacion</code> (KPIs, GPS, ISI, HHI, Semáforo y recomendación)<br>2. <code>Mapa_Visual</code> (<strong>Mapa cartográfico del municipio + sus puntos GPS incrustado en Excel</strong>)<br>3. <code>Serie_Historica_SIT</code> (Radiobases 2016–2026 + 9 Operadores Fijos 2022–2026 + PDF)<br>4. <code>Lugares_Poblados_2026</code> (Todas las aldeas, caseríos y sitios GPS)`;
     } else if (state.expMode === 'depto') {
       const defDid = state.selectedDeptoId || state.deptoFilter || 100;
       expConfigArea.innerHTML = `
         <div class="exp-field"><label>Selecciona el departamento:</label><select id="exp-depto-sel">${sortedDeptosAlpha.map(d => `<option value="${d.id}" ${d.id===defDid?'selected':''}>${esc(d.nom)} (${munisByDepto.get(d.id).length} municipios)</option>`).join('')}</select></div>
         <div class="exp-field"><label>Período de corte:</label><select id="exp-depto-per">${[...SIT.meta.periods_fx].reverse().map(p => `<option value="${p}">${p}</option>`).join('')}</select></div>
       `;
-      expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Resumen_Departamento</code> (Totales oficiales + distribución Semáforo ISI)<br>2. <code>Municipios_Detalle</code> (Todos los municipios del depto con operadores, ISI y recomendación)<br>3. <code>Historico_Depto</code> (Serie histórica 2016–2026 del departamento)`;
+      expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Resumen_Departamento</code> (Totales oficiales + distribución Semáforo ISI)<br>2. <code>Mapa_Visual</code> (<strong>Mapa del departamento coloreado por Semáforo ISI incrustado en Excel</strong>)<br>3. <code>Municipios_Detalle</code> (Todos los municipios del depto con operadores, ISI y recomendación)<br>4. <code>Historico_Depto</code> (Serie histórica 2016–2026 del departamento)`;
     } else if (state.expMode === 'compare') {
       expConfigArea.innerHTML = `
         <div class="exp-field"><label>Agregar municipio a la comparación (2 a 5 municipios):</label>
@@ -2339,10 +2709,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
         const id = parseInt(document.getElementById('exp-cmp-add').value, 10);
         if (!state.expCompareIds.includes(id) && state.expCompareIds.length < 5) { state.expCompareIds.push(id); renderChips(); }
       };
-      expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Comparativo_Directo</code> (Tabla lado a lado: ISI, HHI, operadores, lugares poblados y recomendación)<br>2. <code>Historico_Radiobases</code> (2016-S2 – 2026-S1 comparados)<br>3. <code>Historico_Lineas_Fijas</code> (2022-S2 – 2026-S1 comparados)`;
+      expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Comparativo_Directo</code> (Tabla lado a lado: ISI, HHI, operadores, lugares poblados y recomendación)<br>2. <code>Mapa_Visual</code> (<strong>Mapa de Guatemala destacando los municipios comparados con etiquetas e ISI</strong>)<br>3. <code>Historico_Radiobases</code> (2016-S2 – 2026-S1 comparados)<br>4. <code>Historico_Lineas_Fijas</code> (2022-S2 – 2026-S1 comparados)`;
     } else {
       expConfigArea.innerHTML = `<div class="exp-field"><label>Período de corte nacional:</label><select id="exp-nat-per">${[...SIT.meta.periods_fx].reverse().map(p => `<option value="${p}">${p} (340 municipios completos)</option>`).join('')}</select></div>`;
-      expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Municipios_Consolidado</code> (340 municipios con operadores, GPS, Lugares Poblados, ISI, HHI y recomendación)<br>2. <code>Metodologia_ISI_HHI</code> (Documentación completa de fórmulas y umbrales)`;
+      expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Municipios_Consolidado</code> (340 municipios con operadores, GPS, Lugares Poblados, ISI, HHI y recomendación)<br>2. <code>Mapa_Visual</code> (<strong>Mapa nacional de los 340 municipios coloreado por Semáforo ISI incrustado en Excel</strong>)<br>3. <code>Metodologia_ISI_HHI</code> (Documentación completa de fórmulas y umbrales)`;
     }
   }
 
@@ -2353,21 +2723,27 @@ const SIT = __SIT_DATA_PAYLOAD__;
   document.querySelectorAll('.exp-mode-btn').forEach(btn => {
     btn.onclick = () => { state.expMode = btn.dataset.mode; renderExcelModalBody(); };
   });
-  document.getElementById('btn-do-excel-download').onclick = () => {
-    if (state.expMode === 'muni') {
-      const id = parseInt(document.getElementById('exp-muni-sel').value, 10);
-      exportMuniXLSX(muniById.get(id));
-    } else if (state.expMode === 'depto') {
-      const did = parseInt(document.getElementById('exp-depto-sel').value, 10);
-      const per = document.getElementById('exp-depto-per').value;
-      exportDeptoXLSX(did, per);
-    } else if (state.expMode === 'compare') {
-      if (state.expCompareIds.length < 2) { alert('Selecciona al menos 2 municipios para comparar.'); return; }
-      exportCompareXLSX(state.expCompareIds);
-    } else {
-      exportNationalXLSX(document.getElementById('exp-nat-per').value);
+  document.getElementById('btn-do-excel-download').onclick = async () => {
+    const btn = document.getElementById('btn-do-excel-download');
+    btn.disabled = true; btn.textContent = 'Generando mapa y Excel...';
+    try {
+      if (state.expMode === 'muni') {
+        const id = parseInt(document.getElementById('exp-muni-sel').value, 10);
+        await exportMuniXLSX(muniById.get(id));
+      } else if (state.expMode === 'depto') {
+        const did = parseInt(document.getElementById('exp-depto-sel').value, 10);
+        const per = document.getElementById('exp-depto-per').value;
+        await exportDeptoXLSX(did, per);
+      } else if (state.expMode === 'compare') {
+        if (state.expCompareIds.length < 2) { alert('Selecciona al menos 2 municipios para comparar.'); return; }
+        await exportCompareXLSX(state.expCompareIds);
+      } else {
+        await exportNationalXLSX(document.getElementById('exp-nat-per').value);
+      }
+      excelModal.classList.remove('open');
+    } finally {
+      btn.disabled = false; btn.textContent = '⬇ Generar y Descargar .xlsx';
     }
-    excelModal.classList.remove('open');
   };
 
   // ===== TABLE VIEW =====
@@ -2496,8 +2872,15 @@ const SIT = __SIT_DATA_PAYLOAD__;
   renderInspector();
   initTableView();
   initNationalView();
+  const cmpMatch = hash.match(/cmp=(\d+),(\d+)/);
   const mMatch = hash.match(/muni=(\d+)/);
-  if (mMatch) selectAndFocusMuni(parseInt(mMatch[1], 10));
+  if (cmpMatch) {
+    state.selectedMuniId = parseInt(cmpMatch[1], 10);
+    state.compareMuniId = parseInt(cmpMatch[2], 10);
+    updateMapColors(); renderInspector();
+  } else if (mMatch) {
+    selectAndFocusMuni(parseInt(mMatch[1], 10));
+  }
 })();
 </script>
 </body>
