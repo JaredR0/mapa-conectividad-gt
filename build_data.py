@@ -1,9 +1,11 @@
 import json, zipfile, xml.etree.ElementTree as ET, re, unicodedata, math, os
 from collections import defaultdict, Counter
+from decimal import Decimal, ROUND_HALF_UP
 
 XLSX_PATH = "/Users/jaredruiz/INNOVACON/Copia de 04NOV2026 - SIT Consolidado Historico Boletines 2014-2026 v2.xlsx"
 INE_PATH = "/Users/jaredruiz/INNOVACON/BrechaDigitalConectividadDigitalEnHogaresMunicipio.xlsx"
 TRAZ_PATH = "/Users/jaredruiz/INNOVACON/trazabilidad_brecha_digital.xlsx"
+EDU_ECO_PATH = "/Users/jaredruiz/INNOVACON/DatosEstadisticos_tecnologia_educacion_economico.xlsx"
 KMZ_MUNIS = "/Users/jaredruiz/INNOVACON/Copia de Municipios.kmz"
 KMZ_LP = "/Users/jaredruiz/INNOVACON/Copia de Lugares Poblados 2026.kmz"
 MUNIS_TOPO = "/Users/jaredruiz/.gemini/antigravity/brain/ab0ec326-df20-4463-a2f7-8b69783b005d/scratch/munis.json"
@@ -705,6 +707,113 @@ def main():
     nat_uso23 = round(tot23_pint / tot23_p7 * 100.0, 2)
     print(f"Loaded ENCOVI 2023 (22/22 deptos) + SEGEPLAN 2023 (340/340 munis)! National 2018->2023: Hogares sin internet {nat_br18:.2f}% -> {nat_br23:.2f}% ({nat_br23-nat_br18:+.2f} pp) | Uso 7+ {nat_uso18:.2f}% -> {nat_uso23:.2f}% ({nat_uso23-nat_uso18:+.2f} pp).")
 
+    # === Load Official INE Technology, Education & Economy Table (DatosEstadisticos_tecnologia_educacion_economico.xlsx) ===
+    edu_sheets = load_all_sheets(EDU_ECO_PATH)
+    edu_rows = list(edu_sheets.values())[0]
+    soc_by_gid = {}
+    soc_by_did = defaultdict(lambda: {'pob': 0, 'alf': 0, 'ana': 0, 'ocu': 0})
+    tot_soc_pob = tot_soc_alf = tot_soc_ana = tot_soc_ocu = 0
+    for r in edu_rows:
+        if len(r) < 16 or r[1] is None or not str(r[1]).strip().isdigit():
+            continue
+        cid = int(str(r[1]).strip())
+        if cid not in muni_geoms:
+            continue
+        pob = int(round(float(r[3])))
+        hog = int(round(float(r[4])))
+        hi = int(round(float(r[6])))
+        hsin = int(round(float(r[7])))
+        alf = int(round(float(r[10])))
+        ana = int(round(float(r[11])))
+        ocu = int(round(float(r[14])))
+        assert ine_by_gid[cid]['h'] == hog and ine_by_gid[cid]['con'] == hi and ine_by_gid[cid]['sin'] == hsin, f"EDU_ECO hog mismatch {cid}"
+        assert ine_by_gid[cid]['p7'] == (alf + ana), f"EDU_ECO alf+ana != p7 for {cid}"
+        pct_ana = round(float(r[12]) * 100.0, 2)
+        pct_alf7 = round((alf / (alf + ana)) * 100.0, 2) if (alf + ana) > 0 else 0.0
+        pct_ocu = round(float(r[15]) * 100.0, 2)
+        soc_by_gid[cid] = {
+            'pob': pob, 'alf': alf, 'ana': ana,
+            'pct_ana': pct_ana, 'pct_alf7': pct_alf7,
+            'ocu': ocu, 'pct_ocu': pct_ocu,
+        }
+        did = muni_geoms[cid]['ine_depto']
+        soc_by_did[did]['pob'] += pob
+        soc_by_did[did]['alf'] += alf
+        soc_by_did[did]['ana'] += ana
+        soc_by_did[did]['ocu'] += ocu
+        tot_soc_pob += pob; tot_soc_alf += alf; tot_soc_ana += ana; tot_soc_ocu += ocu
+    assert len(soc_by_gid) == 340, f"Expected 340 EDU_ECO rows, got {len(soc_by_gid)}"
+    for did, drec in soc_by_did.items():
+        drec['pct_ana'] = round((drec['ana'] / drec['pob']) * 100.0, 2) if drec['pob'] > 0 else 0.0
+        drec['pct_alf7'] = round((drec['alf'] / (drec['alf'] + drec['ana'])) * 100.0, 2) if (drec['alf'] + drec['ana']) > 0 else 0.0
+        drec['pct_ocu'] = round((drec['ocu'] / drec['pob']) * 100.0, 2) if drec['pob'] > 0 else 0.0
+    soc_totals = {
+        'pob': tot_soc_pob, 'alf': tot_soc_alf, 'ana': tot_soc_ana,
+        'pct_ana': round((tot_soc_ana / tot_soc_pob) * 100.0, 2),
+        'pct_alf7': round((tot_soc_alf / (tot_soc_alf + tot_soc_ana)) * 100.0, 2),
+        'ocu': tot_soc_ocu,
+        'pct_ocu': round((tot_soc_ocu / tot_soc_pob) * 100.0, 2),
+    }
+    print(f"Loaded INE Tecnologia/Educacion/Economia for 340/340 munis! Pob={tot_soc_pob:,} | Analfabeta={tot_soc_ana:,} ({soc_totals['pct_ana']}%) | Ocupada={tot_soc_ocu:,} ({soc_totals['pct_ocu']}%).")
+
+    # === Exact 5-Step Puntaje de Brecha Digital (0 a 100) — Matches trazabilidad_brecha_digital.xlsx sheet 'Brecha digital' ===
+    # Paso 1: % uso internet 7+ (INE Censo 2018) redondeado a 1 decimal
+    # Paso 2: Posicion 1..340 de menor a mayor (empates comparten promedio, RANK.AVG ascendente)
+    # Paso 3: Antenas por cada 10,000 habitantes (SIT 2026-S1 / Poblacion Censo 2018) -> posicion 1..340 de menor a mayor
+    # Paso 4: Promedio de las dos posiciones
+    # Paso 5: 100 * RANK.AVG(promedio, descendente) / 340 -> 100 = atender primero, cerca de 0 = menor brecha
+    def excel_round1(x):
+        return float(Decimal(str(x)).quantize(Decimal('0.1'), rounding=ROUND_HALF_UP))
+
+    def rank_avg_1based(vals, ascending=True):
+        n = len(vals)
+        indexed = sorted(enumerate(vals), key=lambda kv: kv[1], reverse=not ascending)
+        ranks = [0.0] * n
+        i = 0
+        while i < n:
+            j = i
+            while j + 1 < n and indexed[j+1][1] == indexed[i][1]:
+                j += 1
+            avg_r = (i + j) / 2.0 + 1.0
+            for k in range(i, j + 1):
+                ranks[indexed[k][0]] = avg_r
+            i = j + 1
+        return ranks
+
+    sorted_gids = sorted(muni_geoms.keys())
+    bd_uso_r = []
+    bd_ant10k = []
+    for gid in sorted_gids:
+        uso_exact = 100.0 * ine_by_gid[gid]['pint'] / ine_by_gid[gid]['p7']
+        bd_uso_r.append(excel_round1(uso_exact))
+        ant26 = muni_rb[gid]['2026-S1']['v']
+        pob18 = soc_by_gid[gid]['pob']
+        bd_ant10k.append(10000.0 * ant26 / pob18)
+
+    r_uso_bd = rank_avg_1based(bd_uso_r, ascending=True)
+    r_ant_bd = rank_avg_1based(bd_ant10k, ascending=True)
+    avg_pos_bd = [(r_uso_bd[i] + r_ant_bd[i]) / 2.0 for i in range(len(sorted_gids))]
+    r_score_bd = rank_avg_1based(avg_pos_bd, ascending=False)
+
+    bd_by_gid = {}
+    bd_by_did = defaultdict(list)
+    for idx, gid in enumerate(sorted_gids):
+        sc = round(100.0 * r_score_bd[idx] / len(sorted_gids), 2)
+        bd_by_gid[gid] = {
+            'sc': sc,
+            'uso': bd_uso_r[idx],
+            'ru': round(r_uso_bd[idx], 1),
+            'ant': round(bd_ant10k[idx], 2),
+            'ra': round(r_ant_bd[idx], 1),
+            'avg': round(avg_pos_bd[idx], 2),
+        }
+        bd_by_did[muni_geoms[gid]['ine_depto']].append(sc)
+    # Assign 1..340 priority rank (1 = highest score)
+    for rk, gid in enumerate(sorted(sorted_gids, key=lambda g: (-bd_by_gid[g]['sc'], g)), 1):
+        bd_by_gid[gid]['rk'] = rk
+    assert bd_by_gid[1608]['sc'] == 100.0 and bd_by_gid[102]['sc'] == 0.29, "Puntaje Brecha Digital calibration mismatch!"
+    print(f"Computed exact 5-step Puntaje de Brecha Digital (0-100) for 340/340 munis! #1 Senahu={bd_by_gid[1608]['sc']} | #340 Sta. Catarina Pinula={bd_by_gid[102]['sc']}.")
+
     # === Compute Economic Saturation & Opportunity Index (ISI 0-100) + HHI + 3y Growth ===
     # Methodology: OECD Composite Indicators (percentile-rank normalization across 340 munis)
     # combining SIT 2026-S1 + KMZ 2026 + INE XII Censo Hogares + DOJ/FTC HHI
@@ -771,6 +880,8 @@ def main():
             'area': kmz_area.get(gid),
             'lp_sum': lp_summary[gid],
             'ine': ine_by_gid[gid],
+            'soc': soc_by_gid[gid],
+            'bd': bd_by_gid[gid],
             'eco': eco_by_gid[gid],
             'fx': muni_fixed[gid], 'rb': muni_rb[gid],
         })
@@ -782,6 +893,8 @@ def main():
             'id': did, 'nom': g['name'], 'd': g['d'], 'bb': g['bb'], 'c': g['c'],
             'ine': dict(ine_by_did[did]),
             'ine23': ine23_by_did[did],
+            'soc': dict(soc_by_did[did]),
+            'bd_avg': round(sum(bd_by_did[did]) / len(bd_by_did[did]), 1),
             'fx': depto_fixed[did], 'rb': depto_rb[did], 'sp': special_localities.get(did, []),
         })
 
@@ -790,8 +903,10 @@ def main():
             'source_file': 'Copia de 04NOV2026 - SIT Consolidado Historico Boletines 2014-2026 v2.xlsx',
             'ine_file': 'BrechaDigitalConectividadDigitalEnHogaresMunicipio.xlsx',
             'traz_file': 'trazabilidad_brecha_digital.xlsx',
+            'edu_eco_file': 'DatosEstadisticos_tecnologia_educacion_economico.xlsx',
             'ine_totals': {'h': tot_h_nac, 'con': tot_con_nac, 'sin': tot_sin_nac, 'br': nat_br18, 'pc': round(100.0 - nat_br18, 2), 'uso': nat_uso18},
             'ine23_totals': {'h': tot23_h, 'con': tot23_con, 'sin': tot23_sin, 'br': nat_br23, 'pc': round(100.0 - nat_br23, 2), 'dbr': round(nat_br23 - nat_br18, 2), 'uso': nat_uso23, 'duso': round(nat_uso23 - nat_uso18, 2)},
+            'soc_totals': soc_totals,
             'periods_ine': ['2018', '2023'],
             'kmz_munis': 'Copia de Municipios.kmz',
             'kmz_lp': 'Copia de Lugares Poblados 2026.kmz',

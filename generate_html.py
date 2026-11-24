@@ -789,8 +789,11 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
         <div class="tb-group">
           <select id="metric-select" class="ctrl-select" title="Seleccionar indicador del mapa">
+            <option value="bd_score">Puntaje de Brecha Digital (0–100 · Uso INE + Antenas SIT)</option>
             <option value="ine_brecha">Brecha Digital en Hogares (% sin internet · INE 2018–2023)</option>
             <option value="ine_sin">Hogares sin Internet (cantidad · INE 2018–2023)</option>
+            <option value="edu_ana">Educación: % Población Analfabeta (INE · ITU)</option>
+            <option value="eco_ocu">Economía: % Población Ocupada (INE · ITU)</option>
             <option value="isi">Índice de Saturación Económica (ISI 0–100)</option>
             <option value="rb" selected>Radiobases en operación (2016-S2 – 2026-S1)</option>
             <option value="fx_total">Líneas fijas totales (2022-S2 – 2026-S1)</option>
@@ -915,8 +918,10 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
               <th data-sort="rank">#</th>
               <th data-sort="nom">Municipio</th>
               <th data-sort="dep">Departamento</th>
-              <th data-sort="ine_br">Brecha INE (%)</th>
-              <th data-sort="ine_sin">Hog. sin Int.</th>
+              <th data-sort="bd_sc">Puntaje Brecha</th>
+              <th data-sort="ine_br">Brecha Hog. (%)</th>
+              <th data-sort="edu_ana">Analfabeta (%)</th>
+              <th data-sort="eco_ocu">Ocupación (%)</th>
               <th data-sort="isi">ISI (0–100)</th>
               <th data-sort="tier">Semáforo</th>
               <th data-sort="rb">Radiobases</th>
@@ -1020,6 +1025,33 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             </tr>
           </thead>
           <tbody id="nat-brecha-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="card-hd">
+        <h3>Desarrollo Tecnológico, Educativo y Económico por Departamento (INE · Enfoque ITU)</h3>
+        <span class="pill" style="background:#eef2ff;color:#3730a3;">DatosEstadisticos_tecnologia_educacion_economico.xlsx · 340 munis → 22 deptos</span>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:8px;">
+        Indicadores oficiales del INE (Población, Tecnología, Educación y Economía) agregados exactamente desde los 340 municipios, más el <strong>Puntaje promedio de Brecha Digital (0–100)</strong> para organismos como la <strong>ITU</strong>, planificación educativa y desarrollo económico territorial.
+      </div>
+      <div class="table-scroll" style="max-height:310px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="text-align:left">Departamento</th>
+              <th>Población Total</th>
+              <th>Alfabeta</th>
+              <th>Analfabeta</th>
+              <th>% Analfabeta</th>
+              <th>Pob. Ocupada</th>
+              <th>% Ocupación</th>
+              <th>Puntaje Brecha Prom.</th>
+            </tr>
+          </thead>
+          <tbody id="nat-edu-eco-body"></tbody>
         </table>
       </div>
     </div>
@@ -1134,10 +1166,35 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         <div class="guide-sec-title">2. ¿Qué significa cada palabra y cada número?</div>
         <div class="guide-sec-sub">Explicación en español cotidiano de todos los indicadores oficiales que verás en pantalla:</div>
         <div class="glossary-grid">
+          <div class="gloss-card" style="grid-column: 1 / -1; background:linear-gradient(135deg,#fff1f2 0%,#ffffff 75%); border-color:#fecdd3;" data-speak-title="Cómo se calcula el puntaje de brecha digital" data-speak="Cómo se calcula el puntaje de brecha digital. Va de cero a cien y se arma con dos datos de cada municipio, en cinco pasos. Uno: uso de internet, porcentaje de personas de siete años o más que usó internet según el Censo 2018 del INE. Dos: antenas por habitante, antenas de telefonía móvil por cada diez mil habitantes según la SIT, primer semestre de 2026. Tres: posición en cada dato, se ordenan los 340 municipios de menor a mayor; el que menos usa internet queda en la posición uno, y el que menos antenas tiene por habitante, también. Cuatro: promedio de las dos posiciones. Cinco: puntaje, el municipio con el promedio más bajo recibe cien y el del más alto queda cerca de cero.">
+            <div class="gc-term" style="color:#9f1239;">Cómo se calcula el puntaje de brecha digital <span class="pill danger">Escala 0 a 100 · 5 pasos</span></div>
+            <div class="gc-plain">Va de <strong>0 a 100</strong> y se arma con dos datos de cada municipio, en cinco pasos:</div>
+            <ol style="margin:6px 0 6px 18px;font-size:12.5px;color:var(--ink-2);line-height:1.55;display:flex;flex-direction:column;gap:4px;">
+              <li><strong>Uso de internet:</strong> porcentaje de personas de 7 años o más que usó internet (INE, Censo 2018).</li>
+              <li><strong>Antenas por habitante:</strong> antenas de telefonía móvil por cada 10,000 habitantes (SIT, primer semestre de 2026).</li>
+              <li><strong>Posición en cada dato:</strong> se ordenan los 340 municipios de menor a mayor. El que menos usa internet queda en la posición 1; el que menos antenas tiene por habitante, también.</li>
+              <li><strong>Promedio de las dos posiciones.</strong></li>
+              <li><strong>Puntaje:</strong> el municipio con el promedio más bajo recibe <strong>100</strong> y el del más alto queda cerca de <strong>0</strong>.</li>
+            </ol>
+            <div class="gc-ex"><strong>Ejemplo real verificado:</strong> <strong>Senahú (Alta Verapaz)</strong> ocupa el puesto #1 con <strong>100.0 / 100</strong> (2.6% uso de internet, 5.11 antenas/10,000 hab.), mientras <strong>Santa Catarina Pinula</strong> queda en <strong>0.29 / 100</strong> (58.1% uso, 61.92 antenas/10,000 hab.).</div>
+          </div>
+
           <div class="gloss-card">
-            <div class="gc-term">Brecha Digital INE <span class="pill danger">2018 → 2023</span></div>
+            <div class="gc-term">Brecha Digital en Hogares <span class="pill danger">INE 2018 → 2023</span></div>
             <div class="gc-plain">Porcentaje oficial de hogares que <strong>NO cuentan con acceso a internet en casa</strong>. Usa la <strong>línea de tiempo</strong> para comparar <strong>2018</strong> (XII Censo INE, 340 municipios) con <strong>2023</strong> (ENCOVI 2023 INE, publicada a nivel de los 22 departamentos).</div>
-            <div class="gc-ex"><strong>Evolución nacional oficial:</strong> Bajó de <strong>82.74%</strong> en 2018 (2,710,661 de 3,275,931 hogares) a <strong>79.43%</strong> en 2023 (3,231,890 de 4,068,856 hogares · <strong>−3.31 pp</strong>), mientras el uso de internet en personas de 7+ años subió de 29.32% a 47.34%.</div>
+            <div class="gc-ex"><strong>Evolución nacional oficial:</strong> Bajó de <strong>82.74%</strong> en 2018 a <strong>79.43%</strong> en 2023 (<strong>−3.31 pp</strong>), mientras el uso de internet en personas de 7+ años subió de 29.32% a 47.34%.</div>
+          </div>
+
+          <div class="gloss-card">
+            <div class="gc-term">Educación · % Analfabeta <span class="pill warn">INE · Enfoque ITU</span></div>
+            <div class="gc-plain">Indica población <strong>alfabeta</strong>, <strong>analfabeta</strong> y <strong>% de población analfabeta</strong> de cada municipio y departamento (INE). Permite a organismos como la <strong>ITU</strong> cruzar brecha educativa con conectividad digital.</div>
+            <div class="gc-ex"><strong>Dato nacional real:</strong> 10,215,017 personas alfabetas y 2,313,920 analfabetas (<strong>15.53%</strong> de la población total de 14,901,286).</div>
+          </div>
+
+          <div class="gloss-card">
+            <div class="gc-term">Economía · % Ocupación <span class="pill ok">INE · Enfoque ITU</span></div>
+            <div class="gc-plain">Mide la <strong>población ocupada</strong> y el <strong>% de ocupación</strong> sobre la población total por municipio y departamento (INE), clave para evaluar capacidad productiva y demanda económica de conectividad.</div>
+            <div class="gc-ex"><strong>Dato nacional real:</strong> 4,968,542 personas ocupadas (<strong>33.34%</strong> de la población total) a nivel nacional.</div>
           </div>
 
           <div class="gloss-card">
@@ -1686,6 +1743,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
   function getPeriodsForMetric(metric) {
     if (metric === 'rb' || metric === 'lp_per_rb') return SIT.meta.periods_rb;
     if (metric === 'ine_brecha' || metric === 'ine_sin') return SIT.meta.periods_ine || ['2018', '2023'];
+    if (metric === 'bd_score') return ['2018–2026'];
+    if (metric === 'edu_ana' || metric === 'eco_ocu') return ['Censo INE'];
     if (metric === 'isi' || metric === 'lp_tot') return ['2026-S1'];
     return SIT.meta.periods_fx;
   }
@@ -1694,6 +1753,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
     return ps[Math.min(state.periodIdx, ps.length - 1)];
   }
   function getMetricValue(muni, metric, period) {
+    if (metric === 'bd_score') return muni.bd.sc;
+    if (metric === 'edu_ana') return muni.soc.pct_ana;
+    if (metric === 'eco_ocu') return muni.soc.pct_ocu;
     if (metric === 'ine_brecha') {
       if (period === '2023') {
         const dep = deptoById.get(muni.did);
@@ -1723,6 +1785,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
     return rec.v[parseInt(metric.split('_')[1], 10)];
   }
   function getMetricTitle(metric) {
+    if (metric === 'bd_score') return 'Puntaje Brecha Digital (0–100)';
+    if (metric === 'edu_ana') return 'Educación · % Analfabeta (INE)';
+    if (metric === 'eco_ocu') return 'Economía · % Ocupación (INE)';
     if (metric === 'ine_brecha') return 'Brecha Digital Hogares (INE)';
     if (metric === 'ine_sin') return 'Hogares sin Internet (INE)';
     if (metric === 'isi') return 'Índice Saturación ISI (0–100)';
@@ -1735,13 +1800,68 @@ const SIT = __SIT_DATA_PAYLOAD__;
   }
   function fmtMetricVal(v, metric) {
     if (v === null || v === undefined) return 'Sin dato';
-    if (metric === 'ine_brecha') return fmtDec(v, 1) + '%';
+    if (metric === 'bd_score') return fmtDec(v, 1) + ' / 100';
+    if (metric === 'ine_brecha' || metric === 'edu_ana' || metric === 'eco_ocu') return fmtDec(v, 1) + '%';
     if (metric === 'isi') return fmtDec(v, 1);
     if (metric === 'lp_per_rb') return fmtDec(v, 2);
     return fmtInt(v);
   }
 
   function computeScale(metric, period) {
+    if (metric === 'bd_score') {
+      const pal = ['#0d9488','#2dd4bf','#a7f3d0','#fde68a','#fb923c','#dc2626','#7f1d1d'];
+      const breaks = [0, 15, 30, 50, 70, 85, 100];
+      return {
+        palette: pal, breaks,
+        minLbl: '0 (Menor brecha)', maxLbl: '100 (Atender primero)',
+        colorOf: (v) => {
+          if (v === null) return 'url(#nodata-hatch)';
+          if (v < 15) return pal[0];
+          if (v < 30) return pal[1];
+          if (v < 50) return pal[2];
+          if (v < 70) return pal[3];
+          if (v < 85) return pal[4];
+          if (v < 94) return pal[5];
+          return pal[6];
+        }
+      };
+    }
+    if (metric === 'edu_ana') {
+      const pal = ['#0f766e','#2dd4bf','#fef08a','#fbbf24','#f97316','#dc2626','#7f1d1d'];
+      const breaks = [3, 10, 16, 22, 29, 36, 50];
+      return {
+        palette: pal, breaks,
+        minLbl: '3% (Menor analf.)', maxLbl: '40%+ (Mayor analf.)',
+        colorOf: (v) => {
+          if (v === null) return 'url(#nodata-hatch)';
+          if (v < 10) return pal[0];
+          if (v < 16) return pal[1];
+          if (v < 22) return pal[2];
+          if (v < 29) return pal[3];
+          if (v < 36) return pal[4];
+          if (v < 42) return pal[5];
+          return pal[6];
+        }
+      };
+    }
+    if (metric === 'eco_ocu') {
+      const pal = ['#fef3c7','#fde68a','#a7f3d0','#34d399','#0d9488','#0369a1','#1e3a8a'];
+      const breaks = [15, 24, 28, 32, 36, 40, 50];
+      return {
+        palette: pal, breaks,
+        minLbl: '15% (Menor ocup.)', maxLbl: '45%+ (Mayor ocup.)',
+        colorOf: (v) => {
+          if (v === null) return 'url(#nodata-hatch)';
+          if (v < 24) return pal[0];
+          if (v < 28) return pal[1];
+          if (v < 32) return pal[2];
+          if (v < 36) return pal[3];
+          if (v < 40) return pal[4];
+          if (v < 44) return pal[5];
+          return pal[6];
+        }
+      };
+    }
     if (metric === 'ine_brecha') {
       // Digital divide %: 44.8% (lowest divide -> emerald/teal) up to 99.7% (extreme divide -> deep crimson)
       const pal = ['#0d9488','#2dd4bf','#fde68a','#fbbf24','#f97316','#dc2626','#7f1d1d'];
@@ -2028,6 +2148,32 @@ const SIT = __SIT_DATA_PAYLOAD__;
           <span>Muni 2018: <strong>${fmtDec(m.ine.br,1)}%</strong></span>
         </div>
       `;
+    } else if (state.metric === 'bd_score') {
+      tooltip.innerHTML = `
+        <div class="tt-title">${esc(m.nom)}</div>
+        <div class="tt-dept">${esc(m.dep)} · Prioridad #${m.bd.rk}/340 (100 = atender primero)</div>
+        <div class="tt-val">
+          <span style="font-size:11px;color:#cbd5e1;">Puntaje Brecha Digital</span>
+          <span class="tt-num num">${fmtDec(m.bd.sc, 1)} / 100</span>
+        </div>
+        <div style="font-size:10.5px;color:#cbd5e1;margin-top:4px;display:flex;justify-content:space-between;gap:8px;">
+          <span>Uso 2018: <strong>${fmtDec(m.bd.uso,1)}%</strong> (#${m.bd.ru})</span>
+          <span>Ant/10k: <strong>${fmtDec(m.bd.ant,1)}</strong> (#${m.bd.ra})</span>
+        </div>
+      `;
+    } else if (state.metric === 'edu_ana' || state.metric === 'eco_ocu') {
+      tooltip.innerHTML = `
+        <div class="tt-title">${esc(m.nom)}</div>
+        <div class="tt-dept">${esc(m.dep)} · Pob. ${fmtInt(m.soc.pob)} · INE (Enfoque ITU)</div>
+        <div class="tt-val">
+          <span style="font-size:11px;color:#cbd5e1;">${esc(getMetricTitle(state.metric))}</span>
+          <span class="tt-num num">${fmtMetricVal(v, state.metric)}</span>
+        </div>
+        <div style="font-size:10.5px;color:#cbd5e1;margin-top:4px;display:flex;justify-content:space-between;gap:8px;">
+          <span>Analf.: <strong>${fmtInt(m.soc.ana)}</strong> (${fmtDec(m.soc.pct_ana,1)}%)</span>
+          <span>Ocup.: <strong>${fmtInt(m.soc.ocu)}</strong> (${fmtDec(m.soc.pct_ocu,1)}%)</span>
+        </div>
+      `;
     } else {
       tooltip.innerHTML = `
         <div class="tt-title">${esc(m.nom)}</div>
@@ -2103,6 +2249,14 @@ const SIT = __SIT_DATA_PAYLOAD__;
         granPill.classList.add('muni-lvl');
         granPill.textContent = 'XII Censo 2018 (INE) · Nivel municipal (340 munis)';
       }
+    } else if (state.metric === 'bd_score') {
+      granPill.style.display = 'inline-flex';
+      granPill.classList.remove('muni-lvl');
+      granPill.textContent = 'Puntaje 0–100 · Uso Internet 2018 (INE) + Antenas/10k hab 2026 (SIT)';
+    } else if (state.metric === 'edu_ana' || state.metric === 'eco_ocu') {
+      granPill.style.display = 'inline-flex';
+      granPill.classList.add('muni-lvl');
+      granPill.textContent = 'INE · Tecnología, Educación y Economía (340 munis · Enfoque ITU)';
     } else {
       granPill.style.display = 'none';
     }
@@ -2115,7 +2269,21 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const topItem = scopeScored[0];
 
     let k1Val, k1Sub;
-    if (state.metric === 'ine_brecha') {
+    if (state.metric === 'bd_score') {
+      const avgBd = scopeMunis.reduce((s, m) => s + m.bd.sc, 0) / scopeMunis.length;
+      k1Val = `${fmtDec(avgBd, 1)} / 100`;
+      k1Sub = `Promedio puntaje brecha · 100 = atender primero`;
+    } else if (state.metric === 'edu_ana') {
+      const pSum = scopeMunis.reduce((s, m) => s + m.soc.pob, 0);
+      const aSum = scopeMunis.reduce((s, m) => s + m.soc.ana, 0);
+      k1Val = `${fmtDec((aSum / Math.max(1, pSum)) * 100, 2)}%`;
+      k1Sub = `${fmtInt(aSum)} analfabetas de ${fmtInt(pSum)} personas (INE)`;
+    } else if (state.metric === 'eco_ocu') {
+      const pSum = scopeMunis.reduce((s, m) => s + m.soc.pob, 0);
+      const oSum = scopeMunis.reduce((s, m) => s + m.soc.ocu, 0);
+      k1Val = `${fmtDec((oSum / Math.max(1, pSum)) * 100, 2)}%`;
+      k1Sub = `${fmtInt(oSum)} ocupadas de ${fmtInt(pSum)} personas (INE)`;
+    } else if (state.metric === 'ine_brecha') {
       if (ine23) {
         const hSum = scopeDeptos.reduce((s, d) => s + d.ine23.h, 0);
         const sinSum = scopeDeptos.reduce((s, d) => s + d.ine23.sin, 0);
@@ -2173,7 +2341,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     }
 
     const k3Card = document.getElementById('kpi-3-card');
-    document.getElementById('kpi-3-lbl').textContent = ine23 ? (state.metric === 'ine_sin' ? 'Depto. con más sin internet' : 'Depto. mayor brecha (#1)') : ((state.metric === 'lp_per_rb' || state.metric === 'ine_brecha') ? 'Mayor brecha (#1)' : (state.metric === 'ine_sin' ? 'Más hogares sin internet' : 'Municipio líder (#1)'));
+    document.getElementById('kpi-3-lbl').textContent = ine23 ? (state.metric === 'ine_sin' ? 'Depto. con más sin internet' : 'Depto. mayor brecha (#1)') : (state.metric === 'bd_score' ? 'Prioridad #1 (Puntaje 100)' : (state.metric === 'edu_ana' ? 'Mayor % analfabeta (#1)' : (state.metric === 'eco_ocu' ? 'Mayor % ocupación (#1)' : ((state.metric === 'lp_per_rb' || state.metric === 'ine_brecha') ? 'Mayor brecha (#1)' : (state.metric === 'ine_sin' ? 'Más hogares sin internet' : 'Municipio líder (#1)')))));
     if (ine23) {
       const topDep = [...scopeDeptos].sort((a,b) => (state.metric === 'ine_sin' ? b.ine23.sin - a.ine23.sin : b.ine23.br - a.ine23.br))[0];
       if (topDep) {
@@ -2401,7 +2569,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
           Combina <strong>cobertura móvil por comunidad</strong>, <strong>penetración fija</strong>, <strong>escala de red</strong> y el <strong>Índice HHI de competencia</strong> (metodología OCDE + DOJ/FTC) para detectar plazas saturadas frente a oportunidades de expansión.
         </p>
         <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">
-          <button class="btn-sm" id="btn-quick-ine" style="border-color:#dc2626;color:#991b1b;background:#fef2f2;">Mapa Brecha Digital INE (2018 → 2023)</button>
+          <button class="btn-sm" id="btn-quick-bd" style="border-color:#9f1239;color:#9f1239;background:#fff1f2;">Puntaje Brecha (0–100)</button>
+          <button class="btn-sm" id="btn-quick-ine" style="border-color:#dc2626;color:#991b1b;background:#fef2f2;">Brecha Hogares (2018 → 2023)</button>
+          <button class="btn-sm" id="btn-quick-edu" style="border-color:#d97706;color:#92400e;background:#fffbeb;">Educación · % Analfabeta (ITU)</button>
+          <button class="btn-sm" id="btn-quick-eco" style="border-color:#0369a1;color:#075985;background:#f0f9ff;">Economía · % Ocupación (ITU)</button>
           <button class="btn-sm" id="btn-quick-zerofx">31 munis con 0 líneas fijas</button>
           <button class="btn-sm" id="btn-quick-boom">Top crecimiento RB (3 años)</button>
         </div>
@@ -2452,8 +2623,17 @@ const SIT = __SIT_DATA_PAYLOAD__;
     document.getElementById('btn-view-isi-map').onclick = () => {
       metricSel.value = 'isi'; state.metric = 'isi'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
     };
+    document.getElementById('btn-quick-bd').onclick = () => {
+      metricSel.value = 'bd_score'; state.metric = 'bd_score'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
+    };
     document.getElementById('btn-quick-ine').onclick = () => {
       metricSel.value = 'ine_brecha'; state.metric = 'ine_brecha'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
+    };
+    document.getElementById('btn-quick-edu').onclick = () => {
+      metricSel.value = 'edu_ana'; state.metric = 'edu_ana'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
+    };
+    document.getElementById('btn-quick-eco').onclick = () => {
+      metricSel.value = 'eco_ocu'; state.metric = 'eco_ocu'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
     };
     document.getElementById('btn-quick-zerofx').onclick = () => {
       switchView('table');
@@ -2604,6 +2784,40 @@ const SIT = __SIT_DATA_PAYLOAD__;
               <span>Mediana internet hogar 2023: <strong>Q${fmtInt(d23.q_int)}/mes</strong></span>
             </div>
           </div>
+          <div style="border-top:1px dashed #fecdd3;padding-top:7px;margin-top:6px;font-size:11px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px;">
+              <span style="font-weight:800;color:#9f1239;font-size:10.5px;">Puntaje de Brecha Digital (0 a 100)<span class="help-q" title="Va de 0 a 100 en 5 pasos: 1) Uso de internet 7+ (INE Censo 2018); 2) Antenas por 10,000 hab (SIT 2026-S1); 3) Posición de 1 a 340 de menor a mayor en cada dato; 4) Promedio de ambas posiciones; 5) El promedio más bajo recibe 100 (atender primero) y el más alto cerca de 0.">?</span></span>
+              <span class="num" style="font-weight:900;color:#be123c;font-size:13px;">${fmtDec(m.bd.sc, 2)} / 100 <small style="color:var(--muted);font-weight:700;">(#${m.bd.rk}/340)</small></span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;" class="num">
+              <div style="background:#fff;border:1px solid #ffe4e6;border-radius:6px;padding:4px 7px;">Uso int. 7+ (2018): <strong>${fmtDec(m.bd.uso,1)}%</strong> · pos <strong>#${m.bd.ru}</strong></div>
+              <div style="background:#fff;border:1px solid #ffe4e6;border-radius:6px;padding:4px 7px;">Antenas/10k (2026): <strong>${fmtDec(m.bd.ant,2)}</strong> · pos <strong>#${m.bd.ra}</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- INE Technology, Education & Economy Card (ITU / Development) -->
+        <div class="card stat-box" style="background:linear-gradient(135deg,#f8fafc 0%,#eff6ff 100%);border-color:#bfdbfe;" data-speak-title="Educación y Economía INE · ${esc(m.nom)}" data-speak="Perfil de educación y economía del INE para ${esc(m.nom)}: población total ${fmtInt(m.soc.pob)} personas. En educación cuenta con ${fmtInt(m.soc.alf)} personas alfabetas y ${fmtInt(m.soc.ana)} analfabetas, lo que representa ${fmtDec(m.soc.pct_ana,2)} por ciento de población analfabeta. En economía registra ${fmtInt(m.soc.ocu)} personas ocupadas, equivalente al ${fmtDec(m.soc.pct_ocu,2)} por ciento de ocupación.">
+          <div class="s-lbl" style="color:#1e40af;margin-bottom:5px;padding-right:24px;">
+            <span>Educación y Economía (INE · Enfoque ITU)</span>
+            <span class="num" style="white-space:nowrap;">Pob. ${fmtInt(m.soc.pob)}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" class="num">
+            <div style="background:#fff;border:1px solid #dbeafe;border-radius:8px;padding:7px 9px;">
+              <div style="font-size:9.5px;font-weight:800;color:#92400e;text-transform:uppercase;">Educación · Analfabetismo</div>
+              <div style="font-size:18px;font-weight:900;color:#b45309;line-height:1.15;">${fmtDec(m.soc.pct_ana, 2)}%</div>
+              <div style="height:5px;border-radius:99px;overflow:hidden;background:#fef3c7;margin:4px 0;"><div style="width:${Math.min(100, m.soc.pct_ana)}%;height:100%;background:#d97706;"></div></div>
+              <div style="font-size:10px;color:var(--ink-2);">Analf.: <strong>${fmtInt(m.soc.ana)}</strong></div>
+              <div style="font-size:10px;color:#0f766e;">Alfab.: <strong>${fmtInt(m.soc.alf)}</strong> (${fmtDec(m.soc.pct_alf7,1)}% de 7+)</div>
+            </div>
+            <div style="background:#fff;border:1px solid #dbeafe;border-radius:8px;padding:7px 9px;">
+              <div style="font-size:9.5px;font-weight:800;color:#075985;text-transform:uppercase;">Economía · Ocupación</div>
+              <div style="font-size:18px;font-weight:900;color:#0369a1;line-height:1.15;">${fmtDec(m.soc.pct_ocu, 2)}%</div>
+              <div style="height:5px;border-radius:99px;overflow:hidden;background:#e0f2fe;margin:4px 0;"><div style="width:${Math.min(100, m.soc.pct_ocu)}%;height:100%;background:#0284c7;"></div></div>
+              <div style="font-size:10px;color:var(--ink-2);">Ocupada: <strong>${fmtInt(m.soc.ocu)}</strong></div>
+              <div style="font-size:10px;color:var(--muted);">Pobreza 2023: <strong>${m.ine.pobr23 !== null ? fmtDec(m.ine.pobr23,1)+'%' : '—'}</strong></div>
+            </div>
+          </div>
         </div>
 
         <!-- Hero Economic Saturation & Recommendation Card -->
@@ -2683,12 +2897,26 @@ const SIT = __SIT_DATA_PAYLOAD__;
         specialNote = `<strong>Nota histórica (Hoja 09):</strong> En 2018–2022-S1 la SIT publicó filas separadas para <em>${esc(dep.sp[0].name)}</em> (${dep.sp.map(x=>`${x.p}: ${x.v}`).join(' · ')}). No se suman artificialmente a ${esc(m.nom)}.`;
       }
       tabBody = `
+        <div class="card" style="background:linear-gradient(135deg,#fff1f2 0%,#ffffff 75%);border-color:#fecdd3;">
+          <div class="card-hd"><h3 style="color:#9f1239;">Cómo se calcula el puntaje de brecha digital</h3><span class="pill danger">${fmtDec(m.bd.sc, 2)} / 100</span></div>
+          <p style="font-size:11.5px;color:var(--ink-2);line-height:1.45;margin-bottom:5px;">
+            Va de <strong>0 a 100</strong> y se arma con dos datos de cada municipio, en cinco pasos:
+          </p>
+          <ol style="margin:0 0 7px 16px;font-size:11px;color:var(--ink-2);line-height:1.48;display:flex;flex-direction:column;gap:3px;">
+            <li><strong>Uso de internet:</strong> porcentaje de personas de 7 años o más que usó internet (INE, Censo 2018). <em>(${esc(m.nom)}: <strong>${fmtDec(m.bd.uso,1)}%</strong>)</em></li>
+            <li><strong>Antenas por habitante:</strong> antenas de telefonía móvil por cada 10,000 habitantes (SIT, primer semestre de 2026). <em>(${esc(m.nom)}: <strong>${fmtDec(m.bd.ant,2)}</strong>)</em></li>
+            <li><strong>Posición en cada dato:</strong> se ordenan los 340 municipios de menor a mayor. El que menos usa internet queda en la posición 1; el que menos antenas tiene por habitante, también. <em>(${esc(m.nom)}: pos <strong>${m.bd.ru}</strong> en uso · pos <strong>${m.bd.ra}</strong> en antenas)</em></li>
+            <li><strong>Promedio de las dos posiciones:</strong> <em>(<strong>${m.bd.ru}</strong> + <strong>${m.bd.ra}</strong>) ÷ 2 = <strong>${fmtDec(m.bd.avg, 2)}</strong></em></li>
+            <li><strong>Puntaje:</strong> el municipio con el promedio más bajo recibe <strong>100</strong> y el del más alto queda cerca de <strong>0</strong>. <em>(${esc(m.nom)}: <strong>${fmtDec(m.bd.sc, 2)} / 100</strong> · prioridad <strong>#${m.bd.rk}</strong> de 340)</em></li>
+          </ol>
+        </div>
+
         <div class="card">
           <div class="card-hd"><h3>Fórmula del Índice ISI (0–100) y HHI</h3><span>OCDE + DOJ/FTC</span></div>
           <p style="font-size:11.5px;color:var(--ink-2);line-height:1.45;">
             El <strong>Índice de Saturación de Infraestructura (ISI)</strong> usa normalización por rango percentil <em>P(·)</em> de la metodología <strong>OCDE de Indicadores Compuestos</strong> sobre los 340 municipios:
           </p>
-          <div class="formula-box">ISI = 0.25·P(RB/LP) + 0.25·P(%ConInternet_INE) + 0.20·P(Fijas/Hogares) + 0.15·P(RB) + 0.15·P(10000 - HHI)<br>Brecha Digital INE = (Hogares sin Internet / Total Hogares) × 100<br>HHI = Σ (cuota_operador_i %)²  [DOJ / FTC]</div>
+          <div class="formula-box">ISI = 0.25·P(RB/LP) + 0.25·P(%ConInternet_INE) + 0.20·P(Fijas/Hogares) + 0.15·P(RB) + 0.15·P(10000 - HHI)<br>Brecha Digital Hogares = (Hogares sin Internet / Total Hogares) × 100<br>HHI = Σ (cuota_operador_i %)²  [DOJ / FTC]</div>
           <div class="op-list num" style="margin-top:8px;">
             <div class="op-row"><div class="op-top"><span class="op-name">1. Cobertura móvil por comunidad (25%)</span><span class="op-nums">P = ${m.eco.p1}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p1}%;background:#0284c7"></div></div></div>
             <div class="op-row"><div class="op-top"><span class="op-name">2. Conectividad real en hogares INE (25%)</span><span class="op-nums">P = ${m.eco.p2}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p2}%;background:#e11d48"></div></div></div>
@@ -2703,6 +2931,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
           <div><strong>Trazabilidad Oficial (SIT + INE 2018/2023 + SEGEPLAN + KMZ)</strong></div>
           <div class="audit-row"><strong>Brecha Digital 2018 (Municipal):</strong> XII Censo INE (2018) · ${fmtInt(m.ine.h)} hogares (${fmtDec(m.ine.br,2)}% sin internet)</div>
           <div class="audit-row"><strong>Actualización 2023 (Departamental):</strong> ENCOVI 2023 INE (trazabilidad_brecha_digital.xlsx) · ${esc(m.dep)}: ${fmtDec(deptoById.get(m.did).ine23.br,2)}% hogares sin internet · Uso 7+ años: ${fmtDec(deptoById.get(m.did).ine23.uso,1)}%</div>
+          <div class="audit-row"><strong>Educación y Economía (INE · ITU):</strong> DatosEstadisticos_tecnologia_educacion_economico.xlsx · Pob. ${fmtInt(m.soc.pob)} · Analf. ${fmtDec(m.soc.pct_ana,2)}% · Ocup. ${fmtDec(m.soc.pct_ocu,2)}%</div>
           <div class="audit-row"><strong>Pobreza Municipal 2023:</strong> SEGEPLAN / Banco Mundial (Mapas de pobreza 2023, cuadro 7.2) · ${m.ine.pobr23 !== null ? fmtDec(m.ine.pobr23,1)+'%' : 'Sin dato'}</div>
           <div class="audit-row"><strong>Radiobases (${pRb}):</strong> ${rbRec ? `${esc(SIT.meta.pdfs[rbRec.pdf])} · Pág. ${rbRec.pg ?? '—'} · Fila XLSX ${rbRec.r ?? '—'}` : 'Sin registro en Hoja 09.'}</div>
           <div class="audit-row"><strong>Líneas fijas (${pFx}):</strong> ${fxRec ? `${esc(SIT.meta.pdfs[fxRec.pdf])} · Pág. ${fxRec.pg ?? '—'} · Fila XLSX ${fxRec.r ?? '—'}` : '—'}</div>
@@ -2908,6 +3137,29 @@ const SIT = __SIT_DATA_PAYLOAD__;
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10.5px;color:var(--ink-2);" class="num">
           <div>Uso internet 7+: <strong>${fmtDec(dep.ine.uso,1)}% → ${fmtDec(d23.uso,1)}%</strong> <span style="color:#0f766e;">(${dusoTxt})</span></div>
           <div>Pago 2023: <strong>Q${fmtInt(d23.q_int)}</strong> int. · <strong>Q${fmtInt(d23.q_cel)}</strong> cel.</div>
+        </div>
+        <div style="border-top:1px dashed #fecdd3;margin-top:6px;padding-top:5px;font-size:10.5px;display:flex;justify-content:space-between;align-items:center;" class="num">
+          <span style="font-weight:700;color:#9f1239;">Puntaje Brecha Digital promedio (0–100):</span>
+          <strong style="color:#be123c;font-size:12.5px;">${fmtDec(dep.bd_avg, 1)} / 100</strong>
+        </div>
+      </div>
+
+      <div class="card stat-box" style="background:linear-gradient(135deg,#f8fafc 0%,#eff6ff 100%);border-color:#bfdbfe;" data-speak-title="Educación y Economía · ${esc(dep.nom)}" data-speak="Educación y economía del departamento de ${esc(dep.nom)} según el INE: población total ${fmtInt(dep.soc.pob)} personas; ${fmtInt(dep.soc.alf)} alfabetas y ${fmtInt(dep.soc.ana)} analfabetas (${fmtDec(dep.soc.pct_ana,2)} por ciento de población analfabeta). En economía registra ${fmtInt(dep.soc.ocu)} personas ocupadas, equivalente al ${fmtDec(dep.soc.pct_ocu,2)} por ciento de ocupación.">
+        <div class="s-lbl" style="color:#1e40af;margin-bottom:5px;padding-right:24px;">
+          <span>Educación y Economía (INE · Enfoque ITU)</span>
+          <span class="num" style="white-space:nowrap;">Pob. ${fmtInt(dep.soc.pob)}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;" class="num">
+          <div style="background:#fff;border:1px solid #dbeafe;border-radius:8px;padding:7px 9px;">
+            <div style="font-size:9.5px;font-weight:800;color:#92400e;text-transform:uppercase;">Educación · Analfabeta</div>
+            <div style="font-size:18px;font-weight:900;color:#b45309;line-height:1.15;">${fmtDec(dep.soc.pct_ana, 2)}%</div>
+            <div style="font-size:10px;color:var(--ink-2);">Analf.: <strong>${fmtInt(dep.soc.ana)}</strong> · Alfab.: <strong>${fmtInt(dep.soc.alf)}</strong></div>
+          </div>
+          <div style="background:#fff;border:1px solid #dbeafe;border-radius:8px;padding:7px 9px;">
+            <div style="font-size:9.5px;font-weight:800;color:#075985;text-transform:uppercase;">Economía · Ocupación</div>
+            <div style="font-size:18px;font-weight:900;color:#0369a1;line-height:1.15;">${fmtDec(dep.soc.pct_ocu, 2)}%</div>
+            <div style="font-size:10px;color:var(--ink-2);">Ocup.: <strong>${fmtInt(dep.soc.ocu)}</strong> · Pobr. 23: <strong>${fmtDec(d23.pobr,1)}%</strong></div>
+          </div>
         </div>
       </div>
 
@@ -3219,8 +3471,12 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Hogares con Internet (2018)', m.ine.con, fmtDec(m.ine.pc, 2) + '% de hogares'],
       ['Hogares sin Internet (2018)', m.ine.sin, fmtDec(m.ine.br, 2) + '% brecha digital municipal'],
       ['% Brecha Digital Hogares 2018 (Municipal)', m.ine.br, 'XII Censo INE 2018'],
+      ['Puntaje de Brecha Digital (0 a 100)', m.bd.sc, 'Prioridad #' + m.bd.rk + '/340 · Uso 2018 (' + m.bd.uso + '%, pos ' + m.bd.ru + ') + Antenas/10k 2026 (' + m.bd.ant + ', pos ' + m.bd.ra + ')'],
       ['% Brecha Digital Hogares 2023 (Depto. ' + m.dep + ')', deptoById.get(m.did).ine23.br, 'ENCOVI 2023 INE (publicado a nivel departamental; cambio vs 2018: ' + (deptoById.get(m.did).ine23.dbr >= 0 ? '+' : '') + fmtDec(deptoById.get(m.did).ine23.dbr, 2) + ' pp)'],
       ['% Uso Internet 7+ años 2023 (Depto. ' + m.dep + ')', deptoById.get(m.did).ine23.uso, 'ENCOVI 2023 INE (2018: ' + fmtDec(deptoById.get(m.did).ine.uso, 1) + '%)'],
+      ['Población Total (INE)', m.soc.pob, 'DatosEstadisticos_tecnologia_educacion_economico.xlsx'],
+      ['Población Alfabeta / Analfabeta (INE)', m.soc.alf + ' / ' + m.soc.ana, fmtDec(m.soc.pct_ana, 2) + '% analfabeta (' + fmtDec(m.soc.pct_alf7, 1) + '% alfabetismo 7+)'],
+      ['Población Ocupada (INE)', m.soc.ocu, fmtDec(m.soc.pct_ocu, 2) + '% de ocupación (Enfoque ITU)'],
       ['Población en Pobreza 2023 (%)', m.ine.pobr23 ?? 'Sin dato', 'SEGEPLAN / Banco Mundial (Mapas de pobreza 2023, municipal)'],
       ['Radiobases (2026-S1)', m.rb['2026-S1']?.v ?? null, 'Hoja 09 SIT'],
       ['Líneas Fijas Totales (2026-S1)', m.fx['2026-S1']?.t ?? null, 'Hoja 08 SIT'],
@@ -3278,6 +3534,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Hogares sin Internet Depto (2023)', dep.ine23.sin, fmtDec(dep.ine23.br, 2) + '% brecha digital 2023 (' + (dep.ine23.dbr >= 0 ? '+' : '') + fmtDec(dep.ine23.dbr, 2) + ' pp vs 2018)'],
       ['Uso de Internet 7+ años (2018 → 2023)', fmtDec(dep.ine.uso, 2) + '% → ' + fmtDec(dep.ine23.uso, 2) + '%', 'Cambio: ' + (dep.ine23.duso >= 0 ? '+' : '') + fmtDec(dep.ine23.duso, 2) + ' pp (Censo 2018 vs ENCOVI 2023)'],
       ['Pago Mensual Mediano Internet / Celular (2023)', 'Q ' + dep.ine23.q_int + ' / Q ' + dep.ine23.q_cel, 'INE ENCOVI 2023 · Pobreza dept.: ' + dep.ine23.pobr + '%'],
+      ['Puntaje Brecha Digital Promedio Depto (0-100)', dep.bd_avg, 'Promedio municipal (100 = atender primero)'],
+      ['Educación Depto: Alfabeta / Analfabeta (INE)', dep.soc.alf + ' / ' + dep.soc.ana, fmtDec(dep.soc.pct_ana, 2) + '% analfabeta de ' + fmtInt(dep.soc.pob) + ' hab.'],
+      ['Economía Depto: Población Ocupada (INE)', dep.soc.ocu, fmtDec(dep.soc.pct_ocu, 2) + '% de ocupación (Enfoque ITU)'],
       ['Total Lugares Poblados (2026)', depMunis.reduce((s,m)=>s+m.lp_sum.tot,0), 'Lugares Poblados 2026.kmz'],
       ['Promedio Índice ISI Departamental', avgIsi, 'Escala 0-100'],
       ['Municipios Alta Saturación (≥75)', depMunis.filter(m=>m.eco.tier===2).length, 'Polo maduro'],
@@ -3285,11 +3544,11 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Municipios Baja Saturación (<45)', depMunis.filter(m=>m.eco.tier===0).length, 'Oportunidad territorial'],
     ];
 
-    const s2 = [['INE','Municipio','Total Hogares (INE)','Hogares con Internet','Hogares sin Internet','% Brecha Digital INE','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados','Lug./RB','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP/Telecom']];
+    const s2 = [['INE','Municipio','Población','Alfabeta','Analfabeta','% Analfabeta','Pob. Ocupada','% Ocupación','Total Hogares (INE)','Hogares con Internet','Hogares sin Internet','% Brecha Digital INE','Puntaje Brecha (0-100)','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados','Lug./RB','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP/Telecom']];
     for (const m of [...depMunis].sort((a,b)=>b.eco.isi - a.eco.isi)) {
       const fx = m.fx[period], rec = getEcoRecommendation(m);
       s2.push([
-        String(m.id).padStart(4,'0'), m.nom, m.ine.h, m.ine.con, m.ine.sin, m.ine.br, m.rb[period]?.v ?? 'Sin dato', fx?.t ?? 'N/A',
+        String(m.id).padStart(4,'0'), m.nom, m.soc.pob, m.soc.alf, m.soc.ana, m.soc.pct_ana, m.soc.ocu, m.soc.pct_ocu, m.ine.h, m.ine.con, m.ine.sin, m.ine.br, m.bd.sc, m.rb[period]?.v ?? 'Sin dato', fx?.t ?? 'N/A',
         ...(fx ? fx.v.map(v=>v===null?'N/A':v) : SIT.meta.op_names.map(()=>'')),
         m.lp_sum.tot, m.eco.lp_rb ?? 'N/A', m.eco.g3y ?? 'N/A', m.eco.hhi ?? 'Sin red',
         m.eco.isi, rec.shortLabel, rec.forBiz, rec.forTelco
@@ -3326,7 +3585,11 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Hogares con Internet (2018)', ...munis.map(m => m.ine.con)],
       ['Hogares sin Internet (2018)', ...munis.map(m => m.ine.sin)],
       ['% Brecha Digital Hogares 2018 (Municipal)', ...munis.map(m => m.ine.br)],
+      ['Puntaje de Brecha Digital (0-100)', ...munis.map(m => m.bd.sc)],
       ['% Brecha Digital Hogares 2023 (Depto. ENCOVI)', ...munis.map(m => deptoById.get(m.did).ine23.br)],
+      ['Población Total (INE)', ...munis.map(m => m.soc.pob)],
+      ['Educación: % Población Analfabeta (INE)', ...munis.map(m => m.soc.pct_ana)],
+      ['Economía: % Población Ocupada (INE)', ...munis.map(m => m.soc.pct_ocu)],
       ['Población en Pobreza 2023 (% SEGEPLAN)', ...munis.map(m => m.ine.pobr23 ?? 'Sin dato')],
       ['Índice Saturación ISI (0-100)', ...munis.map(m => m.eco.isi)],
       ['Semáforo Económico', ...munis.map(m => getEcoRecommendation(m).badge)],
@@ -3366,22 +3629,24 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Mapa Nacional de Guatemala (340 Municipios) · Corte ' + period],
       ['Coloreado según el Índice de Saturación Económica ISI (0–100).']
     ];
-    const s1 = [['INE','Departamento','Municipio','Total Hogares (2018)','Hogares con Internet (2018)','Hogares sin Internet (2018)','% Brecha Hogares 2018 (Muni)','% Brecha Hogares 2023 (Depto ENCOVI)','Pobreza 2023 (%)','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados 2026','Lug./RB','Área km²','Lat GPS','Lon GPS','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP']];
+    const s1 = [['INE','Departamento','Municipio','Población','Alfabeta','Analfabeta','% Analfabeta','Pob. Ocupada','% Ocupación','Total Hogares (2018)','Hogares con Internet (2018)','Hogares sin Internet (2018)','% Brecha Hogares 2018 (Muni)','Puntaje Brecha (0-100)','% Brecha Hogares 2023 (Depto ENCOVI)','Pobreza 2023 (%)','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados 2026','Lug./RB','Área km²','Lat GPS','Lon GPS','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP']];
     for (const m of list) {
       const fx = m.fx[period], rec = getEcoRecommendation(m), d23 = deptoById.get(m.did).ine23;
       s1.push([
-        String(m.id).padStart(4,'0'), m.dep, m.nom, m.ine.h, m.ine.con, m.ine.sin, m.ine.br, d23.br, m.ine.pobr23 ?? 'Sin dato', m.rb[period]?.v ?? 'Sin dato', fx?.t ?? 'N/A',
+        String(m.id).padStart(4,'0'), m.dep, m.nom, m.soc.pob, m.soc.alf, m.soc.ana, m.soc.pct_ana, m.soc.ocu, m.soc.pct_ocu, m.ine.h, m.ine.con, m.ine.sin, m.ine.br, m.bd.sc, d23.br, m.ine.pobr23 ?? 'Sin dato', m.rb[period]?.v ?? 'Sin dato', fx?.t ?? 'N/A',
         ...(fx ? fx.v.map(v=>v===null?'N/A':v) : SIT.meta.op_names.map(()=>'')),
         m.lp_sum.tot, m.eco.lp_rb ?? 'N/A', m.area ?? '', m.gps[1], m.gps[0],
         m.eco.g3y ?? 'N/A', m.eco.hhi ?? 'Sin red', m.eco.isi, rec.shortLabel, rec.forBiz, rec.forTelco
       ]);
     }
-    const s3 = [['Código Depto','Departamento','Hogares 2018 (Censo)','Sin Internet 2018','% Brecha 2018','Hogares 2023 (ENCOVI)','Sin Internet 2023','% Brecha 2023','Cambio Brecha (pp)','Uso Int. 7+ 2018 (%)','Uso Int. 7+ 2023 (%)','Cambio Uso (pp)','Pago Int. 2023 (Q)','Pago Cel. 2023 (Q)','Pobreza ENCOVI 2023 (%)']];
+    const s3 = [['Código Depto','Departamento','Población','Alfabeta','Analfabeta','% Analfabeta','Pob. Ocupada','% Ocupación','Puntaje Brecha Prom.','Hogares 2018 (Censo)','Sin Internet 2018','% Brecha 2018','Hogares 2023 (ENCOVI)','Sin Internet 2023','% Brecha 2023','Cambio Brecha (pp)','Uso Int. 7+ 2018 (%)','Uso Int. 7+ 2023 (%)','Cambio Uso (pp)','Pago Int. 2023 (Q)','Pago Cel. 2023 (Q)','Pobreza ENCOVI 2023 (%)']];
     for (const d of SIT.deptos) {
-      s3.push([d.id/100, d.nom, d.ine.h, d.ine.sin, d.ine.br, d.ine23.h, d.ine23.sin, d.ine23.br, d.ine23.dbr, d.ine.uso, d.ine23.uso, d.ine23.duso, d.ine23.q_int, d.ine23.q_cel, d.ine23.pobr]);
+      s3.push([d.id/100, d.nom, d.soc.pob, d.soc.alf, d.soc.ana, d.soc.pct_ana, d.soc.ocu, d.soc.pct_ocu, d.bd_avg, d.ine.h, d.ine.sin, d.ine.br, d.ine23.h, d.ine23.sin, d.ine23.br, d.ine23.dbr, d.ine.uso, d.ine23.uso, d.ine23.duso, d.ine23.q_int, d.ine23.q_cel, d.ine23.pobr]);
     }
     const s2 = [
       ['Componente Metodológico', 'Fórmula / Definición', 'Justificación y Uso Económico'],
+      ['Cómo se calcula el Puntaje de Brecha Digital (0 a 100)', 'Va de 0 a 100 en 5 pasos: 1) Uso de internet (% personas 7+ años, INE Censo 2018); 2) Antenas por cada 10,000 habitantes (SIT 2026-S1); 3) Posición 1..340 de menor a mayor en cada dato; 4) Promedio de las dos posiciones; 5) El promedio más bajo recibe 100 y el más alto queda cerca de 0.', 'Priorización territorial: más alto = atender primero. 100% alineado con la hoja Brecha digital de trazabilidad_brecha_digital.xlsx.'],
+      ['Educación y Economía (INE · Enfoque ITU)', 'Alfabeta, Analfabeta (% analfabeta = Analfabeta / Población) y Población Ocupada (% ocupación = Ocupada / Población)', 'Fuente oficial: DatosEstadisticos_tecnologia_educacion_economico.xlsx (INE, 340 municipios y 22 departamentos).'],
       ['Brecha Digital en Hogares 2018 (INE)', '(Hogares sin Internet / Total Hogares) × 100', 'Fuente oficial: XII Censo de Población y Vivienda INE (2018), nivel municipal (340 municipios).'],
       ['Brecha Digital en Hogares 2023 (ENCOVI INE)', '(Hogares sin Internet en casa / Total Hogares) × 100', 'Fuente oficial: ENCOVI 2023 del INE (trazabilidad_brecha_digital.xlsx), publicada a nivel departamental (22 departamentos). Sin imputación municipal.'],
       ['Pobreza Municipal 2023 (SEGEPLAN)', 'Población en pobreza (%)', 'SEGEPLAN y Banco Mundial, Mapas de pobreza a nivel municipal 2023, cuadro 7.2.'],
@@ -3524,7 +3789,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const valOf = (m, col) => {
       switch(col) {
         case 'nom': return m.nom; case 'dep': return m.dep;
+        case 'bd_sc': return m.bd.sc;
         case 'ine_br': return m.ine.br; case 'ine_sin': return m.ine.sin;
+        case 'edu_ana': return m.soc.pct_ana; case 'eco_ocu': return m.soc.pct_ocu;
         case 'isi': case 'tier': return m.eco.isi;
         case 'rb': return m.rb[p]?.v ?? -1; case 'fx': return m.fx[p]?.t ?? -1;
         case 'g3y': return m.eco.g3y ?? -999;
@@ -3546,8 +3813,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
         <td style="color:var(--muted);font-weight:700;">${idx+1}</td>
         <td style="font-weight:700;color:var(--ink);">${esc(m.nom)}</td>
         <td style="color:var(--ink-2);">${esc(m.dep)}</td>
+        <td style="font-weight:800;color:#9f1239;">${fmtDec(m.bd.sc,1)}</td>
         <td style="font-weight:800;color:#be123c;">${fmtDec(m.ine.br,1)}%</td>
-        <td>${fmtInt(m.ine.sin)}</td>
+        <td style="font-weight:700;color:#b45309;">${fmtDec(m.soc.pct_ana,1)}%</td>
+        <td style="font-weight:700;color:#0369a1;">${fmtDec(m.soc.pct_ocu,1)}%</td>
         <td style="font-weight:800;">${fmtDec(m.eco.isi,1)}</td>
         <td><span class="pill ${rec.badgeCls}" style="font-size:10px;padding:2px 7px;">${rec.shortLabel}</span></td>
         <td style="font-weight:700;color:var(--accent-dark);">${fmtInt(m.rb[p]?.v)}</td>
@@ -3569,6 +3838,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
       { lbl: `Banda Ancha Fija (${latest.p})`, val: fmtInt(latest.baf), sub: `Tráfico BAF: ${fmtDec(latest.tbaf_eb, 2)} exabytes` },
       { lbl: `Smartphones / ETM (${latest.p})`, val: fmtInt(latest.etm), sub: `Tráfico BAM: ${fmtDec(latest.tbam_nac_eb, 2)} EB` },
       { lbl: `Brecha Digital 2018 → 2023 (INE)`, val: `${fmtDec(SIT.meta.ine_totals.br, 1)}% → ${fmtDec(SIT.meta.ine23_totals.br, 1)}%`, sub: `ENCOVI 2023: ${fmtDec(SIT.meta.ine23_totals.dbr, 2)} pp · Uso 7+: ${fmtDec(SIT.meta.ine23_totals.uso, 1)}%` },
+      { lbl: `Educación INE · % Analfabeta (ITU)`, val: `${fmtDec(SIT.meta.soc_totals.pct_ana, 2)}%`, sub: `${fmtInt(SIT.meta.soc_totals.ana)} analf. · ${fmtInt(SIT.meta.soc_totals.alf)} alfab.` },
+      { lbl: `Economía INE · % Ocupación (ITU)`, val: `${fmtDec(SIT.meta.soc_totals.pct_ocu, 2)}%`, sub: `${fmtInt(SIT.meta.soc_totals.ocu)} ocupadas de ${fmtInt(SIT.meta.soc_totals.pob)} hab.` },
     ];
     document.getElementById('nat-kpis').innerHTML = kpiData.map(k => `<div class="kpi-mini" style="padding:10px 12px;"><span class="lbl">${esc(k.lbl)}</span><span class="val num" style="font-size:19px;">${k.val}</span><span class="sub">${esc(k.sub)}</span></div>`).join('');
 
@@ -3630,6 +3901,31 @@ const SIT = __SIT_DATA_PAYLOAD__;
         <td style="color:#0f766e;">+${fmtDec(t23.duso, 1)} pp</td>
         <td>—</td>
         <td>—</td>
+      </tr>`;
+    }
+
+    const eduBody = document.getElementById('nat-edu-eco-body');
+    if (eduBody) {
+      const sDeps = [...SIT.deptos].sort((a,b) => b.soc.pct_ana - a.soc.pct_ana);
+      const st = SIT.meta.soc_totals;
+      eduBody.innerHTML = sDeps.map(d => `<tr class="num">
+        <td style="text-align:left;font-weight:700;">${esc(d.nom)}</td>
+        <td>${fmtInt(d.soc.pob)}</td>
+        <td>${fmtInt(d.soc.alf)}</td>
+        <td>${fmtInt(d.soc.ana)}</td>
+        <td style="font-weight:800;color:#b45309;">${fmtDec(d.soc.pct_ana, 2)}%</td>
+        <td>${fmtInt(d.soc.ocu)}</td>
+        <td style="font-weight:800;color:#0369a1;">${fmtDec(d.soc.pct_ocu, 2)}%</td>
+        <td style="font-weight:800;color:#9f1239;">${fmtDec(d.bd_avg, 1)} / 100</td>
+      </tr>`).join('') + `<tr class="num" style="background:#f8fafc;font-weight:800;border-top:2px solid var(--border-strong);">
+        <td style="text-align:left;">NACIONAL (340 municipios)</td>
+        <td>${fmtInt(st.pob)}</td>
+        <td>${fmtInt(st.alf)}</td>
+        <td>${fmtInt(st.ana)}</td>
+        <td style="color:#b45309;">${fmtDec(st.pct_ana, 2)}%</td>
+        <td>${fmtInt(st.ocu)}</td>
+        <td style="color:#0369a1;">${fmtDec(st.pct_ocu, 2)}%</td>
+        <td style="color:#9f1239;">50.1 / 100</td>
       </tr>`;
     }
   }
@@ -4074,7 +4370,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const wantsDepto = t.includes('departamento') || t.includes('depto');
     const reqIneYear = t.includes('2018') ? '2018' : (t.includes('2023') || t.includes('encovi') ? '2023' : null);
     let reqMetric = null;
-    if (t.includes('brecha digital') || t.includes('encovi') || (t.includes('brecha') && (t.includes('hogar') || t.includes('ine') || t.includes('internet') || t.includes('censo'))) || t.includes('sin internet')) reqMetric = 'ine_brecha';
+    if (t.includes('puntaje') && t.includes('brecha')) reqMetric = 'bd_score';
+    else if (t.includes('educacion') || t.includes('analfabet') || t.includes('alfabet')) reqMetric = 'edu_ana';
+    else if (t.includes('economia') || t.includes('economico') || t.includes('ocupacion') || t.includes('ocupada') || t.includes('empleo')) reqMetric = 'eco_ocu';
+    else if (t.includes('brecha digital') || t.includes('encovi') || (t.includes('brecha') && (t.includes('hogar') || t.includes('ine') || t.includes('internet') || t.includes('censo'))) || t.includes('sin internet')) reqMetric = 'ine_brecha';
     else if (t.includes('hogares sin internet') || t.includes('cuantos hogares')) reqMetric = 'ine_sin';
     else if (t.includes('semaforo') || t.includes('saturad') || t.includes('saturacion') || t.includes('isi') || t.includes('invertir') || t.includes('recomendacion')) reqMetric = 'isi';
     else if (t.includes('radiobase') || t.includes('antena') || t.includes('torre')) reqMetric = 'rb';
@@ -4299,7 +4598,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
   // Optional URL hash helper for direct municipality deep-linking (e.g. #muni=1601 or #metric=isi)
   initMap();
   const hash = location.hash || '';
-  if (hash.includes('metric=ine_brecha')) { state.metric = 'ine_brecha'; metricSel.value = 'ine_brecha'; }
+  if (hash.includes('metric=bd_score')) { state.metric = 'bd_score'; metricSel.value = 'bd_score'; }
+  else if (hash.includes('metric=edu_ana')) { state.metric = 'edu_ana'; metricSel.value = 'edu_ana'; }
+  else if (hash.includes('metric=eco_ocu')) { state.metric = 'eco_ocu'; metricSel.value = 'eco_ocu'; }
+  else if (hash.includes('metric=ine_brecha')) { state.metric = 'ine_brecha'; metricSel.value = 'ine_brecha'; }
   else if (hash.includes('metric=ine_sin')) { state.metric = 'ine_sin'; metricSel.value = 'ine_sin'; }
   else if (hash.includes('metric=isi')) { state.metric = 'isi'; metricSel.value = 'isi'; }
   syncSliderToMetric();
