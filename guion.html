@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Guion 4 Minutos · Observatorio Geoespacial SIT Guatemala</title>
+<style>
+  :root {
+    --bg: #f1f5f9;
+    --surface: #ffffff;
+    --ink: #0f172a;
+    --ink-2: #334155;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --accent: #0284c7;
+    --accent-soft: #e0f2fe;
+    --danger: #be123c;
+    --danger-soft: #fff1f2;
+    --emerald: #047857;
+    --emerald-soft: #ecfdf5;
+    --amber: #b45309;
+    --amber-soft: #fffbeb;
+    --purple: #6d28d9;
+    --purple-soft: #f5f3ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.55;
+    padding-bottom: 60px;
+  }
+  .sticky-bar {
+    position: sticky; top: 0; z-index: 50;
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+    color: #fff; padding: 12px 16px;
+    box-shadow: 0 4px 14px rgba(15,23,42,.22);
+  }
+  .sticky-inner {
+    max-width: 860px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+  }
+  .brand h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
+  .brand p { font-size: 11.5px; color: #cbd5e1; }
+  .timer-box {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.22);
+    border-radius: 10px; padding: 6px 10px;
+  }
+  .timer-display {
+    font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 900;
+    min-width: 62px; text-align: center; color: #38bdf8;
+  }
+  .timer-display.warn { color: #fbbf24; }
+  .timer-display.over { color: #fb7185; }
+  .tbtn {
+    border: none; border-radius: 7px; padding: 6px 10px;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+    background: #0284c7; color: #fff;
+  }
+  .tbtn.sec { background: rgba(255,255,255,.18); }
+  .tbtn:active { transform: scale(.97); }
+
+  .wrap { max-width: 860px; margin: 16px auto; padding: 0 14px; display: flex; flex-direction: column; gap: 14px; }
+
+  .quick-links {
+    display: flex; flex-wrap: wrap; gap: 7px; align-items: center;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px;
+  }
+  .quick-links span { font-size: 11.5px; font-weight: 800; color: var(--muted); text-transform: uppercase; margin-right: 4px; }
+  .qlink {
+    text-decoration: none; font-size: 12px; font-weight: 700;
+    padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: #f8fafc; color: var(--ink);
+  }
+  .qlink.primary { background: #0284c7; color: #fff; border-color: #0284c7; }
+
+  .hook-card {
+    background: linear-gradient(135deg, #fff1f2 0%, #ffffff 70%);
+    border: 2px solid #fda4af; border-radius: 14px; padding: 16px 18px;
+  }
+  .hook-tag {
+    display: inline-block; font-size: 11px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .04em; background: #be123c; color: #fff; padding: 3px 9px; border-radius: 999px; margin-bottom: 8px;
+  }
+  .hook-quote {
+    font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.38; letter-spacing: -0.01em;
+  }
+
+  .block {
+    background: var(--surface); border: 1px solid var(--border); border-left: 5px solid var(--accent);
+    border-radius: 13px; padding: 15px 17px; transition: box-shadow .2s, border-color .2s;
+  }
+  .block.active {
+    box-shadow: 0 0 0 3px rgba(2,132,199,.25), 0 8px 24px rgba(15,23,42,.10);
+    border-color: #0284c7;
+  }
+  .block.b-red { border-left-color: #e11d48; }
+  .block.b-amber { border-left-color: #d97706; }
+  .block.b-blue { border-left-color: #0284c7; }
+  .block.b-emerald { border-left-color: #059669; }
+  .block.b-purple { border-left-color: #7c3aed; }
+
+  .block-hd {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .block-title { font-size: 16px; font-weight: 800; color: var(--ink); }
+  .time-pill {
+    font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 800;
+    padding: 3px 10px; border-radius: 999px; background: var(--accent-soft); color: #0369a1;
+  }
+  .b-red .time-pill { background: var(--danger-soft); color: var(--danger); }
+  .b-amber .time-pill { background: var(--amber-soft); color: var(--amber); }
+  .b-emerald .time-pill { background: var(--emerald-soft); color: var(--emerald); }
+  .b-purple .time-pill { background: var(--purple-soft); color: var(--purple); }
+
+  .say {
+    font-size: 15px; color: var(--ink); margin-bottom: 10px;
+  }
+  .say strong { color: #0f172a; }
+  .cue {
+    background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 9px;
+    padding: 9px 11px; font-size: 12.5px; color: var(--ink-2); margin-top: 8px;
+  }
+  .cue strong { color: #0369a1; }
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 9px; margin: 10px 0; }
+  .mini-box {
+    background: #f8fafc; border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; font-size: 13px;
+  }
+  .mini-box h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; color: var(--muted); }
+  .mini-box ul { margin-left: 16px; }
+  .mini-box li { margin-bottom: 3px; }
+  .kpi-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 8px 0; }
+  .kpi-chip {
+    background: #0f172a; color: #fff; font-size: 12px; font-weight: 700;
+    padding: 5px 10px; border-radius: 8px; font-variant-numeric: tabular-nums;
+  }
+  .kpi-chip.red { background: #be123c; }
+  .kpi-chip.green { background: #047857; }
+  .kpi-chip.amber { background: #b45309; }
+
+  .font-controls { display: flex; gap: 6px; }
+  body.big .say { font-size: 18px; line-height: 1.62; }
+  body.big .hook-quote { font-size: 21px; }
+</style>
+</head>
+<body>
+  <header class="sticky-bar">
+    <div class="sticky-inner">
+      <div class="brand">
+        <h1>Guion Oficial · Presentación 4:00 Minutos</h1>
+        <p>Observatorio Geoespacial SIT Guatemala · Mesa de Trabajo Innovacon</p>
+      </div>
+      <div class="timer-box">
+        <span class="timer-display" id="timer">00:00</span>
+        <button class="tbtn" id="btn-start">▶ Iniciar</button>
+        <button class="tbtn sec" id="btn-reset">↺</button>
+        <button class="tbtn sec" id="btn-big" title="Aumentar letra para leer en celular">A+</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- Accesos directos al mapa para la demo en vivo -->
+    <div class="quick-links">
+      <span>Demo en vivo:</span>
+      <a class="qlink primary" href="./index.html" target="_blank">Abrir Mapa Principal</a>
+      <a class="qlink" href="./index.html#metric=bd_score&muni=1608" target="_blank">Puntaje Brecha (Senahú #1)</a>
+      <a class="qlink" href="./index.html#metric=ine_brecha&period=2023" target="_blank">Brecha 2018→2023</a>
+      <a class="qlink" href="./index.html#metric=edu_ana" target="_blank">Educación (ITU)</a>
+      <a class="qlink" href="./index.html#metric=eco_ocu" target="_blank">Economía (ITU)</a>
+      <a class="qlink" href="./index.html#view=guide" target="_blank">Guía Inclusiva</a>
+    </div>
+
+    <!-- FRASE DE ARRANQUE -->
+    <section class="hook-card">
+      <span class="hook-tag">Frase de Arranque · Segundos 0:00 – 0:10</span>
+      <p class="hook-quote">
+        «En Guatemala, casi 8 de cada 10 hogares siguen sin internet en casa, pero el Estado y las empresas hoy deciden dónde invertir mirando PDFs de hace años y tablas desconectadas. Hoy venimos a cambiar eso: trajimos los 340 municipios y 27,352 comunidades de Guatemala a un solo mapa vivo, inclusivo y accionable.»
+      </p>
+    </section>
+
+    <!-- BLOQUE 1: 0:00 - 0:30 -->
+    <section class="block b-red" data-start="0" data-end="30">
+      <div class="block-hd">
+        <div class="block-title">1. Pregunta de Decisión</div>
+        <span class="time-pill">0:00 – 0:30 · 30 segundos</span>
+      </div>
+      <p class="say">
+        <strong>Nuestra pregunta de decisión es directa:</strong><br>
+        <em>«¿En qué municipios y comunidades exactas de Guatemala debe priorizarse la próxima inversión en conectividad —y con qué modelo— para cerrar la brecha digital sin invertir a ciegas?»</em>
+      </p>
+      <p class="say">
+        Hoy una institución pública, un alcalde, un proveedor de internet o un organismo internacional como la <strong>ITU</strong> no tiene una forma rápida de responder esa pregunta. Nosotros construimos la respuesta en tiempo real.
+      </p>
+      <div class="cue">
+        <strong>En pantalla:</strong> Mapa principal de Guatemala abierto en vista completa (340 municipios) + QR visible para el jurado.
+      </div>
+    </section>
+
+    <!-- BLOQUE 2: 0:30 - 1:15 -->
+    <section class="block b-amber" data-start="30" data-end="75">
+      <div class="block-hd">
+        <div class="block-title">2. Qué datos usamos, qué nos faltó y el problema real de los datos en Guatemala</div>
+        <span class="time-pill">0:30 – 1:15 · 45 segundos</span>
+      </div>
+      <p class="say">
+        Seamos 100% transparentes sobre el reto real de hacer análisis de datos en Guatemala. El paquete base del reto nos entregó únicamente <strong>tres insumos</strong>: los <strong>2 archivos KMZ</strong> (municipios y 27,352 lugares poblados 2026) y la <strong>tabla consolidada de boletines de la SIT (2014–2026)</strong>.
+      </p>
+      <p class="say">
+        <strong>¿Qué nos faltó?</strong> Nos faltó <strong>toda la capa energética del INDE</strong> —no sabemos dónde llega electricidad rural para energizar una antena o fibra—, y <strong>tampoco teníamos datos socioeconómicos integrados</strong>. Ahí enfrentamos una de las mayores decadencias institucionales de Guatemala: <strong>los datos públicos existen en silos cerrados, atrapados en PDFs no procesables, con censos de 2018 desactualizados, encuestas como ENCOVI 2023 que solo bajan a departamento, y sin interoperabilidad entre SIT, INE, INDE y SEGEPLAN.</strong>
+      </p>
+      <p class="say">
+        <strong>Nuestro valor fuerza vendible:</strong> en lugar de inventar números o rendirnos, salimos a rescatar, limpiar y conciliar con <strong>0 errores aritméticos</strong> las fuentes oficiales del <strong>INE (Censo 2018, ENCOVI 2023, Educación y Economía)</strong> y <strong>SEGEPLAN 2023</strong>, convirtiendo ese caos institucional en una plataforma abierta con <strong>trazabilidad fila por fila hasta el PDF original</strong>.
+      </p>
+      <div class="grid-2">
+        <div class="mini-box">
+          <h4>Lo que sí tuvimos + integramos</h4>
+          <ul>
+            <li>SIT Consolidado 2014–2026 (29,186 radiobases, 2.1M líneas fijas)</li>
+            <li>2 KMZ oficiales (340 munis + 27,352 lugares poblados GPS)</li>
+            <li>Rescate propio conciliado: INE 2018, ENCOVI 2023, Educación/Economía INE y Pobreza SEGEPLAN 2023</li>
+          </ul>
+        </div>
+        <div class="mini-box">
+          <h4>Lo que faltó (realidad del país)</h4>
+          <ul>
+            <li><strong>Cero datos del INDE</strong> (red y cobertura eléctrica rural)</li>
+            <li>Banda ancha fija y telefonía móvil sin desglose municipal</li>
+            <li>Calidad real de señal (4G/5G/velocidad) y APIs abiertas inexistentes</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- BLOQUE 3: 1:15 - 2:30 -->
+    <section class="block b-blue" data-start="75" data-end="150">
+      <div class="block-hd">
+        <div class="block-title">3. Visualización en Vivo (Dónde · A quién · Cuándo · Qué variables)</div>
+        <span class="time-pill">1:15 – 2:30 · 1 min 15 s</span>
+      </div>
+      <p class="say">
+        Veámoslo en vivo. Cubrimos <strong>Dónde:</strong> los <strong>340 municipios, 22 departamentos y 27,352 comunidades geolocalizadas</strong> de Guatemala. <strong>Cuándo:</strong> una década de evolución SIT (<strong>2014–2026</strong>) y la línea de tiempo de brecha digital <strong>2018 → 2023</strong>. <strong>Para quién:</strong> para la SIT, alcaldías, operadores ISP, organismos como la <strong>ITU</strong> y cualquier ciudadano — incluyendo <strong>accesibilidad real para personas sordas</strong> (100% visual, español sencillo y subtítulos grandes sincronizados), personas con baja visión (lectura burbuja por burbuja) y dictado por voz.
+      </p>
+      <p class="say">
+        <strong>Qué variables cruzamos en vivo:</strong>
+        <br>1. <strong>Puntaje de Brecha Digital (0 a 100)</strong> en 5 pasos transparentes: combina el <em>uso de internet 7+ (Censo 2018)</em> y las <em>antenas por cada 10,000 habitantes (SIT 2026)</em>, ordenando los 340 municipios para señalar con 100 a quién atender primero.
+        <br>2. <strong>Brecha Digital en Hogares (2018 → 2023)</strong> con línea de tiempo animada, diferenciando con total honestidad nivel municipal (2018) y nivel departamental (ENCOVI 2023).
+        <br>3. <strong>Capas de Educación (% analfabeta) y Economía (% ocupación)</strong> del INE para visión de desarrollo ITU, más nuestro <strong>Semáforo de Saturación Económica (ISI + HHI)</strong> y <strong>descarga instantánea de Excel (.xlsx) con mapa visual incrustado</strong>.
+      </p>
+      <div class="cue">
+        <strong>Secuencia exacta de clics en vivo (45 segundos):</strong><br>
+        ① Cambiar selector a <strong>Puntaje de Brecha Digital (0–100)</strong> → clic en <strong>Senahú (#1, 100.0)</strong> para mostrar sus 153 aldeas GPS y los 5 pasos.<br>
+        ② Cambiar a <strong>Brecha Digital Hogares (2018–2023)</strong> → deslizar la línea de tiempo <strong>2018 → 2023</strong> (se ve el cambio visual de 340 munis a 22 deptos).<br>
+        ③ Mostrar 1 clic en <strong>Educación (% Analfabeta)</strong> o <strong>Economía (% Ocupación)</strong> y tocar una burbuja <strong>🔊</strong> o botón <strong>Descargar Excel (.xlsx)</strong>.
+      </div>
+    </section>
+
+    <!-- BLOQUE 4: 2:30 - 3:20 -->
+    <section class="block b-emerald" data-start="150" data-end="200">
+      <div class="block-hd">
+        <div class="block-title">4. El Insight Más Accionable</div>
+        <span class="time-pill">2:30 – 3:20 · 50 segundos</span>
+      </div>
+      <p class="say">
+        ¿Cuál es el hallazgo más accionable que destapa este mapa? <strong>Que Guatemala está creciendo en celulares, pero la brecha estructural de internet en el hogar casi no se ha movido:</strong> en cinco años solo bajó <strong>3.31 puntos porcentuales</strong> (de <strong>82.74%</strong> en 2018 a <strong>79.43%</strong> en 2023), y hoy <strong>31 municipios siguen reportando CERO líneas fijas</strong> en pleno 2026.
+      </p>
+      <p class="say">
+        Peor aún: la brecha digital se superpone exactamente con la brecha educativa y económica. Cuando cruzamos infraestructura SIT con educación y economía del INE, los municipios prioridad #1 como <strong>Senahú (puntaje 100/100)</strong> combinan <strong>98.8% de hogares sin internet</strong>, apenas <strong>5.1 antenas por cada 10,000 habitantes</strong> y <strong>32.9% de analfabetismo</strong>. Mientras tanto, nuestro Semáforo ISI identifica <strong>140 municipios de baja saturación</strong> donde la inversión pública-privada o WISP tiene terreno fértil y alto impacto social, en lugar de seguir sobre-invirtiendo en las <strong>43 plazas ya saturadas</strong>.
+      </p>
+      <div class="kpi-row">
+        <span class="kpi-chip red">Brecha hogares: 82.74% → 79.43% (−3.31 pp)</span>
+        <span class="kpi-chip red">31 munis con 0 líneas fijas (2026-S1)</span>
+        <span class="kpi-chip amber">#1 Senahú: Puntaje 100.0 · 32.9% analf.</span>
+        <span class="kpi-chip green">140 munis oportunidad · 43 saturados</span>
+      </div>
+    </section>
+
+    <!-- BLOQUE 5: 3:20 - 4:00 -->
+    <section class="block b-purple" data-start="200" data-end="240">
+      <div class="block-hd">
+        <div class="block-title">5. Qué necesitamos de la SIT + Cierre</div>
+        <span class="time-pill">3:20 – 4:00 · 40 segundos</span>
+      </div>
+      <p class="say">
+        Esta herramienta ya funciona hoy, es 100% reproducible y no inventa un solo dato. Para llevarla de prototipo a política pública nacional, <strong>necesitamos tres compromisos concretos de la SIT:</strong>
+      </p>
+      <div class="mini-box" style="margin-bottom:10px;">
+        <ul>
+          <li><strong>1. Datos abiertos estructurados (CSV/API):</strong> dejar de publicar la radiografía del país atrapada en PDFs semestrales y conectar esta plataforma directamente a una salida abierta oficial.</li>
+          <li><strong>2. Desagregación municipal de Banda Ancha Fija y calidad móvil (4G/5G):</strong> hoy esos indicadores solo existen a nivel nacional; sin verlos por municipio, los planes de conectividad rural operan con los ojos vendados.</li>
+          <li><strong>3. Mesa interinstitucional SIT + INDE + INE + SEGEPLAN:</strong> cruzar nuestra capa de telecomunicaciones con la <strong>red eléctrica del INDE</strong> para que cada torre o proyecto de fibra llegue donde sí existe energía —o se planifique junto con electrificación rural.</li>
+        </ul>
+      </div>
+      <p class="say">
+        <strong>Cierre:</strong> <em>«Los datos ya existen, pero mientras sigan encerrados en archivos que nadie entiende, la brecha seguirá igual. Con este observatorio, por primera vez Guatemala puede ver, escuchar y decidir dónde conectar a los que hoy siguen desconectados. Muchas gracias.»</em>
+      </p>
+    </section>
+  </main>
+
+<script>
+(() => {
+  let secs = 0, running = false, iv = null;
+  const disp = document.getElementById('timer');
+  const btnStart = document.getElementById('btn-start');
+  const btnReset = document.getElementById('btn-reset');
+  const btnBig = document.getElementById('btn-big');
+  const blocks = [...document.querySelectorAll('.block')];
+
+  function render() {
+    const m = String(Math.floor(secs / 60)).padStart(2, '0');
+    const s = String(secs % 60).padStart(2, '0');
+    disp.textContent = `${m}:${s}`;
+    disp.classList.toggle('warn', secs >= 210 && secs < 240);
+    disp.classList.toggle('over', secs >= 240);
+    blocks.forEach(b => {
+      const st = parseInt(b.dataset.start, 10), en = parseInt(b.dataset.end, 10);
+      b.classList.toggle('active', running && secs >= st && secs < en);
+    });
+  }
+
+  btnStart.onclick = () => {
+    if (running) {
+      running = false; clearInterval(iv); iv = null;
+      btnStart.textContent = '▶ Reanudar';
+    } else {
+      running = true;
+      btnStart.textContent = '⏸ Pausar';
+      render();
+      iv = setInterval(() => { secs++; render(); }, 1000);
+    }
+  };
+  btnReset.onclick = () => {
+    running = false; clearInterval(iv); iv = null; secs = 0;
+    btnStart.textContent = '▶ Iniciar';
+    render();
+  };
+  btnBig.onclick = () => {
+    document.body.classList.toggle('big');
+    btnBig.textContent = document.body.classList.contains('big') ? 'A−' : 'A+';
+  };
+})();
+</script>
+</body>
+</html>
