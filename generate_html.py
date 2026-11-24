@@ -622,6 +622,35 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   }
   .a11y-controls-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
+  /* Click-to-speak individual bubbles/cards */
+  .speak-bubble {
+    position: relative;
+    cursor: pointer;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .12s ease;
+  }
+  .speak-bubble:hover {
+    border-color: #38bdf8 !important;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.14);
+  }
+  .speak-bubble.is-speaking {
+    border-color: #0284c7 !important;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25) !important;
+    background: #f0f9ff !important;
+  }
+  .speak-badge-hint {
+    position: absolute; top: 8px; right: 8px;
+    width: 22px; height: 22px; border-radius: 999px;
+    background: rgba(224, 242, 254, 0.9); color: #0369a1;
+    border: 1px solid #bae6fd;
+    display: grid; place-items: center; font-size: 11px;
+    pointer-events: none; transition: all .15s;
+  }
+  .speak-bubble:hover .speak-badge-hint { background: #0284c7; color: #ffffff; border-color: #0284c7; }
+  .speak-bubble.is-speaking .speak-badge-hint { background: #dc2626; color: #ffffff; border-color: #dc2626; }
+  .eco-rec-box.speak-bubble, .eco-p-item.speak-bubble { padding-right: 32px; }
+  .gloss-card.speak-bubble, .step-card.speak-bubble, .persona-card.speak-bubble { padding-right: 34px; }
+  .stat-box.speak-bubble .s-lbl { padding-right: 22px; }
+
   @media (max-width: 1160px) {
     .verified-chip { display: none; }
     .brand-text p { display: none; }
@@ -984,7 +1013,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           <div>
             <div class="guide-sec-title" style="margin-bottom:2px;">Accesibilidad e Inclusión: Voz, Subtítulos y Comunicación Asistida</div>
             <div style="font-size:12px;color:var(--ink-2);line-height:1.45;">
-              Diseñado para incluir a <strong>personas sordas, sordomudas / no verbales, con baja visión o que prefieren navegar sin teclear</strong>: toda información hablada muestra subtítulos de alto contraste en pantalla y cualquier persona puede tanto dictar por voz como hacer que la plataforma hable por ella en voz alta.
+              Diseñado para incluir a <strong>personas sordas, sordomudas / no verbales, con baja visión o que prefieren navegar sin teclear</strong>: <strong>cada burbuja o tarjeta (con el ícono 🔊) es un botón interactivo</strong> — al tocarla lee <strong>únicamente esa burbuja</strong> con subtítulos grandes en pantalla (vuelve a tocarla para detener).
             </div>
           </div>
         </div>
@@ -2176,9 +2205,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
   function renderInspector() {
     const container = document.getElementById('inspector-content');
     const activePeriod = getActivePeriod();
-    if (state.selectedMuniId && state.compareMuniId) { renderComparisonInspector(container, muniById.get(state.selectedMuniId), muniById.get(state.compareMuniId)); return; }
-    if (state.selectedMuniId) { renderMuniInspector(container, muniById.get(state.selectedMuniId)); return; }
-    if (state.selectedDeptoId) { renderDeptoInspector(container, deptoById.get(state.selectedDeptoId)); return; }
+    if (state.selectedMuniId && state.compareMuniId) { renderComparisonInspector(container, muniById.get(state.selectedMuniId), muniById.get(state.compareMuniId)); enhanceSpeakBubbles(container); return; }
+    if (state.selectedMuniId) { renderMuniInspector(container, muniById.get(state.selectedMuniId)); enhanceSpeakBubbles(container); return; }
+    if (state.selectedDeptoId) { renderDeptoInspector(container, deptoById.get(state.selectedDeptoId)); enhanceSpeakBubbles(container); return; }
 
     const scored = SIT.munis.map(m => ({ m, v: getMetricValue(m, state.metric, activePeriod) }))
       .filter(x => x.v !== null).sort((a,b) => b.v - a.v || a.m.nom.localeCompare(b.m.nom, 'es'));
@@ -2326,13 +2355,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
       tabBody = `
         <!-- Plain-Spanish Narrative Card -->
-        <div class="story-box">
-          <div class="st-hd">
-            <span>En palabras sencillas</span>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <button class="btn-speak-sm" id="btn-muni-speak" style="padding:2px 7px;font-size:10.5px;">🔊 Escuchar</button>
-              <button class="guide-link-inline" id="btn-muni-open-guide">Guía</button>
-            </div>
+        <div class="story-box" data-speak-title="En palabras sencillas · ${esc(m.nom)}">
+          <div class="st-hd" style="padding-right:24px;">
+            <span>En palabras sencillas (toca para escuchar)</span>
+            <button class="guide-link-inline" id="btn-muni-open-guide">Guía</button>
           </div>
           <div>${storyLine1} ${storyLine2} ${storyLine3}</div>
         </div>
@@ -2355,22 +2381,22 @@ const SIT = __SIT_DATA_PAYLOAD__;
           </div>
           <div class="eco-summary">${esc(rec.summary)}</div>
           <div class="eco-recs">
-            <div class="eco-rec-box"><strong>Si vas a abrir empresa / comercio:</strong> ${esc(rec.forBiz)}</div>
-            <div class="eco-rec-box"><strong>Si evalúas invertir en ISP / telecom:</strong> ${esc(rec.forTelco)}</div>
+            <div class="eco-rec-box" data-speak-title="Recomendación para empresas" data-speak="Recomendación para abrir empresa o comercio en ${esc(m.nom)}: ${esc(rec.forBiz)}"><strong>Si vas a abrir empresa / comercio:</strong> ${esc(rec.forBiz)}</div>
+            <div class="eco-rec-box" data-speak-title="Recomendación para ISP / telecom" data-speak="Recomendación para invertir en internet o telecomunicaciones en ${esc(m.nom)}: ${esc(rec.forTelco)}"><strong>Si evalúas invertir en ISP / telecom:</strong> ${esc(rec.forTelco)}</div>
           </div>
           <div class="eco-pillars-mini num">
-            <div class="eco-p-item"><div class="pl">Concentración HHI<span class="help-q" title="Mide si compiten varias empresas en líneas fijas (0 a 10,000). Cerca de 10,000 = manda un solo operador; debajo de 1,800 = mercado competitivo.">?</span></div><div class="pv">${m.eco.hhi !== null ? fmtInt(Math.round(m.eco.hhi)) : 'Sin red fija'}</div></div>
-            <div class="eco-p-item"><div class="pl">Crecimiento RB (3 años)<span class="help-q" title="Porcentaje en que aumentaron las antenas celulares entre 2023-S1 y 2026-S1. Mediana nacional: +50%.">?</span></div><div class="pv">${m.eco.g3y !== null ? (m.eco.g3y >= 0 ? '+' : '') + m.eco.g3y + '%' : '—'}</div></div>
+            <div class="eco-p-item" data-speak-title="Concentración HHI" data-speak="Concentración HHI en telefonía fija para ${esc(m.nom)}: ${m.eco.hhi !== null ? fmtInt(Math.round(m.eco.hhi)) + ' puntos. Valores cercanos a diez mil indican que domina un solo operador; debajo de mil ochocientos indica competencia.' : 'sin red fija reportada en 2026.'}"><div class="pl">Concentración HHI<span class="help-q" title="Mide si compiten varias empresas en líneas fijas (0 a 10,000). Cerca de 10,000 = manda un solo operador; debajo de 1,800 = mercado competitivo.">?</span></div><div class="pv">${m.eco.hhi !== null ? fmtInt(Math.round(m.eco.hhi)) : 'Sin red fija'}</div></div>
+            <div class="eco-p-item" data-speak-title="Crecimiento a 3 años" data-speak="Crecimiento de antenas celulares en los últimos tres años en ${esc(m.nom)}: ${m.eco.g3y !== null ? (m.eco.g3y >= 0 ? 'más ' : '') + m.eco.g3y + ' por ciento entre 2023 y 2026. La mediana nacional es más 50 por ciento.' : 'sin dato base en 2023.'}"><div class="pl">Crecimiento RB (3 años)<span class="help-q" title="Porcentaje en que aumentaron las antenas celulares entre 2023-S1 y 2026-S1. Mediana nacional: +50%.">?</span></div><div class="pv">${m.eco.g3y !== null ? (m.eco.g3y >= 0 ? '+' : '') + m.eco.g3y + '%' : '—'}</div></div>
           </div>
         </div>
 
         <div class="stat-grid-2">
-          <div class="stat-box">
+          <div class="stat-box" data-speak-title="Radiobases · ${esc(m.nom)}" data-speak="${esc(m.nom)} registra ${rbRec ? fmtInt(rbRec.v) + ' antenas celulares o radiobases en ' + pRb + ', ocupando el puesto número ' + rbRank + ' de ' + rbScored.length + ' municipios del país.' : 'sin dato publicado de radiobases en ' + pRb}">
             <div class="s-lbl"><span>Radiobases<span class="help-q" title="Torres o antenas celulares activas reportadas oficialmente ante la SIT.">?</span></span><span>${pRb}</span></div>
             <div class="s-val num">${rbRec ? fmtInt(rbRec.v) : 'Sin dato'}</div>
             <div class="s-meta">${rbRec ? `Ranking <strong>#${rbRank}</strong> / ${rbScored.length}` : 'No publicado'}${prevRb ? `<br>${deltaHtml(rbRec?.v, prevRb.v, SIT.meta.periods_rb[rbIdx-1])}` : ''}</div>
           </div>
-          <div class="stat-box">
+          <div class="stat-box" data-speak-title="Líneas Fijas · ${esc(m.nom)}" data-speak="${esc(m.nom)} suma ${fxRec ? fmtInt(fxRec.t) + ' líneas fijas oficiales en ' + pFx + ', ocupando el puesto número ' + fxRank + ' de los 340 municipios.' : 'sin dato de líneas fijas.'}">
             <div class="s-lbl"><span>Líneas Fijas<span class="help-q" title="Conexiones telefónicas fijas por cable o fibra reportadas por operador.">?</span></span><span>${pFx}</span></div>
             <div class="s-val num">${fxRec ? fmtInt(fxRec.t) : 'Sin dato'}</div>
             <div class="s-meta">${fxRec ? `Ranking <strong>#${fxRank}</strong> / 340` : '—'}${prevFx ? `<br>${deltaHtml(fxRec?.t, prevFx.t, SIT.meta.periods_fx[fxIdx-1])}` : ''}</div>
@@ -3301,6 +3327,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
   let activeRecog = null;
   let isSpeaking = false;
+  let activeSpeakEl = null;
   let captionTimer = null;
 
   function showCaption(modeLabel, text, isMic=false) {
@@ -3313,6 +3340,12 @@ const SIT = __SIT_DATA_PAYLOAD__;
     if (captionTimer) { clearTimeout(captionTimer); captionTimer = null; }
     if (window.speechSynthesis) { try { window.speechSynthesis.cancel(); } catch(e) {} }
     if (activeRecog) { try { activeRecog.stop(); } catch(e) {} activeRecog = null; }
+    if (activeSpeakEl) {
+      activeSpeakEl.classList.remove('is-speaking');
+      const b = activeSpeakEl.querySelector(':scope > .speak-badge-hint');
+      if (b) b.textContent = '🔊';
+      activeSpeakEl = null;
+    }
     isSpeaking = false;
     btnVoiceMic.classList.remove('active');
     btnSearchMic.classList.remove('listening');
@@ -3320,6 +3353,75 @@ const SIT = __SIT_DATA_PAYLOAD__;
     capBar.classList.remove('open');
   }
   capStopBtn.onclick = stopAllVoice;
+
+  // ===== INDIVIDUAL CLICK-TO-SPEAK BUBBLE ENGINE =====
+  const BUBBLE_SELECTOR = '.gloss-card, .persona-card, .step-card, .story-box, .eco-rec-box, .eco-p-item, .stat-box, .nat-kpi-grid .kpi-mini';
+
+  function enhanceSpeakBubbles(root=document) {
+    root.querySelectorAll(BUBBLE_SELECTOR).forEach(el => {
+      if (el.dataset.bubbleReady) return;
+      el.dataset.bubbleReady = '1';
+      el.classList.add('speak-bubble');
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      if (!el.getAttribute('title')) el.setAttribute('title', 'Toca esta burbuja para escuchar solo este dato');
+      if (!el.querySelector(':scope > .speak-badge-hint')) {
+        const badge = document.createElement('span');
+        badge.className = 'speak-badge-hint';
+        badge.setAttribute('aria-hidden', 'true');
+        badge.textContent = '🔊';
+        el.appendChild(badge);
+      }
+    });
+  }
+
+  function extractBubbleSpeech(el) {
+    if (el.dataset.speak) {
+      return {
+        title: el.dataset.speakTitle || 'Lectura de burbuja',
+        text: el.dataset.speak
+      };
+    }
+    const clone = el.cloneNode(true);
+    // Remove nested buttons, interactive action bars, tiny '?' marks, and speaker badge so only clean prose is read
+    clone.querySelectorAll('button, .speak-badge-hint, .help-q, .persona-actions, .st-hd').forEach(n => n.remove());
+    const rawText = (clone.textContent || '').replace(/\s+/g, ' ').trim();
+    const headingEl = el.querySelector('h3, h4, .gc-term, .lbl, .s-lbl, .pl, .persona-tag');
+    let title = headingEl ? headingEl.textContent.replace(/\?/g,'').replace(/\s+/g,' ').trim() : 'Lectura individual';
+    if (title.length > 42) title = title.slice(0, 42) + '…';
+    return { title, text: rawText };
+  }
+
+  function triggerSpeakBubble(el) {
+    // Clicking the currently speaking bubble toggles it off!
+    if (activeSpeakEl === el && isSpeaking) {
+      stopAllVoice();
+      return;
+    }
+    const { title, text } = extractBubbleSpeech(el);
+    if (!text) return;
+    // Split gently into sentences for smooth live captions
+    const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
+    speakSentences(sentences.length ? sentences : [text], `🔊 ${title}`);
+    activeSpeakEl = el;
+    el.classList.add('is-speaking');
+    const b = el.querySelector(':scope > .speak-badge-hint');
+    if (b) b.textContent = '⏹';
+  }
+
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('button, a, input, select, option, textarea')) return;
+    const bubble = e.target.closest('.speak-bubble');
+    if (!bubble) return;
+    e.stopPropagation();
+    triggerSpeakBubble(bubble);
+  });
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList?.contains('speak-bubble')) {
+      e.preventDefault();
+      triggerSpeakBubble(e.target);
+    }
+  });
 
   function pickSpanishVoice() {
     if (!window.speechSynthesis) return null;
@@ -3734,6 +3836,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
   renderInspector();
   initTableView();
   initNationalView();
+  enhanceSpeakBubbles(document);
   if (hash.includes('view=guide')) switchView('guide');
   const cmpMatch = hash.match(/cmp=(\d+),(\d+)/);
   const mMatch = hash.match(/muni=(\d+)/);
