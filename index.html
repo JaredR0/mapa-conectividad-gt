@@ -3752,62 +3752,34 @@ const SIT = {"meta":{"source_file":"Copia de 04NOV2026 - SIT Consolidado Histori
     captionTimer = setTimeout(() => { if (!isSpeaking) capBar.classList.remove('open'); }, 5500);
   }
 
-  let micPermissionGranted = false;
-
-  async function requestMicrophonePermission() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      return { ok: true, skipped: true }; // fallback directly to SpeechRecognition if mediaDevices unavailable
-    }
-    try {
-      showCaption('Permiso de micrófono requerido', 'Acepta la ventana del navegador ("Permitir micrófono") para activar el dictado por voz...', true);
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // Release stream immediately so SpeechRecognition can capture audio cleanly
-      stream.getTracks().forEach(track => track.stop());
-      micPermissionGranted = true;
-      return { ok: true };
-    } catch (err) {
-      micPermissionGranted = false;
-      const isFileProto = location.protocol === 'file:';
-      const msg = isFileProto
-        ? 'El navegador bloquea el micrófono en archivos locales (file://). Ábrelo desde el enlace HTTPS: https://jaredr0.github.io/mapaton-SIT/'
-        : (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'
-            ? 'Permiso de micrófono denegado. Toca el ícono del candado junto a la URL, permite el micrófono y vuelve a presionar Dictar.'
-            : (err.name === 'NotFoundError'
-                ? 'No se detectó ningún micrófono conectado en este dispositivo.'
-                : `No se pudo activar el micrófono (${err.name || err.message}).`));
-      return { ok: false, msg };
-    }
-  }
-
-  async function toggleVoiceDictation() {
+  function toggleVoiceDictation() {
     if (activeRecog) { stopAllVoice(); return; }
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      showCaption('Web Speech API no disponible en este navegador', 'Abre el enlace HTTPS en Google Chrome, Safari o Edge para dictar por voz, o escribe tu frase en el buscador y presiona Enter.', true);
-      captionTimer = setTimeout(() => capBar.classList.remove('open'), 6500);
+      showCaption('Dictado de voz no soportado en este navegador', 'Usa Google Chrome, Safari o Edge en HTTPS, o escribe tu consulta (ej. "Dame los datos de Petén") en el buscador y presiona Enter.', true);
+      captionTimer = setTimeout(() => capBar.classList.remove('open'), 7000);
       return;
     }
-    stopAllVoice();
-
-    // Explicitly ask the browser for microphone permission before starting SpeechRecognition
-    if (!micPermissionGranted) {
-      const perm = await requestMicrophonePermission();
-      if (!perm.ok) {
-        showCaption('Permiso de micrófono necesario', perm.msg, true);
-        captionTimer = setTimeout(() => capBar.classList.remove('open'), 7500);
-        return;
-      }
+    if (location.protocol === 'file:') {
+      showCaption('Abre el enlace HTTPS para usar micrófono', 'Los navegadores bloquean el micrófono en archivos locales (file://). Ábrelo en: https://jaredr0.github.io/mapaton-SIT/', true);
+      captionTimer = setTimeout(() => capBar.classList.remove('open'), 7500);
+      return;
     }
 
+    stopAllVoice();
+
+    // IMPORTANT: Call recog.start() SYNCHRONOUSLY inside click handler!
+    // Calling await getUserMedia() before recog.start() expires the user gesture on Safari/Chrome
+    // and locks the audio device, causing false "not-allowed" errors even after granting permission.
     const recog = new SR();
-    recog.lang = 'es-GT';
+    recog.lang = 'es-MX'; // Universally supported Spanish model in Chrome, Safari (macOS/iOS) & Edge
     recog.continuous = false;
     recog.interimResults = true;
     recog.maxAlternatives = 3;
     activeRecog = recog;
     btnVoiceMic.classList.add('active');
     btnSearchMic.classList.add('listening');
-    showCaption('Micrófono activo · Escuchando (es-GT)...', 'Prueba decir: "Dame los datos de Petén", "Cuántas radiobases tiene Cobán", "Comparar Guatemala con Jalapa" o "Descargar Excel de Petén".', true);
+    showCaption('Micrófono activo · Escuchando (Español)...', 'Habla ahora: "Dame los datos de Petén", "Cuántas radiobases tiene Cobán", "Comparar Guatemala con Jalapa"...', true);
 
     let finalTxt = '';
     let lastInterim = '';
@@ -3821,14 +3793,36 @@ const SIT = {"meta":{"source_file":"Copia de 04NOV2026 - SIT Consolidado Histori
       const live = (finalTxt + interim).trim();
       if (live) showCaption('Escuchando en vivo...', `"${live}"`, true);
     };
-    recog.onerror = (e) => {
-      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') micPermissionGranted = false;
-      const msg = (e.error === 'not-allowed' || e.error === 'service-not-allowed')
-        ? 'Permiso de micrófono bloqueado. Habilítalo en el ícono de candado junto a la URL (HTTPS) y recarga.'
-        : (e.error === 'no-speech' ? 'No se detectó voz. Toca Dictar de nuevo y habla cerca del micrófono.' : `Error de micrófono (${e.error}).`);
+    recog.onerror = async (e) => {
+      const code = e.error || 'unknown';
       stopAllVoice();
-      showCaption('Dictado por voz', msg, true);
-      captionTimer = setTimeout(() => capBar.classList.remove('open'), 5500);
+      let msg = '';
+      if (code === 'service-not-allowed') {
+        msg = 'El servicio de dictado del sistema está desactivado (service-not-allowed). En Mac/iPhone activa Ajustes → Teclado → Dictado, o prueba en Google Chrome.';
+      } else if (code === 'not-allowed') {
+        let permState = 'unknown';
+        try {
+          if (navigator.permissions?.query) {
+            const st = await navigator.permissions.query({ name: 'microphone' });
+            permState = st.state;
+          }
+        } catch (_) {}
+        if (permState === 'granted') {
+          msg = 'El sitio ya tiene permiso de micrófono, pero macOS o el navegador bloqueó el servicio de voz (not-allowed). En Mac revisa Ajustes del Sistema → Privacidad y Seguridad → Micrófono (habilita tu navegador) y Ajustes → Teclado → Dictado.';
+        } else {
+          msg = 'Permiso de micrófono denegado (not-allowed). Permite el micrófono en la configuración del sitio y vuelve a tocar Dictar.';
+        }
+      } else if (code === 'no-speech') {
+        msg = 'No se detectó voz. Toca Dictar de nuevo y habla cerca del micrófono.';
+      } else if (code === 'audio-capture') {
+        msg = 'No se encontró un micrófono activo (audio-capture). Verifica tu micrófono en Ajustes del Sistema.';
+      } else if (code === 'network') {
+        msg = 'El reconocimiento de voz requiere conexión a internet (si usas Brave, prueba en Chrome o Safari porque Brave bloquea el servidor de voz).';
+      } else {
+        msg = `Error de reconocimiento de voz (${code}). También puedes escribir tu frase en el buscador y presionar Enter.`;
+      }
+      showCaption(`Dictado por voz (${code})`, msg, true);
+      captionTimer = setTimeout(() => capBar.classList.remove('open'), 9500);
     };
     recog.onend = () => {
       const heard = (finalTxt || lastInterim).trim();
@@ -3836,9 +3830,15 @@ const SIT = {"meta":{"source_file":"Copia de 04NOV2026 - SIT Consolidado Histori
       btnVoiceMic.classList.remove('active');
       btnSearchMic.classList.remove('listening');
       if (heard) handleVoiceTranscript(heard);
-      else capBar.classList.remove('open');
+      else if (!capBar.classList.contains('open')) capBar.classList.remove('open');
     };
-    try { recog.start(); } catch (err) { stopAllVoice(); }
+    try {
+      recog.start();
+    } catch (err) {
+      stopAllVoice();
+      showCaption('Dictado por voz', `No se pudo iniciar el micrófono (${err.message || err}). Recarga la página e intenta de nuevo.`, true);
+      captionTimer = setTimeout(() => capBar.classList.remove('open'), 6500);
+    }
   }
 
   btnVoiceMic.onclick = toggleVoiceDictation;
