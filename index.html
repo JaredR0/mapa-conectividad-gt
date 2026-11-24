@@ -980,8 +980,9 @@
           </div>
         </div>
         <div class="a11y-controls-row">
-          <button class="btn-speak-sm" id="guide-a11y-mic">🎙️ Probar Dictado por Voz</button>
-          <button class="btn-speak-sm" id="guide-a11y-tts">🔊 Probar Lectura con Subtítulos</button>
+          <button class="btn-speak-sm" id="guide-a11y-mic">🎙️ Dictar ahora (Web Speech API)</button>
+          <button class="btn-speak-sm" id="guide-a11y-tts">🔊 Escuchar guía con subtítulos</button>
+          <button class="btn-sm" id="guide-test-peten">Probar frase: "Dame los datos de Petén"</button>
           <button class="btn-sm" id="btn-a11y-large">A+ Texto grande</button>
           <button class="btn-sm" id="btn-a11y-contrast">◐ Alto contraste</button>
           <select id="a11y-rate" class="ctrl-select" style="height:29px;font-size:11.5px;" title="Velocidad de lectura en voz alta">
@@ -2084,6 +2085,13 @@ const SIT = {"meta":{"source_file":"Copia de 04NOV2026 - SIT Consolidado Histori
   }
   searchInput.addEventListener('input', () => renderSearch(searchInput.value));
   searchInput.addEventListener('focus', () => { if (searchInput.value) renderSearch(searchInput.value); });
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && searchInput.value.trim()) {
+      e.preventDefault();
+      searchResults.classList.remove('open');
+      handleVoiceTranscript(searchInput.value.trim());
+    }
+  });
   searchClear.onclick = () => { searchInput.value = ''; searchClear.style.display = 'none'; searchResults.classList.remove('open'); };
   document.addEventListener('click', (e) => { if (!e.target.closest('.search-wrap')) searchResults.classList.remove('open'); });
 
@@ -3397,128 +3405,292 @@ const SIT = {"meta":{"source_file":"Copia de 04NOV2026 - SIT Consolidado Histori
     }
     if (state.selectedDeptoId) {
       const d = deptoById.get(state.selectedDeptoId);
-      const dm = munisByDepto.get(d.id);
-      speakSentences([
-        `Departamento de ${d.nom}, integrado por ${dm.length} municipios.`,
-        `En 2026 registra ${fmtInt(d.rb['2026-S1']?.v)} radiobases y ${fmtInt(d.fx['2026-S1']?.t)} líneas fijas oficiales.`,
-        `Toca cualquiera de sus municipios para escuchar su recomendación económica detallada.`
-      ], `Departamento · ${d.nom}`);
+      speakSentences(buildDeptoSpeech(d), `Departamento · ${d.nom}`);
       return;
     }
     speakSentences([
       'Observatorio Geoespacial de Guatemala con datos oficiales de la SIT hasta el primer semestre de 2026.',
       'A nivel nacional existen 29 mil 186 radiobases, 2 millones 105 mil 12 líneas fijas y 27 mil 352 lugares poblados geolocalizados en los 340 municipios.',
       'Según el Semáforo Económico, 139 municipios presentan baja saturación con alta oportunidad de expansión, 161 están en consolidación y 40 son plazas maduras de alta saturación.',
-      'Toca cualquier municipio en el mapa o usa el botón Dictar para explorar un lugar específico.'
+      'Toca cualquier municipio en el mapa o usa el botón Dictar para decir por ejemplo: Dame los datos de Petén.'
     ], 'Resumen Nacional con subtítulos');
   }
 
-  function findBestEntity(phrase) {
-    const np = norm(phrase);
-    if (!np) return null;
-    // Exact muni match first
-    for (const m of SIT.munis) if (norm(m.nom) === np) return { type: 'muni', item: m };
-    // Exact depto match
-    for (const d of SIT.deptos) if (norm(d.nom) === np) return { type: 'depto', item: d };
-    // Contains muni (longest name match wins)
-    const muniHits = SIT.munis.filter(m => np.includes(norm(m.nom)) || norm(m.nom).includes(np))
-      .sort((a,b) => b.nom.length - a.nom.length);
-    if (muniHits.length) return { type: 'muni', item: muniHits[0] };
-    const depHits = SIT.deptos.filter(d => np.includes(norm(d.nom)) || norm(d.nom).includes(np))
-      .sort((a,b) => b.nom.length - a.nom.length);
-    if (depHits.length) return { type: 'depto', item: depHits[0] };
+  function buildDeptoSpeech(d, focusMetric=null) {
+    const dm = munisByDepto.get(d.id);
+    const rb26 = d.rb['2026-S1']?.v ?? dm.reduce((s,m)=>s+(m.rb['2026-S1']?.v||0),0);
+    const fx26 = d.fx['2026-S1']?.t ?? dm.reduce((s,m)=>s+(m.fx['2026-S1']?.t||0),0);
+    const lpTot = dm.reduce((s,m)=>s+m.lp_sum.tot,0);
+    const avgIsi = dm.reduce((s,m)=>s+m.eco.isi,0) / dm.length;
+    const t0 = dm.filter(m=>m.eco.tier===0).length, t1 = dm.filter(m=>m.eco.tier===1).length, t2 = dm.filter(m=>m.eco.tier===2).length;
+    const topRb = [...dm].sort((a,b)=>(b.rb['2026-S1']?.v||0)-(a.rb['2026-S1']?.v||0))[0];
+    const topOport = [...dm].sort((a,b)=>a.eco.isi - b.eco.isi)[0];
+
+    if (focusMetric === 'rb') {
+      return [
+        `El departamento de ${d.nom} cuenta con ${fmtInt(rb26)} radiobases o antenas celulares en el primer semestre de 2026, distribuidas en sus ${dm.length} municipios.`,
+        `El municipio con más antenas en ${d.nom} es ${topRb.nom} con ${fmtInt(topRb.rb['2026-S1']?.v)} radiobases.`
+      ];
+    }
+    if (focusMetric === 'fx_total') {
+      return [
+        `El departamento de ${d.nom} suma ${fmtInt(fx26)} líneas fijas oficiales en el primer semestre de 2026 entre sus ${dm.length} municipios.`
+      ];
+    }
+    return [
+      `Datos oficiales del departamento de ${d.nom}, integrado por ${dm.length} municipios y ${fmtInt(lpTot)} comunidades registradas.`,
+      `En el primer semestre de 2026 suma ${fmtInt(rb26)} antenas celulares o radiobases y ${fmtInt(fx26)} líneas fijas oficiales.`,
+      `Su Índice de Saturación Económica promedio es de ${fmtDec(avgIsi, 1)} sobre 100: tiene ${t0} municipios con baja saturación y alta oportunidad, ${t1} en consolidación y ${t2} de alta saturación.`,
+      `El municipio con más radiobases en ${d.nom} es ${topRb.nom} con ${fmtInt(topRb.rb['2026-S1']?.v)}, y el de mayor oportunidad por baja saturación es ${topOport.nom} con índice ${fmtDec(topOport.eco.isi, 1)}.`
+    ];
+  }
+
+  // Spoken aliases common in Guatemala
+  const VOICE_ALIASES = {
+    'xela': { type: 'muni', id: 901 },
+    'ciudad de guatemala': { type: 'muni', id: 101 },
+    'la capital': { type: 'muni', id: 101 },
+    'antigua': { type: 'muni', id: 301 },
+    'chichi': { type: 'muni', id: 1406 },
+    'chichicastenango': { type: 'muni', id: 1406 },
+    'petapa': { type: 'muni', id: 117 },
+    'barillas': { type: 'muni', id: 1326 },
+    'cahabon': { type: 'muni', id: 1612 },
+    'lanquin': { type: 'muni', id: 1611 },
+    'nebaj': { type: 'muni', id: 1413 },
+    'tucuru': { type: 'muni', id: 1606 },
+    'comalapa': { type: 'muni', id: 404 },
+    'olintepeque': { type: 'muni', id: 903 },
+    'ixcan': { type: 'muni', id: 1420 },
+    'uspantan': { type: 'muni', id: 1415 },
+    'soloma': { type: 'muni', id: 1308 },
+    'alotenango': { type: 'muni', id: 314 },
+  };
+
+  function stripVoiceFillers(str) {
+    let s = ' ' + norm(str) + ' ';
+    const fillers = [
+      'por favor', 'dame los datos de', 'dame datos de', 'dame informacion de', 'dame la informacion de',
+      'dame las radiobases de', 'dame las antenas de', 'dame las lineas fijas de', 'dame el semaforo de',
+      'dame el indice de', 'dame el excel de', 'descarga el excel de', 'descargar el excel de',
+      'descargar excel de', 'bajar excel de', 'baja el excel de', 'exportar excel de', 'exporta excel de',
+      'cuantas radiobases tiene', 'cuantas antenas tiene', 'cuantas lineas fijas tiene', 'cuantos lugares poblados tiene',
+      'que tan saturado esta', 'como esta', 'como se encuentra', 'conviene invertir en', 'quiero invertir en',
+      'muestrame los datos de', 'muestrame a', 'muestrame', 'mostrar los datos de', 'mostrar', 'ensename',
+      'dime los datos de', 'dime de', 'dime', 'quiero ver', 'quiero saber de', 'buscar', 'busca', 'abre', 'abrir', 'ir a',
+      'del departamento de', 'el departamento de', 'departamento de', 'depto de',
+      'del municipio de', 'el municipio de', 'municipio de', 'en el municipio de', 'en el departamento de',
+      'en ', 'de ', 'del ', 'la ', 'el '
+    ];
+    for (const f of fillers) {
+      s = s.replace(new RegExp(' ' + f.trim() + ' ', 'g'), ' ');
+    }
+    return s.replace(/\s+/g, ' ').trim();
+  }
+
+  function findBestEntity(phrase, preferDepto=false) {
+    const rawNorm = norm(phrase);
+    const cleaned = stripVoiceFillers(phrase);
+    const candidates = [cleaned, rawNorm].filter(Boolean);
+
+    // 1. Check exact spoken aliases first
+    for (const c of candidates) {
+      if (VOICE_ALIASES[c]) {
+        const a = VOICE_ALIASES[c];
+        return { type: a.type, item: a.type === 'muni' ? muniById.get(a.id) : deptoById.get(a.id) };
+      }
+    }
+
+    // 2. Exact matches (respecting explicit "departamento de ..." preference)
+    for (const c of candidates) {
+      if (preferDepto) {
+        for (const d of SIT.deptos) if (norm(d.nom) === c) return { type: 'depto', item: d };
+      }
+      for (const m of SIT.munis) if (norm(m.nom) === c) return { type: 'muni', item: m };
+      for (const d of SIT.deptos) if (norm(d.nom) === c) return { type: 'depto', item: d };
+    }
+
+    // 3. Word-boundary / phrase substring match (longest entity name found inside spoken sentence!)
+    const padded = ' ' + rawNorm + ' ';
+    const depInPhrase = SIT.deptos.filter(d => padded.includes(' ' + norm(d.nom) + ' ')).sort((a,b) => b.nom.length - a.nom.length);
+    const muniInPhrase = SIT.munis.filter(m => padded.includes(' ' + norm(m.nom) + ' ')).sort((a,b) => b.nom.length - a.nom.length);
+
+    if (preferDepto && depInPhrase.length) return { type: 'depto', item: depInPhrase[0] };
+    // Check spoken aliases inside full sentence
+    for (const [alias, target] of Object.entries(VOICE_ALIASES)) {
+      if (padded.includes(' ' + alias + ' ')) {
+        return { type: target.type, item: target.type === 'muni' ? muniById.get(target.id) : deptoById.get(target.id) };
+      }
+    }
+    if (muniInPhrase.length && depInPhrase.length) {
+      // If department name is strictly longer (e.g. "Alta Verapaz" vs short word) prefer longer
+      if (depInPhrase[0].nom.length > muniInPhrase[0].nom.length) return { type: 'depto', item: depInPhrase[0] };
+      return { type: 'muni', item: muniInPhrase[0] };
+    }
+    if (muniInPhrase.length) return { type: 'muni', item: muniInPhrase[0] };
+    if (depInPhrase.length) return { type: 'depto', item: depInPhrase[0] };
+
+    // 4. Partial fallback on cleaned token (>= 4 chars)
+    if (cleaned.length >= 4) {
+      const mSub = SIT.munis.filter(m => norm(m.nom).includes(cleaned)).sort((a,b) => a.nom.length - b.nom.length);
+      if (mSub.length) return { type: 'muni', item: mSub[0] };
+      const dSub = SIT.deptos.filter(d => norm(d.nom).includes(cleaned)).sort((a,b) => a.nom.length - b.nom.length);
+      if (dSub.length) return { type: 'depto', item: dSub[0] };
+    }
     return null;
   }
 
   function handleVoiceTranscript(raw) {
     const t = norm(raw);
     if (!t) return;
-    // 1. Comparison command: "comparar X con Y" or "X versus Y"
-    const cmpMatch = t.match(/(?:comparar|compara)?\s*(.+?)\s+(?:con|contra|versus|vs|y)\s+(.+)/);
-    if (cmpMatch && (t.includes('compar') || t.includes('versus') || t.includes('vs') || t.includes('contra'))) {
-      const a = findBestEntity(cmpMatch[1]), b = findBestEntity(cmpMatch[2]);
-      if (a?.type === 'muni' && b?.type === 'muni' && a.item.id !== b.item.id) {
+
+    // Detect requested action & metric WITHOUT exiting early if a place is also named!
+    const wantsExcel = t.includes('excel') || t.includes('descarg') || t.includes('export') || t.includes('bajar tabla');
+    const wantsDepto = t.includes('departamento') || t.includes('depto');
+    let reqMetric = null;
+    if (t.includes('semaforo') || t.includes('saturad') || t.includes('saturacion') || t.includes('isi') || t.includes('invertir') || t.includes('recomendacion')) reqMetric = 'isi';
+    else if (t.includes('radiobase') || t.includes('antena') || t.includes('torre')) reqMetric = 'rb';
+    else if (t.includes('linea') && t.includes('fija')) reqMetric = 'fx_total';
+    else if (t.includes('brecha')) reqMetric = 'lp_per_rb';
+    else if (t.includes('lugares poblados') || t.includes('aldeas') || t.includes('comunidades')) reqMetric = 'lp_tot';
+
+    // 1. Special real-data queries ("municipios sin líneas fijas / cero líneas fijas")
+    if ((t.includes('cero') || t.includes('sin') || t.includes('0')) && (t.includes('linea') || t.includes('fija'))) {
+      switchView('table');
+      document.getElementById('tbl-tier').value = '0';
+      state.tblSort = { col: 'fx', dir: 1 };
+      renderTable();
+      speakSentences([
+        'Mostrando los 31 municipios de Guatemala que reportan cero líneas fijas en el primer semestre de 2026.',
+        'Todos aparecen ordenados al inicio de la tabla para identificar oportunidades de expansión en red fija.'
+      ], 'Consulta por voz · 0 líneas fijas');
+      return;
+    }
+
+    // 2. Comparison command: "comparar X con Y" or "X versus Y"
+    if (t.includes('compar') || t.includes('versus') || t.includes(' vs ') || t.includes('contra')) {
+      const cleanedCmp = t.replace(/^(dame la comparacion de|comparar|compara|quiero comparar|descarga el excel de|descargar excel de)\s+/, '');
+      const parts = cleanedCmp.split(/\s+(?:con|contra|versus|vs|y)\s+/);
+      if (parts.length >= 2) {
+        const a = findBestEntity(parts[0], false), b = findBestEntity(parts[1], false);
+        if (a?.type === 'muni' && b?.type === 'muni' && a.item.id !== b.item.id) {
+          switchView('map');
+          if (reqMetric) { metricSel.value = reqMetric; state.metric = reqMetric; stopPlay(); syncSliderToMetric(); }
+          state.selectedMuniId = a.item.id; state.compareMuniId = b.item.id; state.compareMode = false;
+          resetZoom(); updateMapColors(); renderInspector();
+          if (wantsExcel) exportCompareXLSX([a.item.id, b.item.id]);
+          speakSentences([
+            `Comparando ${a.item.nom} contra ${b.item.nom} con datos oficiales 2026.${wantsExcel ? ' Generando además el archivo de Excel con mapa.' : ''}`,
+            `${a.item.nom} tiene Índice ISI de ${fmtDec(a.item.eco.isi,1)}, ${fmtInt(a.item.rb['2026-S1']?.v)} radiobases y ${fmtInt(a.item.fx['2026-S1']?.t)} líneas fijas.`,
+            `${b.item.nom} tiene Índice ISI de ${fmtDec(b.item.eco.isi,1)}, ${fmtInt(b.item.rb['2026-S1']?.v)} radiobases y ${fmtInt(b.item.fx['2026-S1']?.t)} líneas fijas.`
+          ], `Comparación · ${a.item.nom} vs ${b.item.nom}`);
+          return;
+        }
+      }
+    }
+
+    // 3. Whole-country / national summary queries
+    if (t.includes('resumen nacional') || t.includes('todo el pais') || t.includes('toda guatemala') || t.includes('panorama nacional')) {
+      if (t.includes('panorama')) { switchView('national'); showCaption('Dictado reconocido', 'Abriendo Panorama Nacional SIT', false); return; }
+      switchView('map');
+      state.deptoFilter = null; state.selectedMuniId = null; state.selectedDeptoId = null;
+      document.getElementById('depto-filter').value = '';
+      if (reqMetric) { metricSel.value = reqMetric; state.metric = reqMetric; stopPlay(); syncSliderToMetric(); }
+      resetZoom(); updateMapColors(); renderInspector();
+      speakCurrentContext();
+      return;
+    }
+
+    // 4. Resolve specific Municipality or Department in the phrase!
+    const hit = findBestEntity(raw, wantsDepto);
+    if (hit) {
+      if (reqMetric) { metricSel.value = reqMetric; state.metric = reqMetric; stopPlay(); syncSliderToMetric(); }
+      if (hit.type === 'muni') {
+        const m = hit.item;
+        searchInput.value = m.nom; searchClear.style.display = 'block';
+        selectAndFocusMuni(m.id);
+        if (wantsExcel) {
+          exportMuniXLSX(m);
+          speakSentences([`Descargando el archivo de Excel con mapa visual para el municipio de ${m.nom}, ${m.dep}.`], `Excel · ${m.nom}`);
+        } else {
+          speakSentences(buildMuniSpeech(m), `Dictado · ${m.nom} (${m.dep})`);
+        }
+        return;
+      } else {
+        const d = hit.item;
         switchView('map');
-        state.selectedMuniId = a.item.id; state.compareMuniId = b.item.id; state.compareMode = false;
-        resetZoom(); updateMapColors(); renderInspector();
-        showCaption('Dictado reconocido', `Comparando ${a.item.nom} vs ${b.item.nom}`, false);
-        captionTimer = setTimeout(() => { if (!isSpeaking) capBar.classList.remove('open'); }, 4000);
+        searchInput.value = d.nom; searchClear.style.display = 'block';
+        document.getElementById('depto-filter').value = d.id;
+        state.deptoFilter = d.id; state.selectedMuniId = null; state.selectedDeptoId = d.id;
+        state.compareMode = false; state.compareMuniId = null;
+        layerLp.innerHTML = ''; zoomToBBox(d.bb, 0.22); updateMapColors(); renderInspector();
+        if (wantsExcel) {
+          exportDeptoXLSX(d.id);
+          speakSentences([`Descargando el archivo de Excel departamental con mapa visual para ${d.nom}.`], `Excel · ${d.nom}`);
+        } else {
+          speakSentences(buildDeptoSpeech(d, reqMetric), `Dictado · Depto. ${d.nom}`);
+        }
         return;
       }
     }
-    // 2. Navigation / action commands
-    if (t.includes('guia') || t.includes('manual') || t.includes('ayuda') || t.includes('como interpretar')) { switchView('guide'); showCaption('Dictado reconocido', 'Abriendo guía de interpretación', false); return; }
-    if (t.includes('excel') || t.includes('descargar')) { openExcelModal(); showCaption('Dictado reconocido', 'Abriendo centro de descargas Excel (.xlsx)', false); return; }
-    if (t.includes('tabla') || t.includes('ranking')) { switchView('table'); showCaption('Dictado reconocido', 'Abriendo explorador y ranking', false); return; }
-    if (t.includes('nacional')) { switchView('national'); showCaption('Dictado reconocido', 'Abriendo panorama nacional', false); return; }
-    if (t.includes('semaforo') || t.includes('saturacion') || t.includes('isi')) {
-      switchView('map'); metricSel.value = 'isi'; state.metric = 'isi'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
-      showCaption('Dictado reconocido', 'Mostrando mapa de Semáforo Económico ISI', false); return;
+
+    // 5. General view/metric commands when NO specific municipality/department was mentioned
+    if (t.includes('guia') || t.includes('manual') || t.includes('ayuda') || t.includes('como interpretar')) { switchView('guide'); speakCurrentContext(); return; }
+    if (wantsExcel) { openExcelModal(); showCaption('Dictado reconocido', 'Abriendo centro de descargas Excel (.xlsx)', false); return; }
+    if (t.includes('tabla') || t.includes('ranking')) { switchView('table'); showCaption('Dictado reconocido', 'Abriendo explorador y ranking de los 340 municipios', false); return; }
+    if (reqMetric) {
+      switchView('map'); metricSel.value = reqMetric; state.metric = reqMetric; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
+      showCaption('Dictado reconocido', `Mostrando mapa de ${getMetricTitle(reqMetric)}`, false);
+      captionTimer = setTimeout(() => { if (!isSpeaking) capBar.classList.remove('open'); }, 3800);
+      return;
     }
-    if (t.includes('radiobase') || t.includes('antena')) {
-      switchView('map'); metricSel.value = 'rb'; state.metric = 'rb'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
-      showCaption('Dictado reconocido', 'Mostrando mapa de Radiobases', false); return;
-    }
-    if (t.includes('linea') && t.includes('fija')) {
-      switchView('map'); metricSel.value = 'fx_total'; state.metric = 'fx_total'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
-      showCaption('Dictado reconocido', 'Mostrando mapa de Líneas Fijas', false); return;
-    }
-    // 3. Direct municipality or department lookup
-    const hit = findBestEntity(t);
-    if (hit) {
-      if (hit.type === 'muni') {
-        searchInput.value = hit.item.nom; searchClear.style.display = 'block';
-        selectAndFocusMuni(hit.item.id);
-        speakSentences(buildMuniSpeech(hit.item), `Dictado: ${hit.item.nom}`);
-      } else {
-        switchView('map');
-        document.getElementById('depto-filter').value = hit.item.id;
-        state.deptoFilter = hit.item.id; state.selectedMuniId = null; state.selectedDeptoId = hit.item.id;
-        layerLp.innerHTML = ''; zoomToBBox(hit.item.bb, 0.22); updateMapColors(); renderInspector();
-        showCaption('Dictado reconocido', `Enfocando departamento de ${hit.item.nom}`, false);
-      }
-    } else {
-      searchInput.value = raw; renderSearch(raw);
-      showCaption('Dictado escuchado', `"${raw}" — selecciona una coincidencia en el buscador.`, false);
-      captionTimer = setTimeout(() => { if (!isSpeaking) capBar.classList.remove('open'); }, 4500);
-    }
+
+    searchInput.value = raw; renderSearch(raw);
+    showCaption('Dictado escuchado', `"${raw}" — prueba decir por ejemplo: "Dame los datos de Petén", "Cobán" o "Comparar Guatemala con Jalapa".`, false);
+    captionTimer = setTimeout(() => { if (!isSpeaking) capBar.classList.remove('open'); }, 5500);
   }
 
   function toggleVoiceDictation() {
     if (activeRecog) { stopAllVoice(); return; }
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      showCaption('Dictado por voz no disponible en este navegador', 'Usa Google Chrome, Edge o Safari reciente (en HTTPS) para dictar con micrófono, o escribe en el buscador y usa "Escuchar".', true);
+      showCaption('Web Speech API no disponible en este navegador', 'Abre el enlace en Chrome, Safari o Edge (HTTPS) para dictar con micrófono, o escribe tu frase en el buscador y presiona Enter.', true);
       captionTimer = setTimeout(() => capBar.classList.remove('open'), 6500);
       return;
     }
     stopAllVoice();
     const recog = new SR();
     recog.lang = 'es-GT';
+    recog.continuous = false;
     recog.interimResults = true;
-    recog.maxAlternatives = 1;
+    recog.maxAlternatives = 3;
     activeRecog = recog;
     btnVoiceMic.classList.add('active');
     btnSearchMic.classList.add('listening');
-    showCaption('Escuchando dictado por voz (es-GT)...', 'Di el nombre de un municipio (ej. "Cobán"), "Comparar Guatemala con Jalapa", "Semáforo" o "Descargar Excel"...', true);
+    showCaption('Escuchando dictado (Web Speech API · es-GT)...', 'Prueba decir: "Dame los datos de Petén", "Cuántas radiobases tiene Cobán", "Comparar Guatemala con Jalapa" o "Descargar Excel de Petén".', true);
 
     let finalTxt = '';
+    let lastInterim = '';
     recog.onresult = (e) => {
       let interim = '';
       for (let i = e.resultIndex; i < e.results.length; i++) {
-        if (e.results[i].isFinal) finalTxt += e.results[i][0].transcript;
+        if (e.results[i].isFinal) finalTxt += e.results[i][0].transcript + ' ';
         else interim += e.results[i][0].transcript;
       }
-      showCaption('Transcripción en vivo', (finalTxt + ' ' + interim).trim(), true);
+      lastInterim = interim;
+      const live = (finalTxt + interim).trim();
+      if (live) showCaption('Escuchando en vivo...', `"${live}"`, true);
     };
     recog.onerror = (e) => {
-      const msg = e.error === 'not-allowed' ? 'Permiso de micrófono denegado. Habilítalo en el candado del navegador.' : `No se pudo escuchar (${e.error}). Intenta de nuevo.`;
+      const msg = e.error === 'not-allowed'
+        ? 'Permiso de micrófono bloqueado. Habilítalo en el ícono de candado junto a la URL (HTTPS).'
+        : (e.error === 'no-speech' ? 'No se detectó voz. Toca Dictar de nuevo y habla cerca del micrófono.' : `Error de micrófono (${e.error}).`);
       stopAllVoice();
       showCaption('Dictado por voz', msg, true);
-      captionTimer = setTimeout(() => capBar.classList.remove('open'), 5000);
+      captionTimer = setTimeout(() => capBar.classList.remove('open'), 5500);
     };
     recog.onend = () => {
-      const heard = finalTxt.trim();
+      const heard = (finalTxt || lastInterim).trim();
       activeRecog = null;
       btnVoiceMic.classList.remove('active');
       btnSearchMic.classList.remove('listening');
@@ -3534,6 +3706,7 @@ const SIT = {"meta":{"source_file":"Copia de 04NOV2026 - SIT Consolidado Histori
   document.getElementById('guide-speak-btn').onclick = () => { state.view = 'guide'; speakCurrentContext(); };
   document.getElementById('guide-a11y-mic').onclick = toggleVoiceDictation;
   document.getElementById('guide-a11y-tts').onclick = () => { state.view = 'guide'; speakCurrentContext(); };
+  document.getElementById('guide-test-peten').onclick = () => handleVoiceTranscript('Dame los datos de Petén');
   document.getElementById('btn-a11y-large').onclick = function() {
     document.body.classList.toggle('a11y-large');
     this.classList.toggle('green', document.body.classList.contains('a11y-large'));
