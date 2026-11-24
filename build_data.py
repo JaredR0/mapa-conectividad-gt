@@ -3,6 +3,7 @@ from collections import defaultdict, Counter
 
 XLSX_PATH = "/Users/jaredruiz/INNOVACON/Copia de 04NOV2026 - SIT Consolidado Historico Boletines 2014-2026 v2.xlsx"
 INE_PATH = "/Users/jaredruiz/INNOVACON/BrechaDigitalConectividadDigitalEnHogaresMunicipio.xlsx"
+TRAZ_PATH = "/Users/jaredruiz/INNOVACON/trazabilidad_brecha_digital.xlsx"
 KMZ_MUNIS = "/Users/jaredruiz/INNOVACON/Copia de Municipios.kmz"
 KMZ_LP = "/Users/jaredruiz/INNOVACON/Copia de Lugares Poblados 2026.kmz"
 MUNIS_TOPO = "/Users/jaredruiz/.gemini/antigravity/brain/ab0ec326-df20-4463-a2f7-8b69783b005d/scratch/munis.json"
@@ -48,9 +49,9 @@ def load_all_sheets(xlsx_path):
         for s in wb_root.findall('.//main:sheet', NS):
             name = s.attrib['name']
             rid = s.attrib['{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id']
-            target = rid_to_target[rid]
+            target = rid_to_target[rid].lstrip('/')
             if not target.startswith('xl/'):
-                target = 'xl/' + target.lstrip('/')
+                target = 'xl/' + target
             ws_root = ET.fromstring(z.read(target))
             rows = []
             for row_el in ws_root.findall('.//main:sheetData/main:row', NS):
@@ -620,6 +621,90 @@ def main():
         drec['pc'] = round(100.0 - drec['br'], 2)
     print(f"Loaded INE XII Censo Digital Divide for 340/340 munis! National: {tot_h_nac:,} hogares, {tot_sin_nac:,} sin internet ({tot_sin_nac/tot_h_nac*100:.2f}% brecha).")
 
+    # === Load Official 2018->2023 Traceability Workbook (trazabilidad_brecha_digital.xlsx) ===
+    # Verifies 340/340 municipal 2018 reconciliation (0 diffs) + loads SEGEPLAN 2023 municipal poverty/consumption
+    # + loads official INE ENCOVI 2023 departmental digital divide (22/22 departments, expanded values)
+    traz_sheets = load_all_sheets(TRAZ_PATH)
+    traz_muni_rows = traz_sheets['Datos municipios']
+    traz_depto_rows = traz_sheets['Datos departamentos']
+
+    depto_u18 = defaultdict(lambda: {'p7': 0, 'pint': 0, 'pcel': 0})
+    muni_traz_cnt = 0
+    tot18_p7 = tot18_pint = 0
+    for r in traz_muni_rows[2:]:
+        if len(r) < 17 or r[2] is None or not str(r[2]).strip().replace('.0', '').isdigit():
+            continue
+        cid = int(float(r[2]))
+        hog = int(round(float(r[7])))
+        hint = int(round(float(r[8])))
+        assert ine_by_gid[cid]['h'] == hog and ine_by_gid[cid]['con'] == hint, f"2018 mismatch in trazabilidad for {cid}"
+        p7 = int(round(float(r[4])))
+        pcel = int(round(float(r[5])))
+        pint = int(round(float(r[6])))
+        uso18 = round((pint / p7) * 100.0, 2) if p7 > 0 else 0.0
+        cel18 = round((pcel / p7) * 100.0, 2) if p7 > 0 else 0.0
+        pobr23 = round(float(r[14]), 1) if r[14] is not None and str(r[14]).strip() != '' else None
+        cons23 = round(float(r[16]), 2) if r[16] is not None and str(r[16]).strip() != '' else None
+        ine_by_gid[cid].update({
+            'p7': p7, 'pint': pint, 'pcel': pcel, 'uso': uso18, 'cel': cel18,
+            'pobr23': pobr23, 'cons23': cons23,
+        })
+        did = muni_geoms[cid]['ine_depto']
+        depto_u18[did]['p7'] += p7
+        depto_u18[did]['pint'] += pint
+        depto_u18[did]['pcel'] += pcel
+        tot18_p7 += p7; tot18_pint += pint
+        muni_traz_cnt += 1
+    assert muni_traz_cnt == 340, f"Expected 340 munis in trazabilidad, got {muni_traz_cnt}"
+    for did, urec in depto_u18.items():
+        ine_by_did[did]['p7'] = urec['p7']
+        ine_by_did[did]['pint'] = urec['pint']
+        ine_by_did[did]['uso'] = round((urec['pint'] / urec['p7']) * 100.0, 2) if urec['p7'] > 0 else 0.0
+        ine_by_did[did]['cel'] = round((urec['pcel'] / urec['p7']) * 100.0, 2) if urec['p7'] > 0 else 0.0
+
+    ine23_by_did = {}
+    tot23_h = tot23_con = tot23_sin = tot23_p7 = tot23_pint = 0
+    for r in traz_depto_rows[2:]:
+        if len(r) < 17 or r[0] is None or not str(r[0]).strip().replace('.0', '').isdigit():
+            continue
+        did = int(float(r[0])) * 100
+        assert did in depto_geoms, f"Unknown depto code in ENCOVI 2023: {did}"
+        pob23 = int(round(float(r[2])))
+        h23 = int(round(float(r[3])))
+        p7_23 = int(round(float(r[4])))
+        pint_23 = int(round(float(r[5])))
+        pcel_23 = int(round(float(r[6])))
+        con23 = int(round(float(r[7])))
+        sin23 = h23 - con23
+        assert sin23 >= 0, f"ENCOVI 2023 negative sin for {did}"
+        br23 = round((sin23 / h23) * 100.0, 2) if h23 > 0 else 0.0
+        pc23 = round(100.0 - br23, 2)
+        uso23 = round((pint_23 / p7_23) * 100.0, 2) if p7_23 > 0 else 0.0
+        cel23 = round((pcel_23 / p7_23) * 100.0, 2) if p7_23 > 0 else 0.0
+        pobr23 = round(float(r[10]), 1)
+        q_cel = round(float(r[11]), 2)
+        pct_g_cel = round(float(r[12]), 2)
+        q_int = round(float(r[13]), 2)
+        gasto = round(float(r[15]), 2)
+        peso150 = round(float(r[16]), 2)
+        dbr = round(br23 - ine_by_did[did]['br'], 2)
+        duso = round(uso23 - ine_by_did[did]['uso'], 2)
+        ine23_by_did[did] = {
+            'pob': pob23, 'h': h23, 'con': con23, 'sin': sin23,
+            'br': br23, 'pc': pc23, 'dbr': dbr,
+            'p7': p7_23, 'pint': pint_23, 'uso': uso23, 'duso': duso, 'cel': cel23,
+            'pobr': pobr23, 'q_cel': q_cel, 'pct_g_cel': pct_g_cel,
+            'q_int': q_int, 'gasto': gasto, 'peso150': peso150,
+        }
+        tot23_h += h23; tot23_con += con23; tot23_sin += sin23
+        tot23_p7 += p7_23; tot23_pint += pint_23
+    assert len(ine23_by_did) == 22, f"Expected 22 deptos in ENCOVI 2023, got {len(ine23_by_did)}"
+    nat_br18 = round(tot_sin_nac / tot_h_nac * 100.0, 2)
+    nat_br23 = round(tot23_sin / tot23_h * 100.0, 2)
+    nat_uso18 = round(tot18_pint / tot18_p7 * 100.0, 2)
+    nat_uso23 = round(tot23_pint / tot23_p7 * 100.0, 2)
+    print(f"Loaded ENCOVI 2023 (22/22 deptos) + SEGEPLAN 2023 (340/340 munis)! National 2018->2023: Hogares sin internet {nat_br18:.2f}% -> {nat_br23:.2f}% ({nat_br23-nat_br18:+.2f} pp) | Uso 7+ {nat_uso18:.2f}% -> {nat_uso23:.2f}% ({nat_uso23-nat_uso18:+.2f} pp).")
+
     # === Compute Economic Saturation & Opportunity Index (ISI 0-100) + HHI + 3y Growth ===
     # Methodology: OECD Composite Indicators (percentile-rank normalization across 340 munis)
     # combining SIT 2026-S1 + KMZ 2026 + INE XII Censo Hogares + DOJ/FTC HHI
@@ -696,6 +781,7 @@ def main():
         deptos_list.append({
             'id': did, 'nom': g['name'], 'd': g['d'], 'bb': g['bb'], 'c': g['c'],
             'ine': dict(ine_by_did[did]),
+            'ine23': ine23_by_did[did],
             'fx': depto_fixed[did], 'rb': depto_rb[did], 'sp': special_localities.get(did, []),
         })
 
@@ -703,7 +789,10 @@ def main():
         'meta': {
             'source_file': 'Copia de 04NOV2026 - SIT Consolidado Historico Boletines 2014-2026 v2.xlsx',
             'ine_file': 'BrechaDigitalConectividadDigitalEnHogaresMunicipio.xlsx',
-            'ine_totals': {'h': tot_h_nac, 'con': tot_con_nac, 'sin': tot_sin_nac, 'br': round(tot_sin_nac/tot_h_nac*100.0, 2)},
+            'traz_file': 'trazabilidad_brecha_digital.xlsx',
+            'ine_totals': {'h': tot_h_nac, 'con': tot_con_nac, 'sin': tot_sin_nac, 'br': nat_br18, 'pc': round(100.0 - nat_br18, 2), 'uso': nat_uso18},
+            'ine23_totals': {'h': tot23_h, 'con': tot23_con, 'sin': tot23_sin, 'br': nat_br23, 'pc': round(100.0 - nat_br23, 2), 'dbr': round(nat_br23 - nat_br18, 2), 'uso': nat_uso23, 'duso': round(nat_uso23 - nat_uso18, 2)},
+            'periods_ine': ['2018', '2023'],
             'kmz_munis': 'Copia de Municipios.kmz',
             'kmz_lp': 'Copia de Lugares Poblados 2026.kmz',
             'total_lp': total_lp,

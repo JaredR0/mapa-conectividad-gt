@@ -208,6 +208,10 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   .muni-path.compare-selected { stroke: #7c3aed; stroke-width: 2.3; filter: drop-shadow(0 0 4px rgba(124,58,237,.5)); }
   .depto-outline { fill: none; stroke: #1e293b; stroke-width: 1.05; stroke-opacity: 0.58; pointer-events: none; stroke-linejoin: round; }
   .depto-outline.focused { stroke: #0284c7; stroke-width: 2.1; stroke-opacity: 0.95; }
+  svg#gt-map.depto-level-mode .muni-path { stroke-opacity: 0.28; stroke-width: 0.35; }
+  svg#gt-map.depto-level-mode .depto-outline { stroke: #0f172a; stroke-width: 1.45; stroke-opacity: 0.85; }
+  .granularity-pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
+  .granularity-pill.muni-lvl { background: #f0fdfa; color: #0f766e; border-color: #99f6e4; }
   .lake-path { fill: #7dd3fc; stroke: #0284c7; stroke-width: 0.6; opacity: 0.85; pointer-events: none; }
   .depto-label {
     font-size: 8px; font-weight: 700; fill: #1e293b; text-anchor: middle; pointer-events: none;
@@ -785,8 +789,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
         <div class="tb-group">
           <select id="metric-select" class="ctrl-select" title="Seleccionar indicador del mapa">
-            <option value="ine_brecha">Brecha Digital en Hogares (% sin internet · INE)</option>
-            <option value="ine_sin">Hogares sin Internet (cantidad · INE Censo)</option>
+            <option value="ine_brecha">Brecha Digital en Hogares (% sin internet · INE 2018–2023)</option>
+            <option value="ine_sin">Hogares sin Internet (cantidad · INE 2018–2023)</option>
             <option value="isi">Índice de Saturación Económica (ISI 0–100)</option>
             <option value="rb" selected>Radiobases en operación (2016-S2 – 2026-S1)</option>
             <option value="fx_total">Líneas fijas totales (2022-S2 – 2026-S1)</option>
@@ -869,6 +873,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             <span class="nodata-box"></span>
             Sin dato publicado
           </span>
+          <span class="granularity-pill" id="legend-granularity" style="display:none;"></span>
         </div>
         <div class="gps-pill" id="gps-hud">GPS: 15.7835° N, 90.2308° W</div>
       </div>
@@ -991,9 +996,34 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         </div>
       </div>
     </div>
+    <div class="panel-card">
+      <div class="card-hd">
+        <h3>Evolución Brecha Digital por Departamento: Censo 2018 vs ENCOVI 2023 (INE)</h3>
+        <span class="pill" style="background:#fff1f2;color:#9f1239;">trazabilidad_brecha_digital.xlsx · 22 departamentos</span>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-bottom:8px;">
+        Comparación oficial entre el <strong>XII Censo INE 2018</strong> (agregado de 340 municipios) y la <strong>ENCOVI 2023 del INE</strong> (publicada a nivel departamental). Incluye hogares sin internet en casa, uso de internet en personas de 7+ años y mediana de gasto mensual (Q).
+      </div>
+      <div class="table-scroll" style="max-height:310px;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="text-align:left">Departamento</th>
+              <th>Brecha Hog. 2018</th>
+              <th>Brecha Hog. 2023</th>
+              <th>Cambio (pp)</th>
+              <th>Uso Int. 7+ (2018)</th>
+              <th>Uso Int. 7+ (2023)</th>
+              <th>Cambio Uso</th>
+              <th>Pago Int. 2023 (Q)</th>
+              <th>Pobreza 2023</th>
+            </tr>
+          </thead>
+          <tbody id="nat-brecha-body"></tbody>
+        </table>
+      </div>
+    </div>
   </section>
-
-  <!-- VIEW 4: GUÍA Y MANUAL NARRATIVO -->
   <section id="view-guide" class="view-container">
     <div class="guide-shell">
       <div class="guide-hero">
@@ -1105,9 +1135,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         <div class="guide-sec-sub">Explicación en español cotidiano de todos los indicadores oficiales que verás en pantalla:</div>
         <div class="glossary-grid">
           <div class="gloss-card">
-            <div class="gc-term">Brecha Digital INE <span class="pill danger">XII Censo</span></div>
-            <div class="gc-plain">Porcentaje oficial de hogares del municipio que <strong>NO cuentan con acceso a internet</strong>, según el XII Censo de Población y Vivienda del INE (2018).</div>
-            <div class="gc-ex"><strong>Dato nacional real:</strong> 82.74% de los hogares (2,710,661 de 3,275,931 hogares) no tenían internet en el Censo INE.</div>
+            <div class="gc-term">Brecha Digital INE <span class="pill danger">2018 → 2023</span></div>
+            <div class="gc-plain">Porcentaje oficial de hogares que <strong>NO cuentan con acceso a internet en casa</strong>. Usa la <strong>línea de tiempo</strong> para comparar <strong>2018</strong> (XII Censo INE, 340 municipios) con <strong>2023</strong> (ENCOVI 2023 INE, publicada a nivel de los 22 departamentos).</div>
+            <div class="gc-ex"><strong>Evolución nacional oficial:</strong> Bajó de <strong>82.74%</strong> en 2018 (2,710,661 de 3,275,931 hogares) a <strong>79.43%</strong> en 2023 (3,231,890 de 4,068,856 hogares · <strong>−3.31 pp</strong>), mientras el uso de internet en personas de 7+ años subió de 29.32% a 47.34%.</div>
           </div>
 
           <div class="gloss-card">
@@ -1650,9 +1680,12 @@ const SIT = __SIT_DATA_PAYLOAD__;
     expCompareIds: [101, 901], // default Guatemala vs Quetzaltenango
   };
 
+  function isIne23Mode(metric, period) {
+    return (metric === 'ine_brecha' || metric === 'ine_sin') && period === '2023';
+  }
   function getPeriodsForMetric(metric) {
     if (metric === 'rb' || metric === 'lp_per_rb') return SIT.meta.periods_rb;
-    if (metric === 'ine_brecha' || metric === 'ine_sin') return ['Censo INE'];
+    if (metric === 'ine_brecha' || metric === 'ine_sin') return SIT.meta.periods_ine || ['2018', '2023'];
     if (metric === 'isi' || metric === 'lp_tot') return ['2026-S1'];
     return SIT.meta.periods_fx;
   }
@@ -1661,8 +1694,20 @@ const SIT = __SIT_DATA_PAYLOAD__;
     return ps[Math.min(state.periodIdx, ps.length - 1)];
   }
   function getMetricValue(muni, metric, period) {
-    if (metric === 'ine_brecha') return muni.ine.br;
-    if (metric === 'ine_sin') return muni.ine.sin;
+    if (metric === 'ine_brecha') {
+      if (period === '2023') {
+        const dep = deptoById.get(muni.did);
+        return dep && dep.ine23 ? dep.ine23.br : null;
+      }
+      return muni.ine.br;
+    }
+    if (metric === 'ine_sin') {
+      if (period === '2023') {
+        const dep = deptoById.get(muni.did);
+        return dep && dep.ine23 ? dep.ine23.sin : null;
+      }
+      return muni.ine.sin;
+    }
     if (metric === 'isi') return muni.eco.isi;
     if (metric === 'rb') return muni.rb[period] ? muni.rb[period].v : null;
     if (metric === 'lp_tot') return muni.lp_sum.tot;
@@ -1734,9 +1779,13 @@ const SIT = __SIT_DATA_PAYLOAD__;
       };
     }
     const vals = [];
-    for (const m of SIT.munis) {
-      const v = getMetricValue(m, metric, period);
-      if (v !== null && v > 0) vals.push(v);
+    if (metric === 'ine_sin' && period === '2023') {
+      for (const d of SIT.deptos) if (d.ine23 && d.ine23.sin > 0) vals.push(d.ine23.sin);
+    } else {
+      for (const m of SIT.munis) {
+        const v = getMetricValue(m, metric, period);
+        if (v !== null && v > 0) vals.push(v);
+      }
     }
     const palette = metric === 'rb' ? PALETTE_RB : ((metric === 'lp_per_rb' || metric === 'ine_sin') ? PALETTE_GAP : (metric === 'lp_tot' ? PALETTE_LP : PALETTE_FX));
     if (!vals.length) return { palette, breaks: [0,1,2,5,10,50,100], minLbl: '0', maxLbl: '0', colorOf: (v) => v===null?'url(#nodata-hatch)':palette[0] };
@@ -1961,20 +2010,38 @@ const SIT = __SIT_DATA_PAYLOAD__;
   let activeRankMap = new Map();
   function showTooltipMuni(e, m, isCab=false) {
     const p = getActivePeriod(), v = getMetricValue(m, state.metric, p), rk = activeRankMap.get(m.id);
-    const rec = getEcoRecommendation(m);
     const tierCol = m.eco.tier === 2 ? '#f87171' : (m.eco.tier === 1 ? '#fbbf24' : '#34d399');
-    tooltip.innerHTML = `
-      <div class="tt-title">${esc(m.nom)}</div>
-      <div class="tt-dept">${esc(m.dep)} · INE ${String(m.id).padStart(4,'0')}</div>
-      <div class="tt-val">
-        <span style="font-size:11px;color:#cbd5e1;">${esc(getMetricTitle(state.metric))} (${p})</span>
-        <span class="tt-num num">${fmtMetricVal(v, state.metric)}</span>
-      </div>
-      <div style="font-size:10.5px;color:#cbd5e1;margin-top:4px;display:flex;justify-content:space-between;gap:8px;">
-        <span style="color:${tierCol};font-weight:700;">ISI ${fmtDec(m.eco.isi,1)} · Brecha INE ${fmtDec(m.ine.br,1)}%</span>
-        ${rk ? `<span style="color:#94a3b8;">#${rk}/${activeRankMap.size}</span>` : ''}
-      </div>
-    `;
+    if (isIne23Mode(state.metric, p)) {
+      const dep = deptoById.get(m.did);
+      const d23 = dep.ine23;
+      const dbrTxt = (d23.dbr >= 0 ? '+' : '') + fmtDec(d23.dbr, 2) + ' pp';
+      const dbrCol = d23.dbr <= 0 ? '#34d399' : '#f87171';
+      tooltip.innerHTML = `
+        <div class="tt-title">${esc(m.nom)} <span style="font-size:10.5px;color:#94a3b8;font-weight:600;">(${esc(m.dep)})</span></div>
+        <div class="tt-dept">ENCOVI 2023 (INE) · Dato oficial a nivel departamental</div>
+        <div class="tt-val">
+          <span style="font-size:11px;color:#cbd5e1;">Depto. ${esc(m.dep)} (2023)</span>
+          <span class="tt-num num">${fmtMetricVal(v, state.metric)}</span>
+        </div>
+        <div style="font-size:10.5px;color:#cbd5e1;margin-top:4px;display:flex;justify-content:space-between;gap:8px;">
+          <span>2018→2023: <strong style="color:${dbrCol};">${dbrTxt}</strong></span>
+          <span>Muni 2018: <strong>${fmtDec(m.ine.br,1)}%</strong></span>
+        </div>
+      `;
+    } else {
+      tooltip.innerHTML = `
+        <div class="tt-title">${esc(m.nom)}</div>
+        <div class="tt-dept">${esc(m.dep)} · INE ${String(m.id).padStart(4,'0')}</div>
+        <div class="tt-val">
+          <span style="font-size:11px;color:#cbd5e1;">${esc(getMetricTitle(state.metric))} (${p})</span>
+          <span class="tt-num num">${fmtMetricVal(v, state.metric)}</span>
+        </div>
+        <div style="font-size:10.5px;color:#cbd5e1;margin-top:4px;display:flex;justify-content:space-between;gap:8px;">
+          <span style="color:${tierCol};font-weight:700;">ISI ${fmtDec(m.eco.isi,1)} · Brecha 2018: ${fmtDec(m.ine.br,1)}%</span>
+          ${rk ? `<span style="color:#94a3b8;">#${rk}/${activeRankMap.size}</span>` : ''}
+        </div>
+      `;
+    }
     tooltip.style.display = 'block'; moveTooltip(e);
   }
   function showTooltipLP(e, pt) {
@@ -1998,6 +2065,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
   // ===== UPDATE MAP & KPI STRIP =====
   function updateMapColors() {
     const p = getActivePeriod(), scale = computeScale(state.metric, p);
+    const ine23 = isIne23Mode(state.metric, p);
+    svg.classList.toggle('depto-level-mode', ine23);
     const scored = [];
     for (const m of SIT.munis) {
       const v = getMetricValue(m, state.metric, p);
@@ -2018,30 +2087,62 @@ const SIT = __SIT_DATA_PAYLOAD__;
     if (state.selectedMuniId && muniPathEls.has(state.selectedMuniId)) layerMunis.appendChild(muniPathEls.get(state.selectedMuniId));
     for (const d of SIT.deptos) deptoPathEls.get(d.id).classList.toggle('focused', state.deptoFilter === d.id || state.selectedDeptoId === d.id);
 
-    // Bottom Legend
+    // Bottom Legend + Granularity indicator for INE 2018 vs 2023
     document.getElementById('legend-label').textContent = getMetricTitle(state.metric);
     document.getElementById('legend-min').textContent = scale.minLbl;
     document.getElementById('legend-max').textContent = scale.maxLbl;
     document.getElementById('legend-swatches').innerHTML = scale.palette.map(c => `<span style="background:${c}"></span>`).join('');
     document.getElementById('legend-nodata').style.display = scored.length < 340 ? 'inline-flex' : 'none';
+    const granPill = document.getElementById('legend-granularity');
+    if (state.metric === 'ine_brecha' || state.metric === 'ine_sin') {
+      granPill.style.display = 'inline-flex';
+      if (ine23) {
+        granPill.classList.remove('muni-lvl');
+        granPill.textContent = 'ENCOVI 2023 (INE) · Nivel departamental (22 deptos)';
+      } else {
+        granPill.classList.add('muni-lvl');
+        granPill.textContent = 'XII Censo 2018 (INE) · Nivel municipal (340 munis)';
+      }
+    } else {
+      granPill.style.display = 'none';
+    }
 
     // KPI Strip
     const scopeMunis = state.deptoFilter !== null ? munisByDepto.get(state.deptoFilter) : SIT.munis;
+    const scopeDeptos = state.deptoFilter !== null ? [deptoById.get(state.deptoFilter)] : SIT.deptos;
     const scopeScored = state.deptoFilter !== null ? scored.filter(x => x.m.did === state.deptoFilter) : scored;
     const scopeLabel = state.deptoFilter !== null ? deptoById.get(state.deptoFilter).nom : 'Guatemala (340 munis)';
     const topItem = scopeScored[0];
 
     let k1Val, k1Sub;
     if (state.metric === 'ine_brecha') {
-      const hSum = scopeMunis.reduce((s, m) => s + m.ine.h, 0);
-      const sinSum = scopeMunis.reduce((s, m) => s + m.ine.sin, 0);
-      k1Val = `${fmtDec((sinSum / Math.max(1, hSum)) * 100, 2)}%`;
-      k1Sub = `${fmtInt(sinSum)} de ${fmtInt(hSum)} hogares sin internet`;
+      if (ine23) {
+        const hSum = scopeDeptos.reduce((s, d) => s + d.ine23.h, 0);
+        const sinSum = scopeDeptos.reduce((s, d) => s + d.ine23.sin, 0);
+        const br23 = (sinSum / Math.max(1, hSum)) * 100;
+        const h18 = scopeDeptos.reduce((s, d) => s + d.ine.h, 0);
+        const sin18 = scopeDeptos.reduce((s, d) => s + d.ine.sin, 0);
+        const dbr = br23 - ((sin18 / Math.max(1, h18)) * 100);
+        k1Val = `${fmtDec(br23, 2)}%`;
+        k1Sub = `${fmtInt(sinSum)} de ${fmtInt(hSum)} hog. · ${dbr >= 0 ? '+' : ''}${fmtDec(dbr, 2)} pp vs 2018`;
+      } else {
+        const hSum = scopeMunis.reduce((s, m) => s + m.ine.h, 0);
+        const sinSum = scopeMunis.reduce((s, m) => s + m.ine.sin, 0);
+        k1Val = `${fmtDec((sinSum / Math.max(1, hSum)) * 100, 2)}%`;
+        k1Sub = `${fmtInt(sinSum)} de ${fmtInt(hSum)} hogares · Censo 2018`;
+      }
     } else if (state.metric === 'ine_sin') {
-      const hSum = scopeMunis.reduce((s, m) => s + m.ine.h, 0);
-      const sinSum = scopeMunis.reduce((s, m) => s + m.ine.sin, 0);
-      k1Val = fmtInt(sinSum);
-      k1Sub = `${fmtDec((sinSum / Math.max(1, hSum)) * 100, 2)}% de hogares · XII Censo INE`;
+      if (ine23) {
+        const hSum = scopeDeptos.reduce((s, d) => s + d.ine23.h, 0);
+        const sinSum = scopeDeptos.reduce((s, d) => s + d.ine23.sin, 0);
+        k1Val = fmtInt(sinSum);
+        k1Sub = `${fmtDec((sinSum / Math.max(1, hSum)) * 100, 2)}% de hogares · ENCOVI 2023`;
+      } else {
+        const hSum = scopeMunis.reduce((s, m) => s + m.ine.h, 0);
+        const sinSum = scopeMunis.reduce((s, m) => s + m.ine.sin, 0);
+        k1Val = fmtInt(sinSum);
+        k1Sub = `${fmtDec((sinSum / Math.max(1, hSum)) * 100, 2)}% de hogares · Censo 2018`;
+      }
     } else if (state.metric === 'isi') {
       const avgIsi = scopeMunis.reduce((s, m) => s + m.eco.isi, 0) / scopeMunis.length;
       k1Val = `${fmtDec(avgIsi, 1)} / 100`;
@@ -2063,12 +2164,30 @@ const SIT = __SIT_DATA_PAYLOAD__;
     document.getElementById('kpi-1-sub').textContent = k1Sub;
 
     document.getElementById('kpi-2-lbl').textContent = 'Cobertura de datos';
-    document.getElementById('kpi-2-val').textContent = `${scopeScored.length} / ${scopeMunis.length}`;
-    document.getElementById('kpi-2-sub').textContent = scopeScored.length === scopeMunis.length ? '100% municipios publicados' : `${scopeMunis.length - scopeScored.length} sin dato en ${p}`;
+    if (ine23) {
+      document.getElementById('kpi-2-val').textContent = `${scopeDeptos.length} / ${scopeDeptos.length} deptos`;
+      document.getElementById('kpi-2-sub').textContent = 'ENCOVI 2023 · nivel departamental';
+    } else {
+      document.getElementById('kpi-2-val').textContent = `${scopeScored.length} / ${scopeMunis.length}`;
+      document.getElementById('kpi-2-sub').textContent = scopeScored.length === scopeMunis.length ? (state.metric.startsWith('ine_') ? 'Censo 2018 · nivel municipal' : '100% municipios publicados') : `${scopeMunis.length - scopeScored.length} sin dato en ${p}`;
+    }
 
     const k3Card = document.getElementById('kpi-3-card');
-    document.getElementById('kpi-3-lbl').textContent = (state.metric === 'lp_per_rb' || state.metric === 'ine_brecha') ? 'Mayor brecha (#1)' : (state.metric === 'ine_sin' ? 'Más hogares sin internet' : 'Municipio líder (#1)');
-    if (topItem) {
+    document.getElementById('kpi-3-lbl').textContent = ine23 ? (state.metric === 'ine_sin' ? 'Depto. con más sin internet' : 'Depto. mayor brecha (#1)') : ((state.metric === 'lp_per_rb' || state.metric === 'ine_brecha') ? 'Mayor brecha (#1)' : (state.metric === 'ine_sin' ? 'Más hogares sin internet' : 'Municipio líder (#1)'));
+    if (ine23) {
+      const topDep = [...scopeDeptos].sort((a,b) => (state.metric === 'ine_sin' ? b.ine23.sin - a.ine23.sin : b.ine23.br - a.ine23.br))[0];
+      if (topDep) {
+        const dv = state.metric === 'ine_sin' ? topDep.ine23.sin : topDep.ine23.br;
+        document.getElementById('kpi-3-val').textContent = topDep.nom;
+        document.getElementById('kpi-3-sub').textContent = `${fmtMetricVal(dv, state.metric)} · ENCOVI 2023`;
+        k3Card.onclick = () => {
+          document.getElementById('depto-filter').value = topDep.id;
+          state.deptoFilter = topDep.id; state.selectedMuniId = null; state.selectedDeptoId = topDep.id;
+          state.compareMode = false; state.compareMuniId = null; layerLp.innerHTML = '';
+          zoomToBBox(topDep.bb, 0.22); updateMapColors(); renderInspector();
+        };
+      }
+    } else if (topItem) {
       document.getElementById('kpi-3-val').textContent = topItem.m.nom;
       document.getElementById('kpi-3-sub').textContent = `${fmtMetricVal(topItem.v, state.metric)} · ${topItem.m.dep}`;
       k3Card.onclick = () => selectAndFocusMuni(topItem.m.id);
@@ -2117,7 +2236,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const ps = getPeriodsForMetric(state.metric); if (ps.length <= 1) return;
     if (state.periodIdx >= ps.length - 1) setPeriodIdx(0);
     playBtn.classList.add('playing'); playBtn.textContent = '⏸';
-    state.playTimer = setInterval(() => { if (state.periodIdx >= ps.length - 1) stopPlay(); else setPeriodIdx(state.periodIdx + 1); }, 850);
+    state.playTimer = setInterval(() => { if (state.periodIdx >= ps.length - 1) stopPlay(); else setPeriodIdx(state.periodIdx + 1); }, ps.length === 2 ? 1400 : 850);
   };
 
   document.getElementById('depto-filter').addEventListener('change', function() {
@@ -2252,19 +2371,24 @@ const SIT = __SIT_DATA_PAYLOAD__;
     if (state.selectedMuniId) { renderMuniInspector(container, muniById.get(state.selectedMuniId)); enhanceSpeakBubbles(container); return; }
     if (state.selectedDeptoId) { renderDeptoInspector(container, deptoById.get(state.selectedDeptoId)); enhanceSpeakBubbles(container); return; }
 
+    const ine23 = isIne23Mode(state.metric, activePeriod);
     const scored = SIT.munis.map(m => ({ m, v: getMetricValue(m, state.metric, activePeriod) }))
       .filter(x => x.v !== null).sort((a,b) => b.v - a.v || a.m.nom.localeCompare(b.m.nom, 'es'));
     const top12 = scored.slice(0, 12);
+    const top12Deptos = ine23 ? [...SIT.deptos].sort((a,b) => (state.metric === 'ine_sin' ? b.ine23.sin - a.ine23.sin : b.ine23.br - a.ine23.br)).slice(0, 12) : [];
 
     container.innerHTML = `
       <div class="ins-header">
         <div class="ins-crumbs">
-          <span class="pill">Vista Nacional · 340 Municipios</span>
+          <span class="pill">${ine23 ? 'ENCOVI 2023 · 22 Departamentos' : 'Vista Nacional · 340 Municipios'}</span>
           <span class="pill ine">${activePeriod}</span>
         </div>
-        <div class="ins-title">Explora cualquier municipio</div>
+        <div class="ins-title">${ine23 ? 'Brecha Digital 2023 (ENCOVI)' : 'Explora cualquier municipio'}</div>
         <p style="font-size:12px;color:var(--muted);line-height:1.45;">
-          Haz clic en un municipio del mapa para ver su <strong>Semáforo de Saturación Económica (ISI 0–100)</strong>, recomendación práctica de inversión, operadores oficiales SIT y lugares poblados GPS.
+          ${ine23
+            ? `Mostrando <strong>ENCOVI 2023 del INE</strong> (publicada a nivel de los <strong>22 departamentos</strong>). Mueve la línea de tiempo a <strong>2018</strong> para ver el desglose de los 340 municipios del XII Censo, o haz clic en un municipio/departamento para comparar <strong>2018 vs 2023</strong>.`
+            : `Haz clic en un municipio del mapa para ver su <strong>Semáforo de Saturación Económica (ISI 0–100)</strong>, recomendación práctica de inversión, operadores oficiales SIT y lugares poblados GPS.`
+          }
         </p>
       </div>
 
@@ -2277,28 +2401,44 @@ const SIT = __SIT_DATA_PAYLOAD__;
           Combina <strong>cobertura móvil por comunidad</strong>, <strong>penetración fija</strong>, <strong>escala de red</strong> y el <strong>Índice HHI de competencia</strong> (metodología OCDE + DOJ/FTC) para detectar plazas saturadas frente a oportunidades de expansión.
         </p>
         <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">
-          <button class="btn-sm" id="btn-quick-ine" style="border-color:#dc2626;color:#991b1b;background:#fef2f2;">Mapa Brecha Digital INE (82.7%)</button>
+          <button class="btn-sm" id="btn-quick-ine" style="border-color:#dc2626;color:#991b1b;background:#fef2f2;">Mapa Brecha Digital INE (2018 → 2023)</button>
           <button class="btn-sm" id="btn-quick-zerofx">31 munis con 0 líneas fijas</button>
           <button class="btn-sm" id="btn-quick-boom">Top crecimiento RB (3 años)</button>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-hd"><h3>Top 12 · ${esc(getMetricTitle(state.metric))}</h3><span>${activePeriod}</span></div>
+        <div class="card-hd"><h3>${ine23 ? 'Top 12 Departamentos · ' : 'Top 12 · '}${esc(getMetricTitle(state.metric))}</h3><span>${activePeriod}</span></div>
         <div class="rank-list">
-          ${top12.map((x, idx) => {
-            const rec = getEcoRecommendation(x.m);
-            return `<div class="rank-item" data-muni="${x.m.id}">
-              <div class="rank-left">
-                <span class="rank-num">${idx+1}</span>
-                <div style="min-width:0">
-                  <div class="rank-name">${esc(x.m.nom)}</div>
-                  <div class="rank-sub">${esc(x.m.dep)} · ISI ${fmtDec(x.m.eco.isi,1)} (${rec.shortLabel})</div>
-                </div>
-              </div>
-              <span class="rank-val num">${fmtMetricVal(x.v, state.metric)}</span>
-            </div>`;
-          }).join('')}
+          ${ine23
+            ? top12Deptos.map((d, idx) => {
+                const v = state.metric === 'ine_sin' ? d.ine23.sin : d.ine23.br;
+                const dbrStr = (d.ine23.dbr >= 0 ? '+' : '') + fmtDec(d.ine23.dbr, 2) + ' pp';
+                return `<div class="rank-item" data-depto-row="${d.id}">
+                  <div class="rank-left">
+                    <span class="rank-num">${idx+1}</span>
+                    <div style="min-width:0">
+                      <div class="rank-name">${esc(d.nom)}</div>
+                      <div class="rank-sub">2018: ${fmtDec(d.ine.br,1)}% → 2023: ${fmtDec(d.ine23.br,1)}% (${dbrStr}) · Uso 7+: ${fmtDec(d.ine23.uso,1)}%</div>
+                    </div>
+                  </div>
+                  <span class="rank-val num">${fmtMetricVal(v, state.metric)}</span>
+                </div>`;
+              }).join('')
+            : top12.map((x, idx) => {
+                const rec = getEcoRecommendation(x.m);
+                return `<div class="rank-item" data-muni="${x.m.id}">
+                  <div class="rank-left">
+                    <span class="rank-num">${idx+1}</span>
+                    <div style="min-width:0">
+                      <div class="rank-name">${esc(x.m.nom)}</div>
+                      <div class="rank-sub">${esc(x.m.dep)} · ISI ${fmtDec(x.m.eco.isi,1)} (${rec.shortLabel})</div>
+                    </div>
+                  </div>
+                  <span class="rank-val num">${fmtMetricVal(x.v, state.metric)}</span>
+                </div>`;
+              }).join('')
+          }
         </div>
       </div>
 
@@ -2328,6 +2468,13 @@ const SIT = __SIT_DATA_PAYLOAD__;
       renderTable();
     };
     container.querySelectorAll('.rank-item[data-muni]').forEach(el => el.onclick = () => selectAndFocusMuni(parseInt(el.dataset.muni, 10)));
+    container.querySelectorAll('.rank-item[data-depto-row]').forEach(el => el.onclick = () => {
+      const did = parseInt(el.dataset.deptoRow, 10);
+      document.getElementById('depto-filter').value = did;
+      state.deptoFilter = did; state.selectedMuniId = null; state.selectedDeptoId = did;
+      state.compareMode = false; state.compareMuniId = null; layerLp.innerHTML = '';
+      zoomToBBox(deptoById.get(did).bb, 0.22); updateMapColors(); renderInspector();
+    });
     container.querySelectorAll('button[data-depto]').forEach(el => el.onclick = () => {
       const did = parseInt(el.dataset.depto, 10);
       document.getElementById('depto-filter').value = did;
@@ -2399,7 +2546,11 @@ const SIT = __SIT_DATA_PAYLOAD__;
       const storyLine3 = m.eco.g3y !== null
         ? `En los últimos 3 años sus antenas crecieron <strong>${m.eco.g3y >= 0 ? '+' : ''}${m.eco.g3y}%</strong> (${m.eco.g3y >= 65 ? 'expansión muy acelerada' : (m.eco.g3y >= 50 ? 'por encima de la mediana nacional de +50%' : 'crecimiento moderado frente a la mediana nacional de +50%')}).`
         : '';
-      const storyLine4 = `Según el XII Censo del INE, de sus <strong>${fmtInt(m.ine.h)} hogares</strong>, <strong>${fmtInt(m.ine.sin)}</strong> no tienen acceso a internet (<strong>${fmtDec(m.ine.br, 1)}%</strong> de brecha digital).`;
+      const depObj = deptoById.get(m.did);
+      const d23 = depObj.ine23;
+      const dbrTxt = (d23.dbr >= 0 ? '+' : '') + fmtDec(d23.dbr, 2) + ' pp';
+      const dusoTxt = (d23.duso >= 0 ? '+' : '') + fmtDec(d23.duso, 1) + ' pp';
+      const storyLine4 = `Según el XII Censo del INE (2018), de sus <strong>${fmtInt(m.ine.h)} hogares</strong>, <strong>${fmtInt(m.ine.sin)}</strong> no tienen acceso a internet (<strong>${fmtDec(m.ine.br, 1)}%</strong> de brecha digital). A nivel departamental (${esc(m.dep)}), la <strong>ENCOVI 2023</strong> reporta <strong>${fmtDec(d23.br, 1)}%</strong> de hogares sin internet (<strong>${dbrTxt}</strong> frente a 2018).`;
 
       // National rank by INE digital divide (1 = highest divide)
       const ineRank = [...SIT.munis].sort((a,b) => b.ine.br - a.ine.br).findIndex(x => x.id === m.id) + 1;
@@ -2414,11 +2565,11 @@ const SIT = __SIT_DATA_PAYLOAD__;
           <div>${storyLine1} ${storyLine2} ${storyLine3} ${storyLine4}</div>
         </div>
 
-        <!-- Direct INE XII Censo Digital Divide Card (Click-to-speak) -->
-        <div class="card stat-box" style="background:linear-gradient(135deg,#fff1f2 0%,#ffffff 65%);border-color:#fecdd3;" data-speak-title="Brecha Digital INE · ${esc(m.nom)}" data-speak="Brecha digital en hogares según el doceavo Censo del INE para ${esc(m.nom)}: de un total de ${fmtInt(m.ine.h)} hogares, ${fmtInt(m.ine.con)} cuentan con internet (${fmtDec(m.ine.pc,1)} por ciento) y ${fmtInt(m.ine.sin)} hogares no tienen acceso a internet, lo que representa una brecha digital del ${fmtDec(m.ine.br,2)} por ciento, puesto ${ineRank} de 340 municipios.">
-          <div class="s-lbl" style="color:#9f1239;margin-bottom:4px;">
-            <span>Brecha Digital en Hogares (XII Censo INE)<span class="help-q" title="Porcentaje oficial de hogares sin acceso a internet según el XII Censo de Población y Vivienda del INE (2018). Promedio nacional: 82.74%.">?</span></span>
-            <span>#${ineRank} / 340</span>
+        <!-- Direct INE Digital Divide 2018 (Municipal) + 2023 (ENCOVI Departamental) Card -->
+        <div class="card stat-box" style="background:linear-gradient(135deg,#fff1f2 0%,#ffffff 65%);border-color:#fecdd3;" data-speak-title="Brecha Digital INE 2018–2023 · ${esc(m.nom)}" data-speak="Brecha digital en hogares para ${esc(m.nom)}: en el Censo INE 2018, de ${fmtInt(m.ine.h)} hogares, ${fmtInt(m.ine.sin)} no tenían internet, una brecha del ${fmtDec(m.ine.br,2)} por ciento, puesto ${ineRank} de 340 municipios. En la ENCOVI 2023, publicada a nivel departamental para ${esc(m.dep)}, la brecha en hogares pasó de ${fmtDec(depObj.ine.br,1)} por ciento en 2018 a ${fmtDec(d23.br,1)} por ciento en 2023 (${dbrTxt.replace('pp','puntos porcentuales')}), y el uso de internet en personas de 7 años o más subió de ${fmtDec(depObj.ine.uso,1)} a ${fmtDec(d23.uso,1)} por ciento.">
+          <div class="s-lbl" style="color:#9f1239;margin-bottom:4px;padding-right:24px;">
+            <span>Brecha Digital · 2018 Municipal<span class="help-q" title="Porcentaje oficial de hogares sin acceso a internet: 2018 según XII Censo INE (340 municipios) y actualización 2023 según ENCOVI 2023 INE (publicada a nivel departamental).">?</span></span>
+            <span style="white-space:nowrap;">#${ineRank} / 340</span>
           </div>
           <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px;">
             <span class="num" style="font-size:23px;font-weight:900;color:#be123c;letter-spacing:-0.02em;">${fmtDec(m.ine.br, 2)}%</span>
@@ -2428,10 +2579,30 @@ const SIT = __SIT_DATA_PAYLOAD__;
             <div style="width:${m.ine.pc}%;background:#0d9488;" title="Con internet: ${fmtDec(m.ine.pc,2)}%"></div>
             <div style="width:${m.ine.br}%;background:#e11d48;" title="Sin internet: ${fmtDec(m.ine.br,2)}%"></div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:11px;" class="num">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:11px;margin-bottom:8px;" class="num">
             <div><span style="color:var(--muted);display:block;font-size:9.5px;font-weight:700;">TOTAL HOGARES</span><strong>${fmtInt(m.ine.h)}</strong></div>
             <div><span style="color:#0f766e;display:block;font-size:9.5px;font-weight:700;">CON INTERNET</span><strong>${fmtInt(m.ine.con)}</strong></div>
             <div><span style="color:#be123c;display:block;font-size:9.5px;font-weight:700;">SIN INTERNET</span><strong>${fmtInt(m.ine.sin)}</strong></div>
+          </div>
+          <div style="border-top:1px dashed #fecdd3;padding-top:7px;font-size:11px;display:flex;flex-direction:column;gap:4px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
+              <span style="font-weight:800;color:#9f1239;font-size:10.5px;">Actualización 2023 · Depto. ${esc(m.dep)} (ENCOVI INE)</span>
+              <span class="pill ${d23.dbr <= 0 ? 'ok' : 'danger'}" style="font-size:9.5px;padding:1px 6px;">${dbrTxt}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;" class="num">
+              <div style="background:#fff;border:1px solid #ffe4e6;border-radius:6px;padding:5px 7px;">
+                <span style="color:var(--muted);display:block;font-size:9.5px;font-weight:700;">BRECHA HOGARES DEPTO.</span>
+                <strong>${fmtDec(depObj.ine.br,1)}% → ${fmtDec(d23.br,1)}%</strong>
+              </div>
+              <div style="background:#fff;border:1px solid #ffe4e6;border-radius:6px;padding:5px 7px;">
+                <span style="color:var(--muted);display:block;font-size:9.5px;font-weight:700;">USO INTERNET 7+ AÑOS</span>
+                <strong>${fmtDec(depObj.ine.uso,1)}% → ${fmtDec(d23.uso,1)}%</strong> <span style="color:#0f766e;font-size:9.5px;">(${dusoTxt})</span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:6px;font-size:10px;color:var(--muted);margin-top:1px;" class="num">
+              <span>Pobreza muni 2023 (SEGEPLAN): <strong>${m.ine.pobr23 !== null ? fmtDec(m.ine.pobr23,1)+'%' : '—'}</strong></span>
+              <span>Mediana internet hogar 2023: <strong>Q${fmtInt(d23.q_int)}/mes</strong></span>
+            </div>
           </div>
         </div>
 
@@ -2529,8 +2700,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
         </div>
 
         <div class="audit-box">
-          <div><strong>Trazabilidad Oficial (SIT + INE XII Censo + KMZ)</strong></div>
-          <div class="audit-row"><strong>Brecha Digital Hogares:</strong> XII Censo Población y Vivienda INE (2018) · ${fmtInt(m.ine.h)} hogares (${fmtDec(m.ine.br,2)}% sin internet)</div>
+          <div><strong>Trazabilidad Oficial (SIT + INE 2018/2023 + SEGEPLAN + KMZ)</strong></div>
+          <div class="audit-row"><strong>Brecha Digital 2018 (Municipal):</strong> XII Censo INE (2018) · ${fmtInt(m.ine.h)} hogares (${fmtDec(m.ine.br,2)}% sin internet)</div>
+          <div class="audit-row"><strong>Actualización 2023 (Departamental):</strong> ENCOVI 2023 INE (trazabilidad_brecha_digital.xlsx) · ${esc(m.dep)}: ${fmtDec(deptoById.get(m.did).ine23.br,2)}% hogares sin internet · Uso 7+ años: ${fmtDec(deptoById.get(m.did).ine23.uso,1)}%</div>
+          <div class="audit-row"><strong>Pobreza Municipal 2023:</strong> SEGEPLAN / Banco Mundial (Mapas de pobreza 2023, cuadro 7.2) · ${m.ine.pobr23 !== null ? fmtDec(m.ine.pobr23,1)+'%' : 'Sin dato'}</div>
           <div class="audit-row"><strong>Radiobases (${pRb}):</strong> ${rbRec ? `${esc(SIT.meta.pdfs[rbRec.pdf])} · Pág. ${rbRec.pg ?? '—'} · Fila XLSX ${rbRec.r ?? '—'}` : 'Sin registro en Hoja 09.'}</div>
           <div class="audit-row"><strong>Líneas fijas (${pFx}):</strong> ${fxRec ? `${esc(SIT.meta.pdfs[fxRec.pdf])} · Pág. ${fxRec.pg ?? '—'} · Fila XLSX ${fxRec.r ?? '—'}` : '—'}</div>
           <div class="audit-row"><strong>Geolocalización:</strong> Lugares Poblados 2026.kmz (${fmtInt(m.lp_sum.tot)} sitios) ${m.area !== null ? '· Municipios.kmz ('+m.area+' km²)' : ''}</div>
@@ -2684,7 +2857,12 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const fxRec = dep.fx[pFx], rbRec = dep.rb[pRb];
     const rbDisplay = rbRec ? rbRec.v : depMunis.reduce((s, m) => s + (m.rb[pRb]?.v || 0), 0);
     const avgIsi = depMunis.reduce((s, m) => s + m.eco.isi, 0) / depMunis.length;
-    const ranked = depMunis.map(m => ({ m, v: getMetricValue(m, state.metric, activePeriod) }))
+    const ine23 = isIne23Mode(state.metric, activePeriod);
+    const d23 = dep.ine23;
+    const dbrTxt = (d23.dbr >= 0 ? '+' : '') + fmtDec(d23.dbr, 2) + ' pp';
+    const dusoTxt = (d23.duso >= 0 ? '+' : '') + fmtDec(d23.duso, 1) + ' pp';
+    const listPeriod = ine23 ? '2018' : activePeriod;
+    const ranked = depMunis.map(m => ({ m, v: getMetricValue(m, state.metric, listPeriod) }))
       .sort((a,b) => (b.v ?? -1) - (a.v ?? -1) || a.m.nom.localeCompare(b.m.nom, 'es'));
 
     container.innerHTML = `
@@ -2706,20 +2884,35 @@ const SIT = __SIT_DATA_PAYLOAD__;
         <div class="stat-box"><div class="s-lbl"><span>Líneas Fijas</span><span>${pFx}</span></div><div class="s-val num">${fmtInt(fxRec?.t)}</div><div class="s-meta">Total oficial departamental</div></div>
       </div>
 
-      <div class="card stat-box" style="background:linear-gradient(135deg,#fff1f2 0%,#ffffff 65%);border-color:#fecdd3;" data-speak-title="Brecha Digital INE · ${esc(dep.nom)}" data-speak="Brecha digital en hogares del departamento de ${esc(dep.nom)} según el XII Censo del INE: de ${fmtInt(dep.ine.h)} hogares totales, ${fmtInt(dep.ine.sin)} no cuentan con internet, lo que equivale al ${fmtDec(dep.ine.br,2)} por ciento de brecha digital.">
-        <div class="s-lbl" style="color:#9f1239;"><span>Brecha Digital Hogares (XII Censo INE)</span><span>${esc(dep.nom)}</span></div>
-        <div style="display:flex;align-items:baseline;justify-content:space-between;margin:3px 0 5px;">
-          <span class="num" style="font-size:21px;font-weight:900;color:#be123c;">${fmtDec(dep.ine.br, 2)}%</span>
-          <span style="font-size:11px;color:var(--ink-2);">${fmtInt(dep.ine.sin)} de ${fmtInt(dep.ine.h)} hogares sin internet</span>
+      <div class="card stat-box" style="background:linear-gradient(135deg,#fff1f2 0%,#ffffff 65%);border-color:#fecdd3;" data-speak-title="Brecha Digital 2018 → 2023 · ${esc(dep.nom)}" data-speak="Evolución de la brecha digital en hogares del departamento de ${esc(dep.nom)}: en el Censo INE 2018 era del ${fmtDec(dep.ine.br,2)} por ciento (${fmtInt(dep.ine.sin)} de ${fmtInt(dep.ine.h)} hogares sin internet), y en la ENCOVI 2023 del INE es del ${fmtDec(d23.br,2)} por ciento (${fmtInt(d23.sin)} de ${fmtInt(d23.h)} hogares sin internet), un cambio de ${dbrTxt.replace('pp','puntos porcentuales')}. Además, el uso de internet en personas de 7 años o más subió de ${fmtDec(dep.ine.uso,1)} a ${fmtDec(d23.uso,1)} por ciento.">
+        <div class="s-lbl" style="color:#9f1239;margin-bottom:5px;padding-right:24px;">
+          <span>Brecha Digital Hogares · 2018 → 2023</span>
+          <span class="pill ${d23.dbr <= 0 ? 'ok' : 'danger'}" style="font-size:10px;padding:1px 7px;white-space:nowrap;">${dbrTxt}</span>
         </div>
-        <div style="height:8px;border-radius:99px;overflow:hidden;display:flex;background:#ffe4e6;">
-          <div style="width:${dep.ine.pc}%;background:#0d9488;"></div>
-          <div style="width:${dep.ine.br}%;background:#e11d48;"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:7px;" class="num">
+          <div style="background:#fff;border:1px solid #ffe4e6;border-radius:8px;padding:7px 9px;">
+            <div style="font-size:9.5px;font-weight:800;color:var(--muted);text-transform:uppercase;">2018 · Censo INE</div>
+            <div style="font-size:19px;font-weight:900;color:#be123c;line-height:1.15;">${fmtDec(dep.ine.br, 2)}%</div>
+            <div style="font-size:10px;color:var(--ink-2);">${fmtInt(dep.ine.sin)} / ${fmtInt(dep.ine.h)} hog.</div>
+          </div>
+          <div style="background:#fff;border:1.5px solid #fda4af;border-radius:8px;padding:7px 9px;">
+            <div style="font-size:9.5px;font-weight:800;color:#9f1239;text-transform:uppercase;">2023 · ENCOVI INE</div>
+            <div style="font-size:19px;font-weight:900;color:#9f1239;line-height:1.15;">${fmtDec(d23.br, 2)}%</div>
+            <div style="font-size:10px;color:var(--ink-2);">${fmtInt(d23.sin)} / ${fmtInt(d23.h)} hog.</div>
+          </div>
+        </div>
+        <div style="height:8px;border-radius:99px;overflow:hidden;display:flex;background:#ffe4e6;margin-bottom:6px;">
+          <div style="width:${d23.pc}%;background:#0d9488;" title="2023 Con internet: ${fmtDec(d23.pc,2)}%"></div>
+          <div style="width:${d23.br}%;background:#e11d48;" title="2023 Sin internet: ${fmtDec(d23.br,2)}%"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10.5px;color:var(--ink-2);" class="num">
+          <div>Uso internet 7+: <strong>${fmtDec(dep.ine.uso,1)}% → ${fmtDec(d23.uso,1)}%</strong> <span style="color:#0f766e;">(${dusoTxt})</span></div>
+          <div>Pago 2023: <strong>Q${fmtInt(d23.q_int)}</strong> int. · <strong>Q${fmtInt(d23.q_cel)}</strong> cel.</div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-hd"><h3>Municipios de ${esc(dep.nom)}</h3><span>${esc(getMetricTitle(state.metric))}</span></div>
+        <div class="card-hd"><h3>Municipios de ${esc(dep.nom)}</h3><span>${esc(getMetricTitle(state.metric))}${ine23 ? ' (desglose 2018)' : ''}</span></div>
         <div class="rank-list">
           ${ranked.map((x, idx) => `<div class="rank-item" data-muni="${x.m.id}"><div class="rank-left"><span class="rank-num">${idx+1}</span><div><div class="rank-name">${esc(x.m.nom)}</div><div class="rank-sub">ISI ${fmtDec(x.m.eco.isi,1)} · ${getEcoRecommendation(x.m).shortLabel}</div></div></div><span class="rank-val num">${fmtMetricVal(x.v, state.metric)}</span></div>`).join('')}
         </div>
@@ -2729,6 +2922,13 @@ const SIT = __SIT_DATA_PAYLOAD__;
     document.getElementById('btn-all-gt').onclick = () => { document.getElementById('depto-filter').value = ''; state.deptoFilter = null; state.selectedDeptoId = null; resetZoom(); updateMapColors(); renderInspector(); };
     document.getElementById('btn-zoom-dep').onclick = () => zoomToBBox(dep.bb, 0.22);
     container.querySelectorAll('.rank-item[data-muni]').forEach(el => el.onclick = () => selectAndFocusMuni(parseInt(el.dataset.muni, 10)));
+    container.querySelectorAll('.rank-item[data-depto-row]').forEach(el => el.onclick = () => {
+      const did = parseInt(el.dataset.deptoRow, 10);
+      document.getElementById('depto-filter').value = did;
+      state.deptoFilter = did; state.selectedMuniId = null; state.selectedDeptoId = did;
+      state.compareMode = false; state.compareMuniId = null; layerLp.innerHTML = '';
+      zoomToBBox(deptoById.get(did).bb, 0.22); updateMapColors(); renderInspector();
+    });
   }
 
   // ===== OFFSCREEN CANVAS CARTOGRAPHIC MAP RENDERER FOR EXCEL (.XLSX) =====
@@ -3015,10 +3215,13 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Longitud GPS', m.gps[0], m.gps[2]==='kmz'?'Lugares Poblados 2026.kmz':'Centroide geométrico'],
       ['Área Territorial (km²)', m.area ?? 'No disponible (segregado post-KMZ)', 'Municipios.kmz'],
       ['Lugares Poblados (2026)', m.lp_sum.tot, 'Lugares Poblados 2026.kmz'],
-      ['Total Hogares (XII Censo INE)', m.ine.h, 'Censo Población y Vivienda INE 2018'],
-      ['Hogares con Internet (INE)', m.ine.con, fmtDec(m.ine.pc, 2) + '% de hogares'],
-      ['Hogares sin Internet (INE)', m.ine.sin, fmtDec(m.ine.br, 2) + '% brecha digital'],
-      ['% Brecha Digital Conectividad (INE)', m.ine.br, 'XII Censo INE 2018'],
+      ['Total Hogares (XII Censo INE 2018)', m.ine.h, 'Censo Población y Vivienda INE 2018 (nivel municipal)'],
+      ['Hogares con Internet (2018)', m.ine.con, fmtDec(m.ine.pc, 2) + '% de hogares'],
+      ['Hogares sin Internet (2018)', m.ine.sin, fmtDec(m.ine.br, 2) + '% brecha digital municipal'],
+      ['% Brecha Digital Hogares 2018 (Municipal)', m.ine.br, 'XII Censo INE 2018'],
+      ['% Brecha Digital Hogares 2023 (Depto. ' + m.dep + ')', deptoById.get(m.did).ine23.br, 'ENCOVI 2023 INE (publicado a nivel departamental; cambio vs 2018: ' + (deptoById.get(m.did).ine23.dbr >= 0 ? '+' : '') + fmtDec(deptoById.get(m.did).ine23.dbr, 2) + ' pp)'],
+      ['% Uso Internet 7+ años 2023 (Depto. ' + m.dep + ')', deptoById.get(m.did).ine23.uso, 'ENCOVI 2023 INE (2018: ' + fmtDec(deptoById.get(m.did).ine.uso, 1) + '%)'],
+      ['Población en Pobreza 2023 (%)', m.ine.pobr23 ?? 'Sin dato', 'SEGEPLAN / Banco Mundial (Mapas de pobreza 2023, municipal)'],
       ['Radiobases (2026-S1)', m.rb['2026-S1']?.v ?? null, 'Hoja 09 SIT'],
       ['Líneas Fijas Totales (2026-S1)', m.fx['2026-S1']?.t ?? null, 'Hoja 08 SIT'],
       ['Lugares Poblados por Radiobase', m.eco.lp_rb ?? 'N/A', 'KMZ 2026 / SIT 2026-S1'],
@@ -3069,8 +3272,12 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Período de Corte', period, 'Boletín Oficial SIT'],
       ['Total Radiobases Oficial', dep.rb[period]?.v ?? depMunis.reduce((s,m)=>s+(m.rb[period]?.v||0),0), 'Hoja 09 SIT'],
       ['Total Líneas Fijas Oficial', dep.fx[period]?.t ?? null, 'Hoja 08 SIT'],
-      ['Total Hogares Depto (XII Censo INE)', dep.ine.h, 'INE Censo 2018'],
-      ['Hogares sin Internet Depto (INE)', dep.ine.sin, fmtDec(dep.ine.br, 2) + '% brecha digital'],
+      ['Total Hogares Depto (Censo 2018 INE)', dep.ine.h, 'INE Censo 2018 (suma 340 munis)'],
+      ['Hogares sin Internet Depto (2018)', dep.ine.sin, fmtDec(dep.ine.br, 2) + '% brecha digital 2018'],
+      ['Total Hogares Depto (ENCOVI 2023 INE)', dep.ine23.h, 'INE ENCOVI 2023 (valor expandido departamental)'],
+      ['Hogares sin Internet Depto (2023)', dep.ine23.sin, fmtDec(dep.ine23.br, 2) + '% brecha digital 2023 (' + (dep.ine23.dbr >= 0 ? '+' : '') + fmtDec(dep.ine23.dbr, 2) + ' pp vs 2018)'],
+      ['Uso de Internet 7+ años (2018 → 2023)', fmtDec(dep.ine.uso, 2) + '% → ' + fmtDec(dep.ine23.uso, 2) + '%', 'Cambio: ' + (dep.ine23.duso >= 0 ? '+' : '') + fmtDec(dep.ine23.duso, 2) + ' pp (Censo 2018 vs ENCOVI 2023)'],
+      ['Pago Mensual Mediano Internet / Celular (2023)', 'Q ' + dep.ine23.q_int + ' / Q ' + dep.ine23.q_cel, 'INE ENCOVI 2023 · Pobreza dept.: ' + dep.ine23.pobr + '%'],
       ['Total Lugares Poblados (2026)', depMunis.reduce((s,m)=>s+m.lp_sum.tot,0), 'Lugares Poblados 2026.kmz'],
       ['Promedio Índice ISI Departamental', avgIsi, 'Escala 0-100'],
       ['Municipios Alta Saturación (≥75)', depMunis.filter(m=>m.eco.tier===2).length, 'Polo maduro'],
@@ -3115,10 +3322,12 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const s1 = [
       hdr,
       ['Código INE', ...munis.map(m => String(m.id).padStart(4,'0'))],
-      ['Total Hogares (XII Censo INE)', ...munis.map(m => m.ine.h)],
-      ['Hogares con Internet (INE)', ...munis.map(m => m.ine.con)],
-      ['Hogares sin Internet (INE)', ...munis.map(m => m.ine.sin)],
-      ['% Brecha Digital Conectividad (INE)', ...munis.map(m => m.ine.br)],
+      ['Total Hogares (Censo INE 2018)', ...munis.map(m => m.ine.h)],
+      ['Hogares con Internet (2018)', ...munis.map(m => m.ine.con)],
+      ['Hogares sin Internet (2018)', ...munis.map(m => m.ine.sin)],
+      ['% Brecha Digital Hogares 2018 (Municipal)', ...munis.map(m => m.ine.br)],
+      ['% Brecha Digital Hogares 2023 (Depto. ENCOVI)', ...munis.map(m => deptoById.get(m.did).ine23.br)],
+      ['Población en Pobreza 2023 (% SEGEPLAN)', ...munis.map(m => m.ine.pobr23 ?? 'Sin dato')],
       ['Índice Saturación ISI (0-100)', ...munis.map(m => m.eco.isi)],
       ['Semáforo Económico', ...munis.map(m => getEcoRecommendation(m).badge)],
       ['Radiobases (2026-S1)', ...munis.map(m => m.rb['2026-S1']?.v ?? 0)],
@@ -3157,27 +3366,34 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Mapa Nacional de Guatemala (340 Municipios) · Corte ' + period],
       ['Coloreado según el Índice de Saturación Económica ISI (0–100).']
     ];
-    const s1 = [['INE','Departamento','Municipio','Total Hogares (INE)','Hogares con Internet','Hogares sin Internet','% Brecha Digital INE','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados 2026','Lug./RB','Área km²','Lat GPS','Lon GPS','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP']];
+    const s1 = [['INE','Departamento','Municipio','Total Hogares (2018)','Hogares con Internet (2018)','Hogares sin Internet (2018)','% Brecha Hogares 2018 (Muni)','% Brecha Hogares 2023 (Depto ENCOVI)','Pobreza 2023 (%)','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados 2026','Lug./RB','Área km²','Lat GPS','Lon GPS','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP']];
     for (const m of list) {
-      const fx = m.fx[period], rec = getEcoRecommendation(m);
+      const fx = m.fx[period], rec = getEcoRecommendation(m), d23 = deptoById.get(m.did).ine23;
       s1.push([
-        String(m.id).padStart(4,'0'), m.dep, m.nom, m.ine.h, m.ine.con, m.ine.sin, m.ine.br, m.rb[period]?.v ?? 'Sin dato', fx?.t ?? 'N/A',
+        String(m.id).padStart(4,'0'), m.dep, m.nom, m.ine.h, m.ine.con, m.ine.sin, m.ine.br, d23.br, m.ine.pobr23 ?? 'Sin dato', m.rb[period]?.v ?? 'Sin dato', fx?.t ?? 'N/A',
         ...(fx ? fx.v.map(v=>v===null?'N/A':v) : SIT.meta.op_names.map(()=>'')),
         m.lp_sum.tot, m.eco.lp_rb ?? 'N/A', m.area ?? '', m.gps[1], m.gps[0],
         m.eco.g3y ?? 'N/A', m.eco.hhi ?? 'Sin red', m.eco.isi, rec.shortLabel, rec.forBiz, rec.forTelco
       ]);
     }
+    const s3 = [['Código Depto','Departamento','Hogares 2018 (Censo)','Sin Internet 2018','% Brecha 2018','Hogares 2023 (ENCOVI)','Sin Internet 2023','% Brecha 2023','Cambio Brecha (pp)','Uso Int. 7+ 2018 (%)','Uso Int. 7+ 2023 (%)','Cambio Uso (pp)','Pago Int. 2023 (Q)','Pago Cel. 2023 (Q)','Pobreza ENCOVI 2023 (%)']];
+    for (const d of SIT.deptos) {
+      s3.push([d.id/100, d.nom, d.ine.h, d.ine.sin, d.ine.br, d.ine23.h, d.ine23.sin, d.ine23.br, d.ine23.dbr, d.ine.uso, d.ine23.uso, d.ine23.duso, d.ine23.q_int, d.ine23.q_cel, d.ine23.pobr]);
+    }
     const s2 = [
       ['Componente Metodológico', 'Fórmula / Definición', 'Justificación y Uso Económico'],
-      ['Brecha Digital en Hogares (INE)', '(Hogares sin Internet / Total Hogares) × 100', 'Fuente oficial: XII Censo de Población y Vivienda INE (2018). Mide el porcentaje directo de hogares sin acceso a internet.'],
+      ['Brecha Digital en Hogares 2018 (INE)', '(Hogares sin Internet / Total Hogares) × 100', 'Fuente oficial: XII Censo de Población y Vivienda INE (2018), nivel municipal (340 municipios).'],
+      ['Brecha Digital en Hogares 2023 (ENCOVI INE)', '(Hogares sin Internet en casa / Total Hogares) × 100', 'Fuente oficial: ENCOVI 2023 del INE (trazabilidad_brecha_digital.xlsx), publicada a nivel departamental (22 departamentos). Sin imputación municipal.'],
+      ['Pobreza Municipal 2023 (SEGEPLAN)', 'Población en pobreza (%)', 'SEGEPLAN y Banco Mundial, Mapas de pobreza a nivel municipal 2023, cuadro 7.2.'],
       ['Índice de Saturación de Infraestructura (ISI)', 'ISI = 0.25·P(RB/LP) + 0.25·P(%ConInternet_INE) + 0.20·P(Fijas/Hogares) + 0.15·P(RB) + 0.15·P(10000 - HHI)', 'Normalización percentil (metodología OCDE) sobre 340 municipios integrando SIT 2026 + KMZ 2026 + XII Censo INE. Escala 0 a 100.'],
       ['Índice Herfindahl-Hirschman (HHI)', 'HHI = Σ (cuota_operador_i %)² en líneas fijas 2026-S1', 'Estándar internacional DOJ/FTC para medir concentración y competencia real (>1,800 altamente concentrado; 10,000 monopolio).'],
       ['Crecimiento 3 años Radiobases', '((RB_2026-S1 - RB_2023-S1) / RB_2023-S1) × 100', 'Indica si los operadores están invirtiendo activamente en el municipio o si el mercado está estancado.'],
       ['Umbrales del Semáforo', '≥ 75 Alta Saturación | 45–74.9 Consolidación | < 45 Baja Saturación', 'Traduce los indicadores técnicos a decisiones claras para empresas (conectividad) e inversionistas ISP/telecom (oportunidad).'],
-      ['Fuentes Oficiales Verificadas', 'SIT Consolidado Histórico 2014–2026 (04NOV2026) + Lugares Poblados 2026.kmz + Municipios.kmz', '100% cifras verificadas con conciliación 0 diferencia local en Hoja 15.'],
+      ['Fuentes Oficiales Verificadas', 'SIT Consolidado 2014–2026 + INE Censo 2018 + ENCOVI 2023 + SEGEPLAN 2023 + KMZ 2026', '100% cifras verificadas con conciliación 0 diferencia local en Hoja 15 y 0 diferencia en trazabilidad 2018.'],
     ];
     XLSXWriter.downloadXLSX(`SIT_Guatemala_${list.length}_Municipios_${period}.xlsx`, [
       { name: 'Municipios_Consolidado', rows: s1 },
+      { name: 'Brecha_2018_vs_2023', rows: s3 },
       { name: 'Mapa_Visual', rows: sMap, headerRowIdx: 0, image: mapImg },
       { name: 'Metodologia_ISI_HHI', rows: s2 },
     ]);
@@ -3352,7 +3568,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       { lbl: `Radiobases (${latest.p})`, val: fmtInt(latest.rb), sub: `Suma exacta 340 municipios` },
       { lbl: `Banda Ancha Fija (${latest.p})`, val: fmtInt(latest.baf), sub: `Tráfico BAF: ${fmtDec(latest.tbaf_eb, 2)} exabytes` },
       { lbl: `Smartphones / ETM (${latest.p})`, val: fmtInt(latest.etm), sub: `Tráfico BAM: ${fmtDec(latest.tbam_nac_eb, 2)} EB` },
-      { lbl: `Brecha Digital Hogares (INE)`, val: fmtDec(SIT.meta.ine_totals.br, 2) + '%', sub: `${fmtInt(SIT.meta.ine_totals.sin)} de ${fmtInt(SIT.meta.ine_totals.h)} hogares sin internet` },
+      { lbl: `Brecha Digital 2018 → 2023 (INE)`, val: `${fmtDec(SIT.meta.ine_totals.br, 1)}% → ${fmtDec(SIT.meta.ine23_totals.br, 1)}%`, sub: `ENCOVI 2023: ${fmtDec(SIT.meta.ine23_totals.dbr, 2)} pp · Uso 7+: ${fmtDec(SIT.meta.ine23_totals.uso, 1)}%` },
     ];
     document.getElementById('nat-kpis').innerHTML = kpiData.map(k => `<div class="kpi-mini" style="padding:10px 12px;"><span class="lbl">${esc(k.lbl)}</span><span class="val num" style="font-size:19px;">${k.val}</span><span class="sub">${esc(k.sub)}</span></div>`).join('');
 
@@ -3384,6 +3600,38 @@ const SIT = __SIT_DATA_PAYLOAD__;
     tSearch.oninput = renderTarifas; renderTarifas();
 
     document.getElementById('audit-body').innerHTML = [...SIT.national.control_terr].reverse().map(r => `<tr class="num"><td style="text-align:left;font-weight:700;">${esc(r.p)}</td><td style="text-align:left;">${esc(r.mag)}</td><td>${r.nmuni??'—'}</td><td style="font-weight:700;">${fmtInt(r.smuni)}</td><td>${r.tnac!==null?fmtInt(r.tnac):'—'}</td><td>${r.dloc===0?'<span class="pill ok">0</span>':(r.dloc===null?'—':r.dloc)}</td></tr>`).join('');
+
+    const nbBody = document.getElementById('nat-brecha-body');
+    if (nbBody) {
+      const sortedDeps = [...SIT.deptos].sort((a,b) => b.ine23.br - a.ine23.br);
+      const t18 = SIT.meta.ine_totals, t23 = SIT.meta.ine23_totals;
+      nbBody.innerHTML = sortedDeps.map(d => {
+        const dbrCls = d.ine23.dbr <= 0 ? 'ok' : 'danger';
+        const dbrS = (d.ine23.dbr >= 0 ? '+' : '') + fmtDec(d.ine23.dbr, 2) + ' pp';
+        const dusoS = (d.ine23.duso >= 0 ? '+' : '') + fmtDec(d.ine23.duso, 1) + ' pp';
+        return `<tr class="num">
+          <td style="text-align:left;font-weight:700;">${esc(d.nom)}</td>
+          <td>${fmtDec(d.ine.br, 2)}%</td>
+          <td style="font-weight:800;color:#be123c;">${fmtDec(d.ine23.br, 2)}%</td>
+          <td><span class="pill ${dbrCls}">${dbrS}</span></td>
+          <td>${fmtDec(d.ine.uso, 1)}%</td>
+          <td style="font-weight:700;color:#0f766e;">${fmtDec(d.ine23.uso, 1)}%</td>
+          <td style="color:#0f766e;font-weight:700;">${dusoS}</td>
+          <td>Q ${fmtInt(d.ine23.q_int)}</td>
+          <td>${fmtDec(d.ine23.pobr, 1)}%</td>
+        </tr>`;
+      }).join('') + `<tr class="num" style="background:#f8fafc;font-weight:800;border-top:2px solid var(--border-strong);">
+        <td style="text-align:left;">NACIONAL (22 departamentos)</td>
+        <td>${fmtDec(t18.br, 2)}%</td>
+        <td style="color:#be123c;">${fmtDec(t23.br, 2)}%</td>
+        <td><span class="pill ok">${fmtDec(t23.dbr, 2)} pp</span></td>
+        <td>${fmtDec(t18.uso, 1)}%</td>
+        <td style="color:#0f766e;">${fmtDec(t23.uso, 1)}%</td>
+        <td style="color:#0f766e;">+${fmtDec(t23.duso, 1)} pp</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>`;
+    }
   }
 
   function switchView(name) {
@@ -3624,12 +3872,13 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
   function buildMuniSpeech(m) {
     const rec = getEcoRecommendation(m);
+    const dep = deptoById.get(m.did);
     const rb = m.rb['2026-S1']?.v ?? 0;
     const fx = m.fx['2026-S1']?.t ?? 0;
     const lp = m.lp_sum.tot;
     const s = [
       `Resumen oficial de ${m.nom}, departamento de ${m.dep}.`,
-      `Según el doceavo Censo del INE, de ${fmtInt(m.ine.h)} hogares, ${fmtInt(m.ine.sin)} no tienen internet, lo que representa una brecha digital del ${fmtDec(m.ine.br, 1)} por ciento.`,
+      `Según el Censo INE 2018, de ${fmtInt(m.ine.h)} hogares, ${fmtInt(m.ine.sin)} no tienen internet, una brecha digital municipal del ${fmtDec(m.ine.br, 1)} por ciento. En la ENCOVI 2023 a nivel departamental de ${m.dep}, la brecha en hogares es del ${fmtDec(dep.ine23.br, 1)} por ciento.`,
       `En el primer semestre de 2026 registra ${fmtInt(rb)} antenas celulares o radiobases para cubrir ${fmtInt(lp)} comunidades registradas.`,
       fx === 0
         ? `En telefonía fija reporta cero líneas activas, por lo que depende principalmente de señal móvil o enlaces inalámbricos.`
@@ -3706,13 +3955,15 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ];
     }
     if (focusMetric === 'ine_brecha' || focusMetric === 'ine_sin') {
+      const dbrWord = d.ine23.dbr <= 0 ? `bajó ${fmtDec(Math.abs(d.ine23.dbr), 2)} puntos porcentuales` : `subió ${fmtDec(d.ine23.dbr, 2)} puntos porcentuales`;
       return [
-        `Brecha digital en hogares del departamento de ${d.nom} según el doceavo Censo del INE: de ${fmtInt(d.ine.h)} hogares totales, ${fmtInt(d.ine.sin)} no tienen acceso a internet, lo que representa una brecha digital del ${fmtDec(d.ine.br, 2)} por ciento.`
+        `Evolución de la brecha digital en hogares del departamento de ${d.nom}: en el Censo INE 2018 era del ${fmtDec(d.ine.br, 2)} por ciento (${fmtInt(d.ine.sin)} hogares sin internet), y en la ENCOVI 2023 del INE es del ${fmtDec(d.ine23.br, 2)} por ciento (${fmtInt(d.ine23.sin)} hogares sin internet), es decir, ${dbrWord}.`,
+        `El uso de internet en personas de 7 años o más en ${d.nom} pasó de ${fmtDec(d.ine.uso, 1)} por ciento en 2018 a ${fmtDec(d.ine23.uso, 1)} por ciento en 2023.`
       ];
     }
     return [
       `Datos oficiales del departamento de ${d.nom}, integrado por ${dm.length} municipios y ${fmtInt(lpTot)} comunidades registradas.`,
-      `Según el doceavo Censo del INE, su brecha digital en hogares es del ${fmtDec(d.ine.br, 1)} por ciento (${fmtInt(d.ine.sin)} de ${fmtInt(d.ine.h)} hogares sin internet).`,
+      `En hogares sin internet, pasó de ${fmtDec(d.ine.br, 1)} por ciento en el Censo 2018 a ${fmtDec(d.ine23.br, 1)} por ciento en la ENCOVI 2023 del INE.`,
       `En el primer semestre de 2026 suma ${fmtInt(rb26)} antenas celulares o radiobases y ${fmtInt(fx26)} líneas fijas oficiales.`,
       `Su Índice de Saturación Económica promedio es de ${fmtDec(avgIsi, 1)} sobre 100: tiene ${t0} municipios con baja saturación y alta oportunidad, ${t1} en consolidación y ${t2} de alta saturación.`,
       `El municipio con más radiobases en ${d.nom} es ${topRb.nom} con ${fmtInt(topRb.rb['2026-S1']?.v)}, y el de mayor oportunidad por baja saturación es ${topOport.nom} con índice ${fmtDec(topOport.eco.isi, 1)}.`
@@ -3821,8 +4072,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
     // Detect requested action & metric WITHOUT exiting early if a place is also named!
     const wantsExcel = t.includes('excel') || t.includes('descarg') || t.includes('export') || t.includes('bajar tabla');
     const wantsDepto = t.includes('departamento') || t.includes('depto');
+    const reqIneYear = t.includes('2018') ? '2018' : (t.includes('2023') || t.includes('encovi') ? '2023' : null);
     let reqMetric = null;
-    if (t.includes('brecha digital') || (t.includes('brecha') && (t.includes('hogar') || t.includes('ine') || t.includes('internet') || t.includes('censo'))) || t.includes('sin internet')) reqMetric = 'ine_brecha';
+    if (t.includes('brecha digital') || t.includes('encovi') || (t.includes('brecha') && (t.includes('hogar') || t.includes('ine') || t.includes('internet') || t.includes('censo'))) || t.includes('sin internet')) reqMetric = 'ine_brecha';
     else if (t.includes('hogares sin internet') || t.includes('cuantos hogares')) reqMetric = 'ine_sin';
     else if (t.includes('semaforo') || t.includes('saturad') || t.includes('saturacion') || t.includes('isi') || t.includes('invertir') || t.includes('recomendacion')) reqMetric = 'isi';
     else if (t.includes('radiobase') || t.includes('antena') || t.includes('torre')) reqMetric = 'rb';
@@ -3880,7 +4132,13 @@ const SIT = __SIT_DATA_PAYLOAD__;
     // 4. Resolve specific Municipality or Department in the phrase!
     const hit = findBestEntity(raw, wantsDepto);
     if (hit) {
-      if (reqMetric) { metricSel.value = reqMetric; state.metric = reqMetric; stopPlay(); syncSliderToMetric(); }
+      if (reqMetric) {
+        metricSel.value = reqMetric; state.metric = reqMetric; stopPlay(); syncSliderToMetric();
+        if (reqIneYear && (reqMetric === 'ine_brecha' || reqMetric === 'ine_sin')) {
+          const yIdx = getPeriodsForMetric(reqMetric).indexOf(reqIneYear);
+          if (yIdx >= 0) setPeriodIdx(yIdx);
+        }
+      }
       if (hit.type === 'muni') {
         const m = hit.item;
         searchInput.value = m.nom; searchClear.style.display = 'block';
@@ -3915,8 +4173,15 @@ const SIT = __SIT_DATA_PAYLOAD__;
     if (wantsExcel) { openExcelModal(); showCaption('Dictado reconocido', 'Abriendo centro de descargas Excel (.xlsx)', false); return; }
     if (t.includes('tabla') || t.includes('ranking')) { switchView('table'); showCaption('Dictado reconocido', 'Abriendo explorador y ranking de los 340 municipios', false); return; }
     if (reqMetric) {
-      switchView('map'); metricSel.value = reqMetric; state.metric = reqMetric; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
-      showCaption('Dictado reconocido', `Mostrando mapa de ${getMetricTitle(reqMetric)}`, false);
+      switchView('map'); metricSel.value = reqMetric; state.metric = reqMetric; stopPlay(); syncSliderToMetric();
+      if (reqIneYear && (reqMetric === 'ine_brecha' || reqMetric === 'ine_sin')) {
+        const yIdx = getPeriodsForMetric(reqMetric).indexOf(reqIneYear);
+        if (yIdx >= 0) state.periodIdx = yIdx;
+        periodSlider.value = state.periodIdx;
+        periodPill.textContent = getActivePeriod();
+      }
+      updateMapColors(); renderInspector();
+      showCaption('Dictado reconocido', `Mostrando mapa de ${getMetricTitle(reqMetric)} (${getActivePeriod()})`, false);
       captionTimer = setTimeout(() => { if (!isSpeaking) capBar.classList.remove('open'); }, 3800);
       return;
     }
@@ -4035,22 +4300,37 @@ const SIT = __SIT_DATA_PAYLOAD__;
   initMap();
   const hash = location.hash || '';
   if (hash.includes('metric=ine_brecha')) { state.metric = 'ine_brecha'; metricSel.value = 'ine_brecha'; }
+  else if (hash.includes('metric=ine_sin')) { state.metric = 'ine_sin'; metricSel.value = 'ine_sin'; }
   else if (hash.includes('metric=isi')) { state.metric = 'isi'; metricSel.value = 'isi'; }
   syncSliderToMetric();
+  const perMatch = hash.match(/period=([0-9A-Za-z-]+)/);
+  if (perMatch) {
+    const pIdx = getPeriodsForMetric(state.metric).indexOf(perMatch[1]);
+    if (pIdx >= 0) { state.periodIdx = pIdx; periodSlider.value = pIdx; periodPill.textContent = perMatch[1]; }
+  }
   updateMapColors();
   renderInspector();
   initTableView();
   initNationalView();
   enhanceSpeakBubbles(document);
   if (hash.includes('view=guide')) switchView('guide');
+  else if (hash.includes('view=national')) switchView('national');
   const cmpMatch = hash.match(/cmp=(\d+),(\d+)/);
   const mMatch = hash.match(/muni=(\d+)/);
+  const dMatch = hash.match(/depto=(\d+)/);
   if (cmpMatch) {
     state.selectedMuniId = parseInt(cmpMatch[1], 10);
     state.compareMuniId = parseInt(cmpMatch[2], 10);
     updateMapColors(); renderInspector();
   } else if (mMatch) {
     selectAndFocusMuni(parseInt(mMatch[1], 10));
+  } else if (dMatch) {
+    const did = parseInt(dMatch[1], 10);
+    if (deptoById.has(did)) {
+      document.getElementById('depto-filter').value = did;
+      state.deptoFilter = did; state.selectedMuniId = null; state.selectedDeptoId = did;
+      zoomToBBox(deptoById.get(did).bb, 0.22); updateMapColors(); renderInspector();
+    }
   }
 })();
 </script>
