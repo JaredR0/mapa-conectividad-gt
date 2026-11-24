@@ -83,7 +83,7 @@
     letter-spacing: .04em; background: #be123c; color: #fff; padding: 3px 9px; border-radius: 999px; margin-bottom: 8px;
   }
   .hook-quote {
-    font-size: 18px; font-weight: 800; color: #0f172a; line-height: 1.38; letter-spacing: -0.01em;
+    font-size: 17.5px; font-weight: 800; color: #0f172a; line-height: 1.4; letter-spacing: -0.01em;
   }
 
   .block {
@@ -125,11 +125,11 @@
   .cue strong { color: #0369a1; }
   .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 9px; margin: 10px 0; }
   .mini-box {
-    background: #f8fafc; border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; font-size: 13px;
+    background: #f8fafc; border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; font-size: 13.5px;
   }
   .mini-box h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; color: var(--muted); }
-  .mini-box ul { margin-left: 16px; }
-  .mini-box li { margin-bottom: 3px; }
+  .mini-box ul, .mini-box ol { margin-left: 18px; }
+  .mini-box li { margin-bottom: 4px; }
   .kpi-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 8px 0; }
   .kpi-chip {
     background: #0f172a; color: #fff; font-size: 12px; font-weight: 700;
@@ -139,16 +139,16 @@
   .kpi-chip.green { background: #047857; }
   .kpi-chip.amber { background: #b45309; }
 
-  .font-controls { display: flex; gap: 6px; }
   body.big .say { font-size: 18px; line-height: 1.62; }
-  body.big .hook-quote { font-size: 21px; }
+  body.big .hook-quote { font-size: 20.5px; }
+  body.big .mini-box { font-size: 16px; }
 </style>
 </head>
 <body>
   <header class="sticky-bar">
     <div class="sticky-inner">
       <div class="brand">
-        <h1>Guion Oficial · Presentación 4:00 Minutos</h1>
+        <h1>Guion de Presentación · 4:00 Minutos</h1>
         <p>Observatorio Geoespacial SIT Guatemala · Mesa de Trabajo Innovacon</p>
       </div>
       <div class="timer-box">
@@ -174,9 +174,9 @@
 
     <!-- FRASE DE ARRANQUE -->
     <section class="hook-card">
-      <span class="hook-tag">Frase de Arranque · Segundos 0:00 – 0:10</span>
+      <span class="hook-tag">Saludos y Frase de Arranque · Segundos 0:00 – 0:12</span>
       <p class="hook-quote">
-        «En Guatemala, casi 8 de cada 10 hogares siguen sin internet en casa, pero el Estado y las empresas hoy deciden dónde invertir mirando PDFs de hace años y tablas desconectadas. Hoy venimos a cambiar eso: trajimos los 340 municipios y 27,352 comunidades de Guatemala a un solo mapa vivo, inclusivo y accionable.»
+        «Saludos. En Guatemala, casi 8 de cada 10 hogares siguen sin internet en casa, y hoy las decisiones de dónde invertir se basan en documentos con información desactualizada y tablas que no muestran una relación entre el sector y los subíndices que lo componen. Es por eso que traemos una propuesta innovadora, que incluye información de los 340 municipios y 27,352 comunidades de Guatemala en un solo mapa vivo, inclusivo e interactivo.»
       </p>
     </section>
 
@@ -187,11 +187,10 @@
         <span class="time-pill">0:00 – 0:30 · 30 segundos</span>
       </div>
       <p class="say">
-        <strong>Nuestra pregunta de decisión es directa:</strong><br>
-        <em>«¿En qué municipios y comunidades exactas de Guatemala debe priorizarse la próxima inversión en conectividad —y con qué modelo— para cerrar la brecha digital sin invertir a ciegas?»</em>
+        <strong>¿En qué municipios y comunidades exactas de Guatemala debe priorizarse la próxima inversión en conectividad —y con qué modelo— para cerrar la brecha digital de conectividad sin invertir a ciegas?</strong>
       </p>
       <p class="say">
-        Hoy una institución pública, un alcalde, un proveedor de internet o un organismo internacional como la <strong>ITU</strong> no tiene una forma rápida de responder esa pregunta. Nosotros construimos la respuesta en tiempo real.
+        Hoy es difícil poder responder una priorización a nivel nacional cuando no se cuenta con la información del sector agrupada en un espacio que permita analizar y tomar las decisiones correspondientes. Las municipalidades, empresas y organismos internacionales no tienen una herramienta inmediata que les permita consultar en línea y en tiempo real, con información actualizada.
       </p>
       <div class="cue">
         <strong>En pantalla:</strong> Mapa principal de Guatemala abierto en vista completa (340 municipios) + QR visible para el jurado.
@@ -201,33 +200,33 @@
     <!-- BLOQUE 2: 0:30 - 1:15 -->
     <section class="block b-amber" data-start="30" data-end="75">
       <div class="block-hd">
-        <div class="block-title">2. Qué datos usamos, qué nos faltó y el problema real de los datos en Guatemala</div>
+        <div class="block-title">2. Datos que usamos, qué nos faltó y el valor fuerza vendible</div>
         <span class="time-pill">0:30 – 1:15 · 45 segundos</span>
       </div>
       <p class="say">
-        Seamos 100% transparentes sobre el reto real de hacer análisis de datos en Guatemala. El paquete base del reto nos entregó únicamente <strong>tres insumos</strong>: los <strong>2 archivos KMZ</strong> (municipios y 27,352 lugares poblados 2026) y la <strong>tabla consolidada de boletines de la SIT (2014–2026)</strong>.
+        <strong>Lo que sí nos entregó el reto:</strong> documentos con información agrupada y una tabla consolidada de los boletines de la SIT — Municipios y 27,352 Lugares Poblados 2026, la tabla consolidada de boletines de la SIT (2014–2026), y los datos de población, brecha digital de conectividad, analfabetismo y población ocupada del INE.
       </p>
       <p class="say">
-        <strong>¿Qué nos faltó?</strong> Nos faltó <strong>toda la capa energética del INDE</strong> —no sabemos dónde llega electricidad rural para energizar una antena o fibra—, y <strong>tampoco teníamos datos socioeconómicos integrados</strong>. Ahí enfrentamos una de las mayores decadencias institucionales de Guatemala: <strong>los datos públicos existen en silos cerrados, atrapados en PDFs no procesables, con censos de 2018 desactualizados, encuestas como ENCOVI 2023 que solo bajan a departamento, y sin interoperabilidad entre SIT, INE, INDE y SEGEPLAN.</strong>
+        <strong>Lo que nos faltó:</strong> información actualizada sobre la cobertura eléctrica, cobertura de conectividad digital y el cruce socioeconómico del país.
       </p>
       <p class="say">
-        <strong>Nuestro valor fuerza vendible:</strong> en lugar de inventar números o rendirnos, salimos a rescatar, limpiar y conciliar con <strong>0 errores aritméticos</strong> las fuentes oficiales del <strong>INE (Censo 2018, ENCOVI 2023, Educación y Economía)</strong> y <strong>SEGEPLAN 2023</strong>, convirtiendo ese caos institucional en una plataforma abierta con <strong>trazabilidad fila por fila hasta el PDF original</strong>.
+        En Guatemala los datos públicos carecen de actualización, digitalización e interoperabilidad que permitan acceder de forma segura, rápida y confiable. <strong>Es importante actualizar el censo nacional a nivel de municipios.</strong>
       </p>
       <div class="grid-2">
         <div class="mini-box">
-          <h4>Lo que sí tuvimos + integramos</h4>
+          <h4>Datos integrados</h4>
           <ul>
-            <li>SIT Consolidado 2014–2026 (29,186 radiobases, 2.1M líneas fijas)</li>
-            <li>2 KMZ oficiales (340 munis + 27,352 lugares poblados GPS)</li>
-            <li>Rescate propio conciliado: INE 2018, ENCOVI 2023, Educación/Economía INE y Pobreza SEGEPLAN 2023</li>
+            <li>Municipios y 27,352 Lugares Poblados 2026 (KMZ)</li>
+            <li>Tabla consolidada de boletines SIT (2014–2026)</li>
+            <li>Población, brecha digital, analfabetismo y población ocupada (INE)</li>
           </ul>
         </div>
         <div class="mini-box">
-          <h4>Lo que faltó (realidad del país)</h4>
+          <h4>Qué nos faltó</h4>
           <ul>
-            <li><strong>Cero datos del INDE</strong> (red y cobertura eléctrica rural)</li>
-            <li>Banda ancha fija y telefonía móvil sin desglose municipal</li>
-            <li>Calidad real de señal (4G/5G/velocidad) y APIs abiertas inexistentes</li>
+            <li>Cobertura eléctrica actualizada</li>
+            <li>Cobertura de conectividad digital municipal actualizada</li>
+            <li>Cruce socioeconómico integral y censo municipal actualizado</li>
           </ul>
         </div>
       </div>
@@ -236,23 +235,21 @@
     <!-- BLOQUE 3: 1:15 - 2:30 -->
     <section class="block b-blue" data-start="75" data-end="150">
       <div class="block-hd">
-        <div class="block-title">3. Visualización en Vivo (Dónde · A quién · Cuándo · Qué variables)</div>
+        <div class="block-title">3. Visualización en Vivo</div>
         <span class="time-pill">1:15 – 2:30 · 1 min 15 s</span>
       </div>
       <p class="say">
-        Veámoslo en vivo. Cubrimos <strong>Dónde:</strong> los <strong>340 municipios, 22 departamentos y 27,352 comunidades geolocalizadas</strong> de Guatemala. <strong>Cuándo:</strong> una década de evolución SIT (<strong>2014–2026</strong>) y la línea de tiempo de brecha digital <strong>2018 → 2023</strong>. <strong>Para quién:</strong> para la SIT, alcaldías, operadores ISP, organismos como la <strong>ITU</strong> y cualquier ciudadano — incluyendo <strong>accesibilidad real para personas sordas</strong> (100% visual, español sencillo y subtítulos grandes sincronizados), personas con baja visión (lectura burbuja por burbuja) y dictado por voz.
+        <strong>Dónde:</strong> 340 municipios, 22 departamentos y 27,352 comunidades GPS.<br>
+        <strong>Cuándo:</strong> 10 años de historia SIT (2014–2026) + línea de tiempo Brecha Digital (2018 → 2023).<br>
+        <strong>A quién:</strong> SIT, operadores, prestadores de servicios, municipalidades, organismos internacionales y ciudadanos. Se cuenta con <strong>accesibilidad para personas no videntes y sordas</strong>.
       </p>
-      <p class="say">
-        <strong>Qué variables cruzamos en vivo:</strong>
-        <br>1. <strong>Puntaje de Brecha Digital (0 a 100)</strong> en 5 pasos transparentes: combina el <em>uso de internet 7+ (Censo 2018)</em> y las <em>antenas por cada 10,000 habitantes (SIT 2026)</em>, ordenando los 340 municipios para señalar con 100 a quién atender primero.
-        <br>2. <strong>Brecha Digital en Hogares (2018 → 2023)</strong> con línea de tiempo animada, diferenciando con total honestidad nivel municipal (2018) y nivel departamental (ENCOVI 2023).
-        <br>3. <strong>Capas de Educación (% analfabeta) y Economía (% ocupación)</strong> del INE para visión de desarrollo ITU, más nuestro <strong>Semáforo de Saturación Económica (ISI + HHI)</strong> y <strong>descarga instantánea de Excel (.xlsx) con mapa visual incrustado</strong>.
-      </p>
-      <div class="cue">
-        <strong>Secuencia exacta de clics en vivo (45 segundos):</strong><br>
-        ① Cambiar selector a <strong>Puntaje de Brecha Digital (0–100)</strong> → clic en <strong>Senahú (#1, 100.0)</strong> para mostrar sus 153 aldeas GPS y los 5 pasos.<br>
-        ② Cambiar a <strong>Brecha Digital Hogares (2018–2023)</strong> → deslizar la línea de tiempo <strong>2018 → 2023</strong> (se ve el cambio visual de 340 munis a 22 deptos).<br>
-        ③ Mostrar 1 clic en <strong>Educación (% Analfabeta)</strong> o <strong>Economía (% Ocupación)</strong> y tocar una burbuja <strong>🔊</strong> o botón <strong>Descargar Excel (.xlsx)</strong>.
+      <div class="mini-box" style="margin-bottom:8px;">
+        <h4>Qué variables mostramos en vivo</h4>
+        <ol>
+          <li>Abrir <strong>Puntaje de Brecha Digital (0–100)</strong> (5 pasos: uso internet 2018 + antenas/10,000 hab 2026) → clic en <strong>Senahú (#1, puntaje 100.0)</strong> para ver sus 153 comunidades GPS.</li>
+          <li>Cambiar a <strong>Brecha Digital Hogares (2018–2023)</strong> → deslizar <strong>2018 (340 munis) → 2023 (22 deptos ENCOVI)</strong>.</li>
+          <li>Mostrar <strong>Educación (% Analfabeta)</strong> / <strong>Economía (% Ocupación)</strong> (enfoque ITU), tocar una burbuja <strong>🔊</strong> y mostrar <strong>Descargar Excel (.xlsx) con mapa visual incluido</strong>.</li>
+        </ol>
       </div>
     </section>
 
@@ -263,10 +260,13 @@
         <span class="time-pill">2:30 – 3:20 · 50 segundos</span>
       </div>
       <p class="say">
-        ¿Cuál es el hallazgo más accionable que destapa este mapa? <strong>Que Guatemala está creciendo en celulares, pero la brecha estructural de internet en el hogar casi no se ha movido:</strong> en cinco años solo bajó <strong>3.31 puntos porcentuales</strong> (de <strong>82.74%</strong> en 2018 a <strong>79.43%</strong> en 2023), y hoy <strong>31 municipios siguen reportando CERO líneas fijas</strong> en pleno 2026.
+        En 5 años la brecha de hogares sin internet solo bajó <strong>3.31 puntos porcentuales</strong> (<strong>82.74% → 79.43%</strong>), y en pleno 2026 <strong>31 municipios siguen con 0 líneas fijas</strong>.
       </p>
       <p class="say">
-        Peor aún: la brecha digital se superpone exactamente con la brecha educativa y económica. Cuando cruzamos infraestructura SIT con educación y economía del INE, los municipios prioridad #1 como <strong>Senahú (puntaje 100/100)</strong> combinan <strong>98.8% de hogares sin internet</strong>, apenas <strong>5.1 antenas por cada 10,000 habitantes</strong> y <strong>32.9% de analfabetismo</strong>. Mientras tanto, nuestro Semáforo ISI identifica <strong>140 municipios de baja saturación</strong> donde la inversión pública-privada o WISP tiene terreno fértil y alto impacto social, en lugar de seguir sobre-invirtiendo en las <strong>43 plazas ya saturadas</strong>.
+        La brecha digital coincide exactamente con la educativa y económica: <strong>Senahú (#1, puntaje 100.0/100)</strong> combina <strong>98.8% de hogares sin internet</strong>, solo <strong>5.1 antenas por cada 10,000 habitantes</strong> y <strong>32.9% de población analfabeta</strong>.
+      </p>
+      <p class="say">
+        Nuestro Semáforo ISI identifica <strong>140 municipios de baja saturación</strong> donde la expansión WISP, fibra o inversión público-privada genera mayor impacto social y retorno, en vez de sobre-invertir en las <strong>43 plazas ya saturadas</strong>.
       </p>
       <div class="kpi-row">
         <span class="kpi-chip red">Brecha hogares: 82.74% → 79.43% (−3.31 pp)</span>
@@ -282,18 +282,15 @@
         <div class="block-title">5. Qué necesitamos de la SIT + Cierre</div>
         <span class="time-pill">3:20 – 4:00 · 40 segundos</span>
       </div>
-      <p class="say">
-        Esta herramienta ya funciona hoy, es 100% reproducible y no inventa un solo dato. Para llevarla de prototipo a política pública nacional, <strong>necesitamos tres compromisos concretos de la SIT:</strong>
-      </p>
       <div class="mini-box" style="margin-bottom:10px;">
-        <ul>
-          <li><strong>1. Datos abiertos estructurados (CSV/API):</strong> dejar de publicar la radiografía del país atrapada en PDFs semestrales y conectar esta plataforma directamente a una salida abierta oficial.</li>
-          <li><strong>2. Desagregación municipal de Banda Ancha Fija y calidad móvil (4G/5G):</strong> hoy esos indicadores solo existen a nivel nacional; sin verlos por municipio, los planes de conectividad rural operan con los ojos vendados.</li>
-          <li><strong>3. Mesa interinstitucional SIT + INDE + INE + SEGEPLAN:</strong> cruzar nuestra capa de telecomunicaciones con la <strong>red eléctrica del INDE</strong> para que cada torre o proyecto de fibra llegue donde sí existe energía —o se planifique junto con electrificación rural.</li>
-        </ul>
+        <ol>
+          <li><strong>Datos abiertos en CSV/API</strong> en lugar de PDFs semestrales para conectar el observatorio en vivo.</li>
+          <li><strong>Desagregación municipal de Banda Ancha Fija y calidad móvil (4G/5G)</strong> — hoy solo existen a nivel nacional.</li>
+          <li><strong>Mesa interinstitucional a nivel público-privado</strong> con la participación de instituciones como <strong>SIT + INDE + INE + SEGEPLAN + SECTOR PRIVADO + ACADEMIA</strong> para generar un análisis técnico que permita que sea integral.</li>
+        </ol>
       </div>
       <p class="say">
-        <strong>Cierre:</strong> <em>«Los datos ya existen, pero mientras sigan encerrados en archivos que nadie entiende, la brecha seguirá igual. Con este observatorio, por primera vez Guatemala puede ver, escuchar y decidir dónde conectar a los que hoy siguen desconectados. Muchas gracias.»</em>
+        <strong>Cierre:</strong> <em>«Los datos existen y se requiere que se puedan interconectar y actualizar para que en Guatemala se pueda tener información que permita a los tomadores de decisiones saber dónde invertir para el desarrollo económico y social. Muchas gracias.»</em>
       </p>
     </section>
   </main>
