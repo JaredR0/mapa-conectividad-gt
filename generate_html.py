@@ -998,7 +998,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     <div class="guide-shell">
       <div class="guide-hero">
         <div>
-          <h2>Cómo leer e interpretar este mapa (Guía inclusiva y sin tecnicismos)</h2>
+          <h2>Cómo leer e interpretar este mapa</h2>
           <p>
             Los datos oficiales de telecomunicaciones de Guatemala suelen venir en tablas gigantescas de Excel con miles de filas. Esta herramienta transforma esos archivos oficiales de la <strong>SIT (2014–2026)</strong> y el mapa oficial de <strong>27,352 comunidades (KMZ 2026)</strong> en un mapa interactivo y accesible —con lectura en voz alta, subtítulos visuales en vivo y dictado por voz— para que cualquier persona pueda entenderlo en segundos.
           </p>
@@ -3430,7 +3430,26 @@ const SIT = __SIT_DATA_PAYLOAD__;
   let activeRecog = null;
   let isSpeaking = false;
   let activeSpeakEl = null;
+  let speakRunId = 0;
+  let currentUtterance = null;
   let captionTimer = null;
+
+  const btnGuideSpeak = document.getElementById('guide-speak-btn');
+  const btnGuideA11yTts = document.getElementById('guide-a11y-tts');
+
+  function updateSpeakButtonsUI(playing) {
+    btnVoiceRead.classList.toggle('speaking', playing);
+    const vrSpan = btnVoiceRead.querySelector('span');
+    if (vrSpan) vrSpan.textContent = playing ? 'Detener' : 'Escuchar';
+    if (btnGuideSpeak) {
+      btnGuideSpeak.textContent = playing ? '⏹ Detener lectura' : '🔊 Escuchar esta guía';
+      btnGuideSpeak.style.background = playing ? '#dc2626' : '#0284c7';
+    }
+    if (btnGuideA11yTts) {
+      btnGuideA11yTts.textContent = playing ? '⏹ Detener lectura' : '🔊 Escuchar guía con subtítulos';
+      btnGuideA11yTts.classList.toggle('speaking', playing);
+    }
+  }
 
   function showCaption(modeLabel, text, isMic=false) {
     capLabel.textContent = modeLabel;
@@ -3439,8 +3458,25 @@ const SIT = __SIT_DATA_PAYLOAD__;
     capBar.classList.add('open');
   }
   function stopAllVoice() {
+    speakRunId++;
+    isSpeaking = false;
     if (captionTimer) { clearTimeout(captionTimer); captionTimer = null; }
-    if (window.speechSynthesis) { try { window.speechSynthesis.cancel(); } catch(e) {} }
+    if (currentUtterance) {
+      currentUtterance.onend = null;
+      currentUtterance.onerror = null;
+      currentUtterance = null;
+    }
+    if (window.speechSynthesis) {
+      try {
+        window.speechSynthesis.cancel();
+        // Safari/WebKit safety flush to guarantee audio cuts off immediately
+        setTimeout(() => {
+          if (!isSpeaking && (window.speechSynthesis.speaking || window.speechSynthesis.pending)) {
+            try { window.speechSynthesis.pause(); window.speechSynthesis.cancel(); } catch (_) {}
+          }
+        }, 35);
+      } catch(e) {}
+    }
     if (activeRecog) { try { activeRecog.stop(); } catch(e) {} activeRecog = null; }
     if (activeSpeakEl) {
       activeSpeakEl.classList.remove('is-speaking');
@@ -3448,10 +3484,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
       if (b) b.textContent = '🔊';
       activeSpeakEl = null;
     }
-    isSpeaking = false;
     btnVoiceMic.classList.remove('active');
     btnSearchMic.classList.remove('listening');
-    btnVoiceRead.classList.remove('speaking');
+    updateSpeakButtonsUI(false);
     capBar.classList.remove('open');
   }
   capStopBtn.onclick = stopAllVoice;
@@ -3495,14 +3530,13 @@ const SIT = __SIT_DATA_PAYLOAD__;
   }
 
   function triggerSpeakBubble(el) {
-    // Clicking the currently speaking bubble toggles it off!
-    if (activeSpeakEl === el && isSpeaking) {
+    // Clicking the currently speaking bubble toggles it off immediately!
+    if (activeSpeakEl === el && (isSpeaking || window.speechSynthesis?.speaking)) {
       stopAllVoice();
       return;
     }
     const { title, text } = extractBubbleSpeech(el);
     if (!text) return;
-    // Split gently into sentences for smooth live captions
     const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
     speakSentences(sentences.length ? sentences : [text], `🔊 ${title}`);
     activeSpeakEl = el;
@@ -3537,15 +3571,18 @@ const SIT = __SIT_DATA_PAYLOAD__;
   function speakSentences(sentences, title='Lectura con subtítulos') {
     stopAllVoice();
     if (!sentences.length) return;
+    const myRun = ++speakRunId;
     isSpeaking = true;
-    btnVoiceRead.classList.add('speaking');
+    updateSpeakButtonsUI(true);
     const rate = parseFloat(rateSel?.value || '1');
 
     if (!window.speechSynthesis) {
-      // Visual-only caption fallback if browser has no TTS
       let i = 0;
       function nextCap() {
-        if (!isSpeaking || i >= sentences.length) { stopAllVoice(); return; }
+        if (!isSpeaking || myRun !== speakRunId || i >= sentences.length) {
+          if (myRun === speakRunId) stopAllVoice();
+          return;
+        }
         showCaption(title + ' (solo subtítulos)', sentences[i], false);
         i++;
         captionTimer = setTimeout(nextCap, 4200);
@@ -3556,19 +3593,33 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
     let idx = 0;
     function speakNext() {
-      if (!isSpeaking || idx >= sentences.length) { stopAllVoice(); return; }
+      if (!isSpeaking || myRun !== speakRunId || idx >= sentences.length) {
+        if (myRun === speakRunId) stopAllVoice();
+        return;
+      }
       const txt = sentences[idx];
       showCaption(title, txt, false);
       const utt = new SpeechSynthesisUtterance(txt);
+      currentUtterance = utt;
       const voice = pickSpanishVoice();
       if (voice) utt.voice = voice;
-      utt.lang = voice?.lang || 'es-GT';
+      utt.lang = voice?.lang || 'es-MX';
       utt.rate = rate;
-      utt.onend = () => { idx++; speakNext(); };
-      utt.onerror = () => { idx++; speakNext(); };
+      utt.onend = () => {
+        if (myRun !== speakRunId || !isSpeaking) return;
+        idx++;
+        speakNext();
+      };
+      utt.onerror = (ev) => {
+        if (myRun !== speakRunId || !isSpeaking) return;
+        if (ev && (ev.error === 'canceled' || ev.error === 'interrupted')) return;
+        idx++;
+        speakNext();
+      };
       window.speechSynthesis.speak(utt);
     }
-    speakNext();
+    // Slight 20ms yield after cancel() prevents WebKit from dropping or tangling consecutive utterances
+    setTimeout(() => { if (myRun === speakRunId && isSpeaking) speakNext(); }, 20);
   }
 
   function buildMuniSpeech(m) {
@@ -3592,7 +3643,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
   }
 
   function speakCurrentContext() {
-    if (isSpeaking) { stopAllVoice(); return; }
+    if (isSpeaking || window.speechSynthesis?.speaking || window.speechSynthesis?.pending) {
+      stopAllVoice();
+      return;
+    }
     if (state.view === 'guide') {
       speakSentences([
         'Bienvenido a la guía inclusiva del Observatorio Geoespacial de la Superintendencia de Telecomunicaciones de Guatemala.',
