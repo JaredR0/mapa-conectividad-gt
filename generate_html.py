@@ -785,10 +785,12 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
         <div class="tb-group">
           <select id="metric-select" class="ctrl-select" title="Seleccionar indicador del mapa">
+            <option value="ine_brecha">Brecha Digital en Hogares (% sin internet · INE)</option>
+            <option value="ine_sin">Hogares sin Internet (cantidad · INE Censo)</option>
             <option value="isi">Índice de Saturación Económica (ISI 0–100)</option>
             <option value="rb" selected>Radiobases en operación (2016-S2 – 2026-S1)</option>
             <option value="fx_total">Líneas fijas totales (2022-S2 – 2026-S1)</option>
-            <option value="lp_per_rb">Brecha: Lugares Poblados / Radiobase</option>
+            <option value="lp_per_rb">Brecha territorial: Lugares Poblados / Radiobase</option>
             <option value="lp_tot">Lugares Poblados geolocalizados (KMZ 2026)</option>
             <option value="op_3">Líneas fijas · TELGUA</option>
             <option value="op_1">Líneas fijas · COMCEL</option>
@@ -908,13 +910,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
               <th data-sort="rank">#</th>
               <th data-sort="nom">Municipio</th>
               <th data-sort="dep">Departamento</th>
+              <th data-sort="ine_br">Brecha INE (%)</th>
+              <th data-sort="ine_sin">Hog. sin Int.</th>
               <th data-sort="isi">ISI (0–100)</th>
               <th data-sort="tier">Semáforo</th>
               <th data-sort="rb">Radiobases</th>
               <th data-sort="fx">Líneas Fijas</th>
-              <th data-sort="lp">Lug. Pobl.</th>
               <th data-sort="g3y">Crec. 3a</th>
-              <th data-sort="hhi">HHI Fijo</th>
               <th>Mapa</th>
             </tr>
           </thead>
@@ -1102,6 +1104,12 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         <div class="guide-sec-title">2. ¿Qué significa cada palabra y cada número?</div>
         <div class="guide-sec-sub">Explicación en español cotidiano de todos los indicadores oficiales que verás en pantalla:</div>
         <div class="glossary-grid">
+          <div class="gloss-card">
+            <div class="gc-term">Brecha Digital INE <span class="pill danger">XII Censo</span></div>
+            <div class="gc-plain">Porcentaje oficial de hogares del municipio que <strong>NO cuentan con acceso a internet</strong>, según el XII Censo de Población y Vivienda del INE (2018).</div>
+            <div class="gc-ex"><strong>Dato nacional real:</strong> 82.74% de los hogares (2,710,661 de 3,275,931 hogares) no tenían internet en el Censo INE.</div>
+          </div>
+
           <div class="gloss-card">
             <div class="gc-term">Radiobases <span class="pill">Antenas celulares</span></div>
             <div class="gc-plain">Son las torres o antenas que dan señal a los teléfonos celulares en un municipio. Mientras más radiobases hay, mayor es la capacidad de la red móvil.</div>
@@ -1644,6 +1652,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
   function getPeriodsForMetric(metric) {
     if (metric === 'rb' || metric === 'lp_per_rb') return SIT.meta.periods_rb;
+    if (metric === 'ine_brecha' || metric === 'ine_sin') return ['Censo INE'];
     if (metric === 'isi' || metric === 'lp_tot') return ['2026-S1'];
     return SIT.meta.periods_fx;
   }
@@ -1652,6 +1661,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
     return ps[Math.min(state.periodIdx, ps.length - 1)];
   }
   function getMetricValue(muni, metric, period) {
+    if (metric === 'ine_brecha') return muni.ine.br;
+    if (metric === 'ine_sin') return muni.ine.sin;
     if (metric === 'isi') return muni.eco.isi;
     if (metric === 'rb') return muni.rb[period] ? muni.rb[period].v : null;
     if (metric === 'lp_tot') return muni.lp_sum.tot;
@@ -1667,6 +1678,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
     return rec.v[parseInt(metric.split('_')[1], 10)];
   }
   function getMetricTitle(metric) {
+    if (metric === 'ine_brecha') return 'Brecha Digital Hogares (INE)';
+    if (metric === 'ine_sin') return 'Hogares sin Internet (INE)';
     if (metric === 'isi') return 'Índice Saturación ISI (0–100)';
     if (metric === 'rb') return 'Radiobases en operación';
     if (metric === 'fx_total') return 'Líneas fijas totales';
@@ -1677,12 +1690,32 @@ const SIT = __SIT_DATA_PAYLOAD__;
   }
   function fmtMetricVal(v, metric) {
     if (v === null || v === undefined) return 'Sin dato';
+    if (metric === 'ine_brecha') return fmtDec(v, 1) + '%';
     if (metric === 'isi') return fmtDec(v, 1);
     if (metric === 'lp_per_rb') return fmtDec(v, 2);
     return fmtInt(v);
   }
 
   function computeScale(metric, period) {
+    if (metric === 'ine_brecha') {
+      // Digital divide %: 44.8% (lowest divide -> emerald/teal) up to 99.7% (extreme divide -> deep crimson)
+      const pal = ['#0d9488','#2dd4bf','#fde68a','#fbbf24','#f97316','#dc2626','#7f1d1d'];
+      const breaks = [44, 65, 78, 86, 92, 96, 100];
+      return {
+        palette: pal, breaks,
+        minLbl: '45% (Menor brecha)', maxLbl: '99.7% (Sin internet)',
+        colorOf: (v) => {
+          if (v === null) return 'url(#nodata-hatch)';
+          if (v < 65) return pal[0];
+          if (v < 78) return pal[1];
+          if (v < 86) return pal[2];
+          if (v < 92) return pal[3];
+          if (v < 96) return pal[4];
+          if (v < 98) return pal[5];
+          return pal[6];
+        }
+      };
+    }
     if (metric === 'isi') {
       const breaks = [0, 22, 35, 45, 60, 75, 88, 100];
       return {
@@ -1705,7 +1738,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       const v = getMetricValue(m, metric, period);
       if (v !== null && v > 0) vals.push(v);
     }
-    const palette = metric === 'rb' ? PALETTE_RB : (metric === 'lp_per_rb' ? PALETTE_GAP : (metric === 'lp_tot' ? PALETTE_LP : PALETTE_FX));
+    const palette = metric === 'rb' ? PALETTE_RB : ((metric === 'lp_per_rb' || metric === 'ine_sin') ? PALETTE_GAP : (metric === 'lp_tot' ? PALETTE_LP : PALETTE_FX));
     if (!vals.length) return { palette, breaks: [0,1,2,5,10,50,100], minLbl: '0', maxLbl: '0', colorOf: (v) => v===null?'url(#nodata-hatch)':palette[0] };
     vals.sort((a,b) => a - b);
     const maxV = vals[vals.length - 1];
@@ -1938,7 +1971,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
         <span class="tt-num num">${fmtMetricVal(v, state.metric)}</span>
       </div>
       <div style="font-size:10.5px;color:#cbd5e1;margin-top:4px;display:flex;justify-content:space-between;gap:8px;">
-        <span style="color:${tierCol};font-weight:700;">ISI ${fmtDec(m.eco.isi,1)} · ${rec.shortLabel}</span>
+        <span style="color:${tierCol};font-weight:700;">ISI ${fmtDec(m.eco.isi,1)} · Brecha INE ${fmtDec(m.ine.br,1)}%</span>
         ${rk ? `<span style="color:#94a3b8;">#${rk}/${activeRankMap.size}</span>` : ''}
       </div>
     `;
@@ -1999,7 +2032,17 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const topItem = scopeScored[0];
 
     let k1Val, k1Sub;
-    if (state.metric === 'isi') {
+    if (state.metric === 'ine_brecha') {
+      const hSum = scopeMunis.reduce((s, m) => s + m.ine.h, 0);
+      const sinSum = scopeMunis.reduce((s, m) => s + m.ine.sin, 0);
+      k1Val = `${fmtDec((sinSum / Math.max(1, hSum)) * 100, 2)}%`;
+      k1Sub = `${fmtInt(sinSum)} de ${fmtInt(hSum)} hogares sin internet`;
+    } else if (state.metric === 'ine_sin') {
+      const hSum = scopeMunis.reduce((s, m) => s + m.ine.h, 0);
+      const sinSum = scopeMunis.reduce((s, m) => s + m.ine.sin, 0);
+      k1Val = fmtInt(sinSum);
+      k1Sub = `${fmtDec((sinSum / Math.max(1, hSum)) * 100, 2)}% de hogares · XII Censo INE`;
+    } else if (state.metric === 'isi') {
       const avgIsi = scopeMunis.reduce((s, m) => s + m.eco.isi, 0) / scopeMunis.length;
       k1Val = `${fmtDec(avgIsi, 1)} / 100`;
       k1Sub = `Promedio ISI · ${scopeLabel}`;
@@ -2024,7 +2067,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     document.getElementById('kpi-2-sub').textContent = scopeScored.length === scopeMunis.length ? '100% municipios publicados' : `${scopeMunis.length - scopeScored.length} sin dato en ${p}`;
 
     const k3Card = document.getElementById('kpi-3-card');
-    document.getElementById('kpi-3-lbl').textContent = state.metric === 'lp_per_rb' ? 'Mayor brecha' : 'Municipio líder (#1)';
+    document.getElementById('kpi-3-lbl').textContent = (state.metric === 'lp_per_rb' || state.metric === 'ine_brecha') ? 'Mayor brecha (#1)' : (state.metric === 'ine_sin' ? 'Más hogares sin internet' : 'Municipio líder (#1)');
     if (topItem) {
       document.getElementById('kpi-3-val').textContent = topItem.m.nom;
       document.getElementById('kpi-3-sub').textContent = `${fmtMetricVal(topItem.v, state.metric)} · ${topItem.m.dep}`;
@@ -2234,6 +2277,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
           Combina <strong>cobertura móvil por comunidad</strong>, <strong>penetración fija</strong>, <strong>escala de red</strong> y el <strong>Índice HHI de competencia</strong> (metodología OCDE + DOJ/FTC) para detectar plazas saturadas frente a oportunidades de expansión.
         </p>
         <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;">
+          <button class="btn-sm" id="btn-quick-ine" style="border-color:#dc2626;color:#991b1b;background:#fef2f2;">Mapa Brecha Digital INE (82.7%)</button>
           <button class="btn-sm" id="btn-quick-zerofx">31 munis con 0 líneas fijas</button>
           <button class="btn-sm" id="btn-quick-boom">Top crecimiento RB (3 años)</button>
         </div>
@@ -2267,6 +2311,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
     `;
     document.getElementById('btn-view-isi-map').onclick = () => {
       metricSel.value = 'isi'; state.metric = 'isi'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
+    };
+    document.getElementById('btn-quick-ine').onclick = () => {
+      metricSel.value = 'ine_brecha'; state.metric = 'ine_brecha'; stopPlay(); syncSliderToMetric(); updateMapColors(); renderInspector();
     };
     document.getElementById('btn-quick-zerofx').onclick = () => {
       switchView('table');
@@ -2352,6 +2399,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
       const storyLine3 = m.eco.g3y !== null
         ? `En los últimos 3 años sus antenas crecieron <strong>${m.eco.g3y >= 0 ? '+' : ''}${m.eco.g3y}%</strong> (${m.eco.g3y >= 65 ? 'expansión muy acelerada' : (m.eco.g3y >= 50 ? 'por encima de la mediana nacional de +50%' : 'crecimiento moderado frente a la mediana nacional de +50%')}).`
         : '';
+      const storyLine4 = `Según el XII Censo del INE, de sus <strong>${fmtInt(m.ine.h)} hogares</strong>, <strong>${fmtInt(m.ine.sin)}</strong> no tienen acceso a internet (<strong>${fmtDec(m.ine.br, 1)}%</strong> de brecha digital).`;
+
+      // National rank by INE digital divide (1 = highest divide)
+      const ineRank = [...SIT.munis].sort((a,b) => b.ine.br - a.ine.br).findIndex(x => x.id === m.id) + 1;
 
       tabBody = `
         <!-- Plain-Spanish Narrative Card -->
@@ -2360,7 +2411,28 @@ const SIT = __SIT_DATA_PAYLOAD__;
             <span>En palabras sencillas (toca para escuchar)</span>
             <button class="guide-link-inline" id="btn-muni-open-guide">Guía</button>
           </div>
-          <div>${storyLine1} ${storyLine2} ${storyLine3}</div>
+          <div>${storyLine1} ${storyLine2} ${storyLine3} ${storyLine4}</div>
+        </div>
+
+        <!-- Direct INE XII Censo Digital Divide Card (Click-to-speak) -->
+        <div class="card stat-box" style="background:linear-gradient(135deg,#fff1f2 0%,#ffffff 65%);border-color:#fecdd3;" data-speak-title="Brecha Digital INE · ${esc(m.nom)}" data-speak="Brecha digital en hogares según el doceavo Censo del INE para ${esc(m.nom)}: de un total de ${fmtInt(m.ine.h)} hogares, ${fmtInt(m.ine.con)} cuentan con internet (${fmtDec(m.ine.pc,1)} por ciento) y ${fmtInt(m.ine.sin)} hogares no tienen acceso a internet, lo que representa una brecha digital del ${fmtDec(m.ine.br,2)} por ciento, puesto ${ineRank} de 340 municipios.">
+          <div class="s-lbl" style="color:#9f1239;margin-bottom:4px;">
+            <span>Brecha Digital en Hogares (XII Censo INE)<span class="help-q" title="Porcentaje oficial de hogares sin acceso a internet según el XII Censo de Población y Vivienda del INE (2018). Promedio nacional: 82.74%.">?</span></span>
+            <span>#${ineRank} / 340</span>
+          </div>
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:6px;">
+            <span class="num" style="font-size:23px;font-weight:900;color:#be123c;letter-spacing:-0.02em;">${fmtDec(m.ine.br, 2)}%</span>
+            <span style="font-size:11px;color:var(--ink-2);font-weight:600;">sin internet · <strong>${fmtDec(m.ine.pc, 2)}%</strong> con internet</span>
+          </div>
+          <div style="height:9px;border-radius:99px;overflow:hidden;display:flex;background:#ffe4e6;margin-bottom:7px;">
+            <div style="width:${m.ine.pc}%;background:#0d9488;" title="Con internet: ${fmtDec(m.ine.pc,2)}%"></div>
+            <div style="width:${m.ine.br}%;background:#e11d48;" title="Sin internet: ${fmtDec(m.ine.br,2)}%"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:11px;" class="num">
+            <div><span style="color:var(--muted);display:block;font-size:9.5px;font-weight:700;">TOTAL HOGARES</span><strong>${fmtInt(m.ine.h)}</strong></div>
+            <div><span style="color:#0f766e;display:block;font-size:9.5px;font-weight:700;">CON INTERNET</span><strong>${fmtInt(m.ine.con)}</strong></div>
+            <div><span style="color:#be123c;display:block;font-size:9.5px;font-weight:700;">SIN INTERNET</span><strong>${fmtInt(m.ine.sin)}</strong></div>
+          </div>
         </div>
 
         <!-- Hero Economic Saturation & Recommendation Card -->
@@ -2445,18 +2517,20 @@ const SIT = __SIT_DATA_PAYLOAD__;
           <p style="font-size:11.5px;color:var(--ink-2);line-height:1.45;">
             El <strong>Índice de Saturación de Infraestructura (ISI)</strong> usa normalización por rango percentil <em>P(·)</em> de la metodología <strong>OCDE de Indicadores Compuestos</strong> sobre los 340 municipios:
           </p>
-          <div class="formula-box">ISI = 0.35·P(RB/LP) + 0.30·P(Fijas/LP) + 0.20·P(RB) + 0.15·P(10000 - HHI)<br>HHI = Σ (cuota_operador_i %)²  [DOJ / FTC]</div>
+          <div class="formula-box">ISI = 0.25·P(RB/LP) + 0.25·P(%ConInternet_INE) + 0.20·P(Fijas/Hogares) + 0.15·P(RB) + 0.15·P(10000 - HHI)<br>Brecha Digital INE = (Hogares sin Internet / Total Hogares) × 100<br>HHI = Σ (cuota_operador_i %)²  [DOJ / FTC]</div>
           <div class="op-list num" style="margin-top:8px;">
-            <div class="op-row"><div class="op-top"><span class="op-name">1. Cobertura móvil por comunidad (35%)</span><span class="op-nums">P = ${m.eco.p1}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p1}%;background:#0284c7"></div></div></div>
-            <div class="op-row"><div class="op-top"><span class="op-name">2. Penetración fija por comunidad (30%)</span><span class="op-nums">P = ${m.eco.p2}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p2}%;background:#0d9488"></div></div></div>
-            <div class="op-row"><div class="op-top"><span class="op-name">3. Escala absoluta de radiobases (20%)</span><span class="op-nums">P = ${m.eco.p3}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p3}%;background:#6366f1"></div></div></div>
-            <div class="op-row"><div class="op-top"><span class="op-name">4. Diversidad competitiva HHI fija (15%)</span><span class="op-nums">P = ${m.eco.p4}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p4}%;background:#f59e0b"></div></div></div>
+            <div class="op-row"><div class="op-top"><span class="op-name">1. Cobertura móvil por comunidad (25%)</span><span class="op-nums">P = ${m.eco.p1}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p1}%;background:#0284c7"></div></div></div>
+            <div class="op-row"><div class="op-top"><span class="op-name">2. Conectividad real en hogares INE (25%)</span><span class="op-nums">P = ${m.eco.p2}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p2}%;background:#e11d48"></div></div></div>
+            <div class="op-row"><div class="op-top"><span class="op-name">3. Penetración fija por hogar SIT/INE (20%)</span><span class="op-nums">P = ${m.eco.p3}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p3}%;background:#0d9488"></div></div></div>
+            <div class="op-row"><div class="op-top"><span class="op-name">4. Escala absoluta de radiobases (15%)</span><span class="op-nums">P = ${m.eco.p4}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p4}%;background:#6366f1"></div></div></div>
+            <div class="op-row"><div class="op-top"><span class="op-name">5. Diversidad competitiva HHI fija (15%)</span><span class="op-nums">P = ${m.eco.p5}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p5}%;background:#f59e0b"></div></div></div>
           </div>
           <p class="chart-note"><strong>Umbrales:</strong> ISI ≥ 75 = Alta Saturación · 45–74.9 = Consolidación · &lt; 45 = Baja Saturación / Oportunidad. Complementado con crecimiento real de radiobases a 3 años (2023-S1 → 2026-S1).</p>
         </div>
 
         <div class="audit-box">
-          <div><strong>Trazabilidad Oficial (Archivo SIT Consolidado)</strong></div>
+          <div><strong>Trazabilidad Oficial (SIT + INE XII Censo + KMZ)</strong></div>
+          <div class="audit-row"><strong>Brecha Digital Hogares:</strong> XII Censo Población y Vivienda INE (2018) · ${fmtInt(m.ine.h)} hogares (${fmtDec(m.ine.br,2)}% sin internet)</div>
           <div class="audit-row"><strong>Radiobases (${pRb}):</strong> ${rbRec ? `${esc(SIT.meta.pdfs[rbRec.pdf])} · Pág. ${rbRec.pg ?? '—'} · Fila XLSX ${rbRec.r ?? '—'}` : 'Sin registro en Hoja 09.'}</div>
           <div class="audit-row"><strong>Líneas fijas (${pFx}):</strong> ${fxRec ? `${esc(SIT.meta.pdfs[fxRec.pdf])} · Pág. ${fxRec.pg ?? '—'} · Fila XLSX ${fxRec.r ?? '—'}` : '—'}</div>
           <div class="audit-row"><strong>Geolocalización:</strong> Lugares Poblados 2026.kmz (${fmtInt(m.lp_sum.tot)} sitios) ${m.area !== null ? '· Municipios.kmz ('+m.area+' km²)' : ''}</div>
@@ -2568,6 +2642,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
         <table class="cmp-table">
           <thead><tr><th>Indicador</th><th style="color:#b45309">${esc(m1.nom)}</th><th style="color:#6d28d9">${esc(m2.nom)}</th></tr></thead>
           <tbody class="num">
+            <tr><td><strong>Brecha Digital INE (%)</strong></td><td style="color:#be123c;font-weight:800;">${fmtDec(m1.ine.br,2)}%</td><td style="color:#be123c;font-weight:800;">${fmtDec(m2.ine.br,2)}%</td></tr>
+            <tr><td>Hogares sin Internet (INE)</td><td>${fmtInt(m1.ine.sin)}</td><td>${fmtInt(m2.ine.sin)}</td></tr>
+            <tr><td>Total Hogares (INE)</td><td>${fmtInt(m1.ine.h)}</td><td>${fmtInt(m2.ine.h)}</td></tr>
             <tr><td><strong>Índice ISI (0–100)</strong></td><td><strong>${fmtDec(m1.eco.isi,1)}</strong></td><td><strong>${fmtDec(m2.eco.isi,1)}</strong></td></tr>
             <tr><td>Semáforo</td><td>${r1.shortLabel}</td><td>${r2.shortLabel}</td></tr>
             <tr><td>Radiobases (2026-S1)</td><td>${fmtInt(m1.rb[pRb]?.v)}</td><td>${fmtInt(m2.rb[pRb]?.v)}</td></tr>
@@ -2627,6 +2704,18 @@ const SIT = __SIT_DATA_PAYLOAD__;
       <div class="stat-grid-2">
         <div class="stat-box"><div class="s-lbl"><span>Radiobases</span><span>${pRb}</span></div><div class="s-val num">${fmtInt(rbDisplay)}</div><div class="s-meta">Total oficial departamental</div></div>
         <div class="stat-box"><div class="s-lbl"><span>Líneas Fijas</span><span>${pFx}</span></div><div class="s-val num">${fmtInt(fxRec?.t)}</div><div class="s-meta">Total oficial departamental</div></div>
+      </div>
+
+      <div class="card stat-box" style="background:linear-gradient(135deg,#fff1f2 0%,#ffffff 65%);border-color:#fecdd3;" data-speak-title="Brecha Digital INE · ${esc(dep.nom)}" data-speak="Brecha digital en hogares del departamento de ${esc(dep.nom)} según el XII Censo del INE: de ${fmtInt(dep.ine.h)} hogares totales, ${fmtInt(dep.ine.sin)} no cuentan con internet, lo que equivale al ${fmtDec(dep.ine.br,2)} por ciento de brecha digital.">
+        <div class="s-lbl" style="color:#9f1239;"><span>Brecha Digital Hogares (XII Censo INE)</span><span>${esc(dep.nom)}</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin:3px 0 5px;">
+          <span class="num" style="font-size:21px;font-weight:900;color:#be123c;">${fmtDec(dep.ine.br, 2)}%</span>
+          <span style="font-size:11px;color:var(--ink-2);">${fmtInt(dep.ine.sin)} de ${fmtInt(dep.ine.h)} hogares sin internet</span>
+        </div>
+        <div style="height:8px;border-radius:99px;overflow:hidden;display:flex;background:#ffe4e6;">
+          <div style="width:${dep.ine.pc}%;background:#0d9488;"></div>
+          <div style="width:${dep.ine.br}%;background:#e11d48;"></div>
+        </div>
       </div>
 
       <div class="card">
@@ -2926,6 +3015,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Longitud GPS', m.gps[0], m.gps[2]==='kmz'?'Lugares Poblados 2026.kmz':'Centroide geométrico'],
       ['Área Territorial (km²)', m.area ?? 'No disponible (segregado post-KMZ)', 'Municipios.kmz'],
       ['Lugares Poblados (2026)', m.lp_sum.tot, 'Lugares Poblados 2026.kmz'],
+      ['Total Hogares (XII Censo INE)', m.ine.h, 'Censo Población y Vivienda INE 2018'],
+      ['Hogares con Internet (INE)', m.ine.con, fmtDec(m.ine.pc, 2) + '% de hogares'],
+      ['Hogares sin Internet (INE)', m.ine.sin, fmtDec(m.ine.br, 2) + '% brecha digital'],
+      ['% Brecha Digital Conectividad (INE)', m.ine.br, 'XII Censo INE 2018'],
       ['Radiobases (2026-S1)', m.rb['2026-S1']?.v ?? null, 'Hoja 09 SIT'],
       ['Líneas Fijas Totales (2026-S1)', m.fx['2026-S1']?.t ?? null, 'Hoja 08 SIT'],
       ['Lugares Poblados por Radiobase', m.eco.lp_rb ?? 'N/A', 'KMZ 2026 / SIT 2026-S1'],
@@ -2976,6 +3069,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Período de Corte', period, 'Boletín Oficial SIT'],
       ['Total Radiobases Oficial', dep.rb[period]?.v ?? depMunis.reduce((s,m)=>s+(m.rb[period]?.v||0),0), 'Hoja 09 SIT'],
       ['Total Líneas Fijas Oficial', dep.fx[period]?.t ?? null, 'Hoja 08 SIT'],
+      ['Total Hogares Depto (XII Censo INE)', dep.ine.h, 'INE Censo 2018'],
+      ['Hogares sin Internet Depto (INE)', dep.ine.sin, fmtDec(dep.ine.br, 2) + '% brecha digital'],
       ['Total Lugares Poblados (2026)', depMunis.reduce((s,m)=>s+m.lp_sum.tot,0), 'Lugares Poblados 2026.kmz'],
       ['Promedio Índice ISI Departamental', avgIsi, 'Escala 0-100'],
       ['Municipios Alta Saturación (≥75)', depMunis.filter(m=>m.eco.tier===2).length, 'Polo maduro'],
@@ -2983,11 +3078,11 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Municipios Baja Saturación (<45)', depMunis.filter(m=>m.eco.tier===0).length, 'Oportunidad territorial'],
     ];
 
-    const s2 = [['INE','Municipio','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados','Lug./RB','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP/Telecom']];
+    const s2 = [['INE','Municipio','Total Hogares (INE)','Hogares con Internet','Hogares sin Internet','% Brecha Digital INE','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados','Lug./RB','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP/Telecom']];
     for (const m of [...depMunis].sort((a,b)=>b.eco.isi - a.eco.isi)) {
       const fx = m.fx[period], rec = getEcoRecommendation(m);
       s2.push([
-        String(m.id).padStart(4,'0'), m.nom, m.rb[period]?.v ?? 'Sin dato', fx?.t ?? 'N/A',
+        String(m.id).padStart(4,'0'), m.nom, m.ine.h, m.ine.con, m.ine.sin, m.ine.br, m.rb[period]?.v ?? 'Sin dato', fx?.t ?? 'N/A',
         ...(fx ? fx.v.map(v=>v===null?'N/A':v) : SIT.meta.op_names.map(()=>'')),
         m.lp_sum.tot, m.eco.lp_rb ?? 'N/A', m.eco.g3y ?? 'N/A', m.eco.hhi ?? 'Sin red',
         m.eco.isi, rec.shortLabel, rec.forBiz, rec.forTelco
@@ -3020,6 +3115,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const s1 = [
       hdr,
       ['Código INE', ...munis.map(m => String(m.id).padStart(4,'0'))],
+      ['Total Hogares (XII Censo INE)', ...munis.map(m => m.ine.h)],
+      ['Hogares con Internet (INE)', ...munis.map(m => m.ine.con)],
+      ['Hogares sin Internet (INE)', ...munis.map(m => m.ine.sin)],
+      ['% Brecha Digital Conectividad (INE)', ...munis.map(m => m.ine.br)],
       ['Índice Saturación ISI (0-100)', ...munis.map(m => m.eco.isi)],
       ['Semáforo Económico', ...munis.map(m => getEcoRecommendation(m).badge)],
       ['Radiobases (2026-S1)', ...munis.map(m => m.rb['2026-S1']?.v ?? 0)],
@@ -3058,11 +3157,11 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Mapa Nacional de Guatemala (340 Municipios) · Corte ' + period],
       ['Coloreado según el Índice de Saturación Económica ISI (0–100).']
     ];
-    const s1 = [['INE','Departamento','Municipio','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados 2026','Lug./RB','Área km²','Lat GPS','Lon GPS','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP']];
+    const s1 = [['INE','Departamento','Municipio','Total Hogares (INE)','Hogares con Internet','Hogares sin Internet','% Brecha Digital INE','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados 2026','Lug./RB','Área km²','Lat GPS','Lon GPS','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP']];
     for (const m of list) {
       const fx = m.fx[period], rec = getEcoRecommendation(m);
       s1.push([
-        String(m.id).padStart(4,'0'), m.dep, m.nom, m.rb[period]?.v ?? 'Sin dato', fx?.t ?? 'N/A',
+        String(m.id).padStart(4,'0'), m.dep, m.nom, m.ine.h, m.ine.con, m.ine.sin, m.ine.br, m.rb[period]?.v ?? 'Sin dato', fx?.t ?? 'N/A',
         ...(fx ? fx.v.map(v=>v===null?'N/A':v) : SIT.meta.op_names.map(()=>'')),
         m.lp_sum.tot, m.eco.lp_rb ?? 'N/A', m.area ?? '', m.gps[1], m.gps[0],
         m.eco.g3y ?? 'N/A', m.eco.hhi ?? 'Sin red', m.eco.isi, rec.shortLabel, rec.forBiz, rec.forTelco
@@ -3070,7 +3169,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
     }
     const s2 = [
       ['Componente Metodológico', 'Fórmula / Definición', 'Justificación y Uso Económico'],
-      ['Índice de Saturación de Infraestructura (ISI)', 'ISI = 0.35·P(RB/LP) + 0.30·P(Fijas/LP) + 0.20·P(RB) + 0.15·P(10000 - HHI)', 'Normalización percentil (metodología OCDE) sobre 340 municipios sin sesgo por valores extremos. Escala intuitiva 0 a 100.'],
+      ['Brecha Digital en Hogares (INE)', '(Hogares sin Internet / Total Hogares) × 100', 'Fuente oficial: XII Censo de Población y Vivienda INE (2018). Mide el porcentaje directo de hogares sin acceso a internet.'],
+      ['Índice de Saturación de Infraestructura (ISI)', 'ISI = 0.25·P(RB/LP) + 0.25·P(%ConInternet_INE) + 0.20·P(Fijas/Hogares) + 0.15·P(RB) + 0.15·P(10000 - HHI)', 'Normalización percentil (metodología OCDE) sobre 340 municipios integrando SIT 2026 + KMZ 2026 + XII Censo INE. Escala 0 a 100.'],
       ['Índice Herfindahl-Hirschman (HHI)', 'HHI = Σ (cuota_operador_i %)² en líneas fijas 2026-S1', 'Estándar internacional DOJ/FTC para medir concentración y competencia real (>1,800 altamente concentrado; 10,000 monopolio).'],
       ['Crecimiento 3 años Radiobases', '((RB_2026-S1 - RB_2023-S1) / RB_2023-S1) × 100', 'Indica si los operadores están invirtiendo activamente en el municipio o si el mercado está estancado.'],
       ['Umbrales del Semáforo', '≥ 75 Alta Saturación | 45–74.9 Consolidación | < 45 Baja Saturación', 'Traduce los indicadores técnicos a decisiones claras para empresas (conectividad) e inversionistas ISP/telecom (oportunidad).'],
@@ -3207,9 +3307,11 @@ const SIT = __SIT_DATA_PAYLOAD__;
     );
     const valOf = (m, col) => {
       switch(col) {
-        case 'nom': return m.nom; case 'dep': return m.dep; case 'isi': case 'tier': return m.eco.isi;
+        case 'nom': return m.nom; case 'dep': return m.dep;
+        case 'ine_br': return m.ine.br; case 'ine_sin': return m.ine.sin;
+        case 'isi': case 'tier': return m.eco.isi;
         case 'rb': return m.rb[p]?.v ?? -1; case 'fx': return m.fx[p]?.t ?? -1;
-        case 'lp': return m.lp_sum.tot; case 'g3y': return m.eco.g3y ?? -999; case 'hhi': return m.eco.hhi ?? -1;
+        case 'g3y': return m.eco.g3y ?? -999;
         default: return m.eco.isi;
       }
     };
@@ -3228,13 +3330,13 @@ const SIT = __SIT_DATA_PAYLOAD__;
         <td style="color:var(--muted);font-weight:700;">${idx+1}</td>
         <td style="font-weight:700;color:var(--ink);">${esc(m.nom)}</td>
         <td style="color:var(--ink-2);">${esc(m.dep)}</td>
+        <td style="font-weight:800;color:#be123c;">${fmtDec(m.ine.br,1)}%</td>
+        <td>${fmtInt(m.ine.sin)}</td>
         <td style="font-weight:800;">${fmtDec(m.eco.isi,1)}</td>
         <td><span class="pill ${rec.badgeCls}" style="font-size:10px;padding:2px 7px;">${rec.shortLabel}</span></td>
         <td style="font-weight:700;color:var(--accent-dark);">${fmtInt(m.rb[p]?.v)}</td>
         <td style="font-weight:700;color:var(--teal);">${fmtInt(m.fx[p]?.t)}</td>
-        <td>${fmtInt(m.lp_sum.tot)}</td>
         <td>${m.eco.g3y !== null ? (m.eco.g3y>=0?'+':'')+m.eco.g3y+'%' : '—'}</td>
-        <td>${m.eco.hhi !== null ? fmtInt(Math.round(m.eco.hhi)) : 'Sin red'}</td>
         <td><button class="jump-btn" data-jump="${m.id}">Ver mapa →</button></td>
       </tr>`;
     }).join('');
@@ -3250,7 +3352,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       { lbl: `Radiobases (${latest.p})`, val: fmtInt(latest.rb), sub: `Suma exacta 340 municipios` },
       { lbl: `Banda Ancha Fija (${latest.p})`, val: fmtInt(latest.baf), sub: `Tráfico BAF: ${fmtDec(latest.tbaf_eb, 2)} exabytes` },
       { lbl: `Smartphones / ETM (${latest.p})`, val: fmtInt(latest.etm), sub: `Tráfico BAM: ${fmtDec(latest.tbam_nac_eb, 2)} EB` },
-      { lbl: `Lugares Poblados (KMZ)`, val: fmtInt(SIT.meta.total_lp), sub: `Sitios GPS en 340 municipios` },
+      { lbl: `Brecha Digital Hogares (INE)`, val: fmtDec(SIT.meta.ine_totals.br, 2) + '%', sub: `${fmtInt(SIT.meta.ine_totals.sin)} de ${fmtInt(SIT.meta.ine_totals.h)} hogares sin internet` },
     ];
     document.getElementById('nat-kpis').innerHTML = kpiData.map(k => `<div class="kpi-mini" style="padding:10px 12px;"><span class="lbl">${esc(k.lbl)}</span><span class="val num" style="font-size:19px;">${k.val}</span><span class="sub">${esc(k.sub)}</span></div>`).join('');
 
@@ -3476,7 +3578,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const lp = m.lp_sum.tot;
     const s = [
       `Resumen oficial de ${m.nom}, departamento de ${m.dep}.`,
-      `En el primer semestre de 2026 registra ${fmtInt(rb)} antenas celulares o radiobases para dar cobertura a ${fmtInt(lp)} comunidades registradas en el mapa oficial.`,
+      `Según el doceavo Censo del INE, de ${fmtInt(m.ine.h)} hogares, ${fmtInt(m.ine.sin)} no tienen internet, lo que representa una brecha digital del ${fmtDec(m.ine.br, 1)} por ciento.`,
+      `En el primer semestre de 2026 registra ${fmtInt(rb)} antenas celulares o radiobases para cubrir ${fmtInt(lp)} comunidades registradas.`,
       fx === 0
         ? `En telefonía fija reporta cero líneas activas, por lo que depende principalmente de señal móvil o enlaces inalámbricos.`
         : `En telefonía fija suma ${fmtInt(fx)} líneas oficiales entre los operadores activos.`,
@@ -3548,8 +3651,14 @@ const SIT = __SIT_DATA_PAYLOAD__;
         `El departamento de ${d.nom} suma ${fmtInt(fx26)} líneas fijas oficiales en el primer semestre de 2026 entre sus ${dm.length} municipios.`
       ];
     }
+    if (focusMetric === 'ine_brecha' || focusMetric === 'ine_sin') {
+      return [
+        `Brecha digital en hogares del departamento de ${d.nom} según el doceavo Censo del INE: de ${fmtInt(d.ine.h)} hogares totales, ${fmtInt(d.ine.sin)} no tienen acceso a internet, lo que representa una brecha digital del ${fmtDec(d.ine.br, 2)} por ciento.`
+      ];
+    }
     return [
       `Datos oficiales del departamento de ${d.nom}, integrado por ${dm.length} municipios y ${fmtInt(lpTot)} comunidades registradas.`,
+      `Según el doceavo Censo del INE, su brecha digital en hogares es del ${fmtDec(d.ine.br, 1)} por ciento (${fmtInt(d.ine.sin)} de ${fmtInt(d.ine.h)} hogares sin internet).`,
       `En el primer semestre de 2026 suma ${fmtInt(rb26)} antenas celulares o radiobases y ${fmtInt(fx26)} líneas fijas oficiales.`,
       `Su Índice de Saturación Económica promedio es de ${fmtDec(avgIsi, 1)} sobre 100: tiene ${t0} municipios con baja saturación y alta oportunidad, ${t1} en consolidación y ${t2} de alta saturación.`,
       `El municipio con más radiobases en ${d.nom} es ${topRb.nom} con ${fmtInt(topRb.rb['2026-S1']?.v)}, y el de mayor oportunidad por baja saturación es ${topOport.nom} con índice ${fmtDec(topOport.eco.isi, 1)}.`
@@ -3659,7 +3768,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const wantsExcel = t.includes('excel') || t.includes('descarg') || t.includes('export') || t.includes('bajar tabla');
     const wantsDepto = t.includes('departamento') || t.includes('depto');
     let reqMetric = null;
-    if (t.includes('semaforo') || t.includes('saturad') || t.includes('saturacion') || t.includes('isi') || t.includes('invertir') || t.includes('recomendacion')) reqMetric = 'isi';
+    if (t.includes('brecha digital') || (t.includes('brecha') && (t.includes('hogar') || t.includes('ine') || t.includes('internet') || t.includes('censo'))) || t.includes('sin internet')) reqMetric = 'ine_brecha';
+    else if (t.includes('hogares sin internet') || t.includes('cuantos hogares')) reqMetric = 'ine_sin';
+    else if (t.includes('semaforo') || t.includes('saturad') || t.includes('saturacion') || t.includes('isi') || t.includes('invertir') || t.includes('recomendacion')) reqMetric = 'isi';
     else if (t.includes('radiobase') || t.includes('antena') || t.includes('torre')) reqMetric = 'rb';
     else if (t.includes('linea') && t.includes('fija')) reqMetric = 'fx_total';
     else if (t.includes('brecha')) reqMetric = 'lp_per_rb';
@@ -3869,7 +3980,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
   // Optional URL hash helper for direct municipality deep-linking (e.g. #muni=1601 or #metric=isi)
   initMap();
   const hash = location.hash || '';
-  if (hash.includes('metric=isi')) { state.metric = 'isi'; metricSel.value = 'isi'; }
+  if (hash.includes('metric=ine_brecha')) { state.metric = 'ine_brecha'; metricSel.value = 'ine_brecha'; }
+  else if (hash.includes('metric=isi')) { state.metric = 'isi'; metricSel.value = 'isi'; }
   syncSliderToMetric();
   updateMapColors();
   renderInspector();

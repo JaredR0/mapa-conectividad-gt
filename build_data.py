@@ -2,6 +2,7 @@ import json, zipfile, xml.etree.ElementTree as ET, re, unicodedata, math, os
 from collections import defaultdict, Counter
 
 XLSX_PATH = "/Users/jaredruiz/INNOVACON/Copia de 04NOV2026 - SIT Consolidado Historico Boletines 2014-2026 v2.xlsx"
+INE_PATH = "/Users/jaredruiz/INNOVACON/BrechaDigitalConectividadDigitalEnHogaresMunicipio.xlsx"
 KMZ_MUNIS = "/Users/jaredruiz/INNOVACON/Copia de Municipios.kmz"
 KMZ_LP = "/Users/jaredruiz/INNOVACON/Copia de Lugares Poblados 2026.kmz"
 MUNIS_TOPO = "/Users/jaredruiz/.gemini/antigravity/brain/ab0ec326-df20-4463-a2f7-8b69783b005d/scratch/munis.json"
@@ -591,10 +592,37 @@ def main():
     control_num = [{'tab': r[0], 'regs': int(float(r[1])), 'nper': int(float(r[2])), 'from': r[3], 'to': r[4]} for r in sheets['13 Control numérico'][3:]]
     conciliacion = [{'p': r[0], 'chk': r[1], 'c1': int(float(r[2])), 'c2': int(float(r[3])), 'tot': int(float(r[4])), 'dif': int(float(r[5]))} for r in sheets['14 Conciliación'][3:]]
 
+    # === Load Official INE XII Censo Digital Divide in Households (340/340 exact INE codes) ===
+    ine_sheets = load_all_sheets(INE_PATH)
+    ine_rows = list(ine_sheets.values())[0]
+    ine_by_gid = {}
+    ine_by_did = defaultdict(lambda: {'h': 0, 'con': 0, 'sin': 0})
+    tot_h_nac = tot_con_nac = tot_sin_nac = 0
+    for r in ine_rows:
+        if len(r) < 7 or r[1] is None or not str(r[1]).strip().isdigit():
+            continue
+        cid = int(str(r[1]).strip())
+        h = int(float(r[3]))
+        con = int(float(r[4]))
+        sin = int(float(r[5]))
+        assert h == con + sin, f"INE arithmetic mismatch for {cid}: {h} != {con}+{sin}"
+        brecha = round(float(r[6]) * 100.0, 2)
+        pct_con = round(100.0 - brecha, 2)
+        ine_by_gid[cid] = {'h': h, 'con': con, 'sin': sin, 'br': brecha, 'pc': pct_con}
+        did = muni_geoms[cid]['ine_depto']
+        ine_by_did[did]['h'] += h
+        ine_by_did[did]['con'] += con
+        ine_by_did[did]['sin'] += sin
+        tot_h_nac += h; tot_con_nac += con; tot_sin_nac += sin
+    assert len(ine_by_gid) == 340, f"Expected 340 INE rows, got {len(ine_by_gid)}"
+    for did, drec in ine_by_did.items():
+        drec['br'] = round((drec['sin'] / drec['h']) * 100.0, 2) if drec['h'] > 0 else 0.0
+        drec['pc'] = round(100.0 - drec['br'], 2)
+    print(f"Loaded INE XII Censo Digital Divide for 340/340 munis! National: {tot_h_nac:,} hogares, {tot_sin_nac:,} sin internet ({tot_sin_nac/tot_h_nac*100:.2f}% brecha).")
+
     # === Compute Economic Saturation & Opportunity Index (ISI 0-100) + HHI + 3y Growth ===
     # Methodology: OECD Composite Indicators (percentile-rank normalization across 340 munis)
-    # + DOJ/FTC Herfindahl-Hirschman Index (HHI) on official 2026-S1 fixed operators
-    # + 3-year Radiobase Infrastructure Growth (2023-S1 -> 2026-S1)
+    # combining SIT 2026-S1 + KMZ 2026 + INE XII Censo Hogares + DOJ/FTC HHI
     def pct_ranks(values):
         n = len(values)
         indexed = sorted(enumerate(values), key=lambda x: x[1])
@@ -612,34 +640,36 @@ def main():
         return ranks
 
     sorted_gids = sorted(muni_geoms.keys())
-    raw_p1, raw_p2, raw_p3, raw_p4 = [], [], [], []
+    raw_p1, raw_p2, raw_p3, raw_p4, raw_p5 = [], [], [], [], []
     eco_raw = {}
     for gid in sorted_gids:
         rb26 = muni_rb[gid]['2026-S1']['v']
         rb23 = muni_rb[gid]['2023-S1']['v']
         fx26 = muni_fixed[gid]['2026-S1']['t']
         lp_tot = max(1, lp_summary[gid]['tot'])
+        ine_rec = ine_by_gid[gid]
         vals = [v for v in muni_fixed[gid]['2026-S1']['v'] if v is not None]
         n_ops = sum(1 for v in vals if v > 0)
         hhi = round(sum(((v / fx26) * 100.0) ** 2 for v in vals if v > 0), 1) if fx26 > 0 else None
         comp = (10000.0 - hhi) if hhi is not None else -1.0
         g3y = round(((rb26 - rb23) / rb23) * 100.0, 1) if rb23 > 0 else None
-        raw_p1.append(rb26 / lp_tot)
-        raw_p2.append(fx26 / lp_tot)
-        raw_p3.append(rb26)
-        raw_p4.append(comp)
+        raw_p1.append(rb26 / lp_tot)                    # 25% Cobertura móvil por comunidad
+        raw_p2.append(ine_rec['pc'])                    # 25% Conectividad real en hogares (% con internet INE)
+        raw_p3.append(fx26 / max(1, ine_rec['h']))      # 20% Penetración fija por hogar (SIT / INE)
+        raw_p4.append(rb26)                             # 15% Escala absoluta de radiobases
+        raw_p5.append(comp)                             # 15% Diversidad competitiva fija (10000 - HHI)
         eco_raw[gid] = {'hhi': hhi, 'n_ops': n_ops, 'g3y': g3y, 'rb_lp': round(rb26 / lp_tot, 3), 'lp_rb': round(lp_tot / rb26, 2) if rb26 > 0 else None}
 
-    r_p1, r_p2, r_p3, r_p4 = pct_ranks(raw_p1), pct_ranks(raw_p2), pct_ranks(raw_p3), pct_ranks(raw_p4)
+    r_p1, r_p2, r_p3, r_p4, r_p5 = pct_ranks(raw_p1), pct_ranks(raw_p2), pct_ranks(raw_p3), pct_ranks(raw_p4), pct_ranks(raw_p5)
     eco_by_gid = {}
     for idx, gid in enumerate(sorted_gids):
-        isi = round(0.35 * r_p1[idx] + 0.30 * r_p2[idx] + 0.20 * r_p3[idx] + 0.15 * r_p4[idx], 1)
-        tier = 2 if isi >= 75 else (1 if isi >= 45 else 0)  # 2=Alta Saturación, 1=Consolidación, 0=Baja Saturación
+        isi = round(0.25 * r_p1[idx] + 0.25 * r_p2[idx] + 0.20 * r_p3[idx] + 0.15 * r_p4[idx] + 0.15 * r_p5[idx], 1)
+        tier = 2 if isi >= 75 else (1 if isi >= 45 else 0)
         er = eco_raw[gid]
         eco_by_gid[gid] = {
             'isi': isi, 'tier': tier,
             'p1': round(r_p1[idx], 1), 'p2': round(r_p2[idx], 1),
-            'p3': round(r_p3[idx], 1), 'p4': round(r_p4[idx], 1),
+            'p3': round(r_p3[idx], 1), 'p4': round(r_p4[idx], 1), 'p5': round(r_p5[idx], 1),
             'hhi': er['hhi'], 'n_ops': er['n_ops'], 'g3y': er['g3y'],
             'rb_lp': er['rb_lp'], 'lp_rb': er['lp_rb']
         }
@@ -655,6 +685,7 @@ def main():
             'gps': [cab['lon'], cab['lat'], cab['src']],
             'area': kmz_area.get(gid),
             'lp_sum': lp_summary[gid],
+            'ine': ine_by_gid[gid],
             'eco': eco_by_gid[gid],
             'fx': muni_fixed[gid], 'rb': muni_rb[gid],
         })
@@ -664,12 +695,15 @@ def main():
         g = depto_geoms[did]
         deptos_list.append({
             'id': did, 'nom': g['name'], 'd': g['d'], 'bb': g['bb'], 'c': g['c'],
+            'ine': dict(ine_by_did[did]),
             'fx': depto_fixed[did], 'rb': depto_rb[did], 'sp': special_localities.get(did, []),
         })
 
     payload = {
         'meta': {
             'source_file': 'Copia de 04NOV2026 - SIT Consolidado Historico Boletines 2014-2026 v2.xlsx',
+            'ine_file': 'BrechaDigitalConectividadDigitalEnHogaresMunicipio.xlsx',
+            'ine_totals': {'h': tot_h_nac, 'con': tot_con_nac, 'sin': tot_sin_nac, 'br': round(tot_sin_nac/tot_h_nac*100.0, 2)},
             'kmz_munis': 'Copia de Municipios.kmz',
             'kmz_lp': 'Copia de Lugares Poblados 2026.kmz',
             'total_lp': total_lp,
