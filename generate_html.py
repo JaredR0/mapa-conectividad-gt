@@ -13,8 +13,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#0f172a" />
-<meta name="description" content="Mapa interactivo oficial de los 340 municipios de Guatemala con datos SIT (2014–2026), 27,352 lugares poblados GPS e Índice de Saturación Económica (ISI)." />
-<title>Observatorio Geoespacial SIT Guatemala · Mapa Interactivo y Decisión Económica</title>
+<meta name="description" content="Mapa interactivo oficial de los 340 municipios de Guatemala con datos de telecomunicaciones (2014–2026), 27,352 lugares poblados GPS e Índice de Saturación Económica (ISI)." />
+<title>Observatorio Geoespacial de Telecomunicaciones · Guatemala</title>
 <style>
   :root {
     --bg: #f1f5f9;
@@ -703,9 +703,9 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <!-- HEADER -->
   <header class="topbar">
     <div class="brand">
-      <div class="brand-mark">SIT</div>
+      <div class="brand-mark">GT</div>
       <div class="brand-text">
-        <h1>Observatorio Geoespacial SIT Guatemala</h1>
+        <h1>Observatorio Geoespacial · Guatemala</h1>
         <p>340 municipios · 27,352 lugares poblados (KMZ 2026) · Boletines 2014–2026</p>
       </div>
     </div>
@@ -721,7 +721,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
       </button>
       <button class="nav-tab" data-view="national">
         <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        <span>Nacional<span class="tab-long"> (SIT)</span></span>
+        <span>Nacional<span class="tab-long"> (País)</span></span>
       </button>
       <button class="nav-tab guide-tab" data-view="guide" title="Manual paso a paso y significado sencillo de cada dato">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -789,7 +789,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
         <div class="tb-group">
           <select id="metric-select" class="ctrl-select" title="Seleccionar indicador del mapa">
-            <option value="bd_score">Puntaje de Brecha Digital (0–100 · Uso INE + Antenas SIT)</option>
+            <option value="bd_score">Puntaje de Brecha Digital (0–100 · Uso INE + Antenas)</option>
             <option value="ine_brecha">Brecha Digital en Hogares (% sin internet · INE 2018–2023)</option>
             <option value="ine_sin">Hogares sin Internet (cantidad · INE 2018–2023)</option>
             <option value="edu_ana">Educación: % Población Analfabeta (INE · ITU)</option>
@@ -940,7 +940,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   <section id="view-national" class="view-container">
     <div class="nat-banner">
       <div>
-        <strong>Alcance metodológico oficial (SIT + KMZ 2026):</strong> Telefonía móvil, banda ancha (BAF/BAM), smartphones (ETM), tráfico y tarifas se publican únicamente a <strong>nivel nacional</strong> (Hojas 01–07 y 10–12). A nivel <strong>municipal y departamental</strong> se integran <strong>Líneas fijas por operador (Hoja 08)</strong>, <strong>Radiobases (Hoja 09)</strong> y los <strong>27,352 sitios GPS</strong> de <code>Lugares Poblados 2026.kmz</code>.
+        <strong>Alcance metodológico (Boletines 2014–2026 + KMZ 2026):</strong> Telefonía móvil, banda ancha (BAF/BAM), smartphones (ETM), tráfico y tarifas se publican únicamente a <strong>nivel nacional</strong> (Hojas 01–07 y 10–12). A nivel <strong>municipal y departamental</strong> se integran <strong>Líneas fijas por operador (Hoja 08)</strong>, <strong>Radiobases (Hoja 09)</strong> y los <strong>27,352 sitios GPS</strong> de <code>Lugares Poblados 2026.kmz</code>.
       </div>
       <span class="pill ok">100% Verificado · 0 datos inventados</span>
     </div>
@@ -1062,7 +1062,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         <div>
           <h2>Cómo leer e interpretar este mapa</h2>
           <p>
-            Los datos oficiales de telecomunicaciones de Guatemala suelen venir en tablas gigantescas de Excel con miles de filas. Esta herramienta transforma esos archivos oficiales de la <strong>SIT (2014–2026)</strong> y el mapa oficial de <strong>27,352 comunidades (KMZ 2026)</strong> en un mapa interactivo y accesible —con lectura en voz alta, subtítulos visuales en vivo y dictado por voz— para que cualquier persona pueda entenderlo en segundos.
+            Los datos oficiales de telecomunicaciones de Guatemala suelen venir en tablas gigantescas de Excel con miles de filas. Esta herramienta transforma esos boletines estadísticos del sector <strong>(2014–2026)</strong> y el mapa oficial de <strong>27,352 comunidades (KMZ 2026)</strong> en un mapa interactivo y accesible —con lectura en voz alta, subtítulos visuales en vivo y dictado por voz— para que cualquier persona pueda entenderlo en segundos.
           </p>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -1166,12 +1166,12 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         <div class="guide-sec-title">2. ¿Qué significa cada palabra y cada número?</div>
         <div class="guide-sec-sub">Explicación en español cotidiano de todos los indicadores oficiales que verás en pantalla:</div>
         <div class="glossary-grid">
-          <div class="gloss-card" style="grid-column: 1 / -1; background:linear-gradient(135deg,#fff1f2 0%,#ffffff 75%); border-color:#fecdd3;" data-speak-title="Cómo se calcula el puntaje de brecha digital" data-speak="Cómo se calcula el puntaje de brecha digital. Va de cero a cien y se arma con dos datos de cada municipio, en cinco pasos. Uno: uso de internet, porcentaje de personas de siete años o más que usó internet según el Censo 2018 del INE. Dos: antenas por habitante, antenas de telefonía móvil por cada diez mil habitantes según la SIT, primer semestre de 2026. Tres: posición en cada dato, se ordenan los 340 municipios de menor a mayor; el que menos usa internet queda en la posición uno, y el que menos antenas tiene por habitante, también. Cuatro: promedio de las dos posiciones. Cinco: puntaje, el municipio con el promedio más bajo recibe cien y el del más alto queda cerca de cero.">
+          <div class="gloss-card" style="grid-column: 1 / -1; background:linear-gradient(135deg,#fff1f2 0%,#ffffff 75%); border-color:#fecdd3;" data-speak-title="Cómo se calcula el puntaje de brecha digital" data-speak="Cómo se calcula el puntaje de brecha digital. Va de cero a cien y se arma con dos datos de cada municipio, en cinco pasos. Uno: uso de internet, porcentaje de personas de siete años o más que usó internet según el Censo 2018 del INE. Dos: antenas por habitante, antenas de telefonía móvil por cada diez mil habitantes según los boletines estadísticos del primer semestre de 2026. Tres: posición en cada dato, se ordenan los 340 municipios de menor a mayor; el que menos usa internet queda en la posición uno, y el que menos antenas tiene por habitante, también. Cuatro: promedio de las dos posiciones. Cinco: puntaje, el municipio con el promedio más bajo recibe cien y el del más alto queda cerca de cero.">
             <div class="gc-term" style="color:#9f1239;">Cómo se calcula el puntaje de brecha digital <span class="pill danger">Escala 0 a 100 · 5 pasos</span></div>
             <div class="gc-plain">Va de <strong>0 a 100</strong> y se arma con dos datos de cada municipio, en cinco pasos:</div>
             <ol style="margin:6px 0 6px 18px;font-size:12.5px;color:var(--ink-2);line-height:1.55;display:flex;flex-direction:column;gap:4px;">
               <li><strong>Uso de internet:</strong> porcentaje de personas de 7 años o más que usó internet (INE, Censo 2018).</li>
-              <li><strong>Antenas por habitante:</strong> antenas de telefonía móvil por cada 10,000 habitantes (SIT, primer semestre de 2026).</li>
+              <li><strong>Antenas por habitante:</strong> antenas de telefonía móvil por cada 10,000 habitantes (Boletines estadísticos, primer semestre de 2026).</li>
               <li><strong>Posición en cada dato:</strong> se ordenan los 340 municipios de menor a mayor. El que menos usa internet queda en la posición 1; el que menos antenas tiene por habitante, también.</li>
               <li><strong>Promedio de las dos posiciones.</strong></li>
               <li><strong>Puntaje:</strong> el municipio con el promedio más bajo recibe <strong>100</strong> y el del más alto queda cerca de <strong>0</strong>.</li>
@@ -1245,7 +1245,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 
           <div class="gloss-card">
             <div class="gc-term">Panorama Nacional <span class="pill ine">Solo país</span></div>
-            <div class="gc-plain">Datos como usuarios celulares (21.5 millones), banda ancha fija (BAF), smartphones (ETM) y tarifas solo los publica la SIT a nivel de todo el país.</div>
+            <div class="gc-plain">Datos como usuarios celulares (21.5 millones), banda ancha fija (BAF), smartphones (ETM) y tarifas solo se publican a nivel de todo el país.</div>
             <div class="gc-ex"><strong>Transparencia:</strong> Por eso los mostramos aparte en <em>Panorama Nacional</em> y nunca inventamos estimaciones por municipio.</div>
           </div>
         </div>
@@ -1269,7 +1269,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
           <div class="step-card">
             <span class="step-badge">3</span>
             <h4>Ver la historia en movimiento</h4>
-            <p>Mueve la barra de años o presiona el botón azul <strong>▶</strong> para ver cómo cambiaron las antenas semestre por semestre desde 2016 hasta 2026. Si un municipio aparece rayado en gris, significa que la SIT no publicó ese dato ese año.</p>
+            <p>Mueve la barra de años o presiona el botón azul <strong>▶</strong> para ver cómo cambiaron las antenas semestre por semestre desde 2016 hasta 2026. Si un municipio aparece rayado en gris, significa que no se publicó ese dato en ese período.</p>
           </div>
           <div class="step-card">
             <span class="step-badge">4</span>
@@ -1296,7 +1296,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
     </div>
     <div class="modal-body">
       <p style="font-size:12px;color:var(--muted);line-height:1.45;">
-        Genera un libro real de Microsoft Excel (<code>.xlsx</code>) multi-hoja, con encabezados formateados, filtros automáticos, índice económico ISI y trazabilidad oficial SIT. Elige la categoría:
+        Genera un libro real de Microsoft Excel (<code>.xlsx</code>) multi-hoja, con encabezados formateados, filtros automáticos, índice económico ISI y trazabilidad de fuentes. Elige la categoría:
       </p>
 
       <div class="exp-modes">
@@ -1340,7 +1340,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 </div>
 
 <script>
-const SIT = __SIT_DATA_PAYLOAD__;
+const DATA = __DATA_PAYLOAD__;
 </script>
 <script>
 (function() {
@@ -1503,7 +1503,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     <xdr:ext cx="${cx}" cy="${cy}"/>
     <xdr:pic>
       <xdr:nvPicPr>
-        <xdr:cNvPr id="${imgIdx + 1}" name="MapaSIT_${imgIdx}"/>
+        <xdr:cNvPr id="${imgIdx + 1}" name="MapaGT_${imgIdx}"/>
         <xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr>
       </xdr:nvPicPr>
       <xdr:blipFill>
@@ -1681,15 +1681,15 @@ const SIT = __SIT_DATA_PAYLOAD__;
     }
   }
 
-  const PRJ = SIT.meta.proj;
+  const PRJ = DATA.meta.proj;
   function projLonLat(lon, lat) { return [PRJ.pad + (lon - PRJ.min_lon) * PRJ.cos_lat * PRJ.scale, PRJ.pad + (PRJ.max_lat - lat) * PRJ.scale]; }
   function unprojXY(x, y) { return [PRJ.min_lon + (x - PRJ.pad) / (PRJ.cos_lat * PRJ.scale), PRJ.max_lat - (y - PRJ.pad) / PRJ.scale]; }
 
-  const muniById = new Map(SIT.munis.map(m => [m.id, m]));
-  const deptoById = new Map(SIT.deptos.map(d => [d.id, d]));
+  const muniById = new Map(DATA.munis.map(m => [m.id, m]));
+  const deptoById = new Map(DATA.deptos.map(d => [d.id, d]));
   const munisByDepto = new Map();
-  SIT.deptos.forEach(d => munisByDepto.set(d.id, []));
-  SIT.munis.forEach(m => munisByDepto.get(m.did).push(m));
+  DATA.deptos.forEach(d => munisByDepto.set(d.id, []));
+  DATA.munis.forEach(m => munisByDepto.get(m.did).push(m));
 
   const PALETTE_RB  = ['#f0f9ff','#bae6fd','#7dd3fc','#38bdf8','#0284c7','#0369a1','#0c4a6e'];
   const PALETTE_FX  = ['#f0fdfa','#99f6e4','#5eead4','#2dd4bf','#0d9488','#0f766e','#115e59'];
@@ -1716,7 +1716,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
   const state = {
     view: 'map',
     metric: 'rb',
-    periodIdx: SIT.meta.periods_rb.length - 1,
+    periodIdx: DATA.meta.periods_rb.length - 1,
     deptoFilter: null,
     selectedMuniId: null,
     selectedDeptoId: null,
@@ -1729,7 +1729,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     lpGroupFilter: -1,
     lpSearchQ: '',
     playTimer: null,
-    vb: { x: 0, y: 0, w: SIT.meta.svg_w, h: SIT.meta.svg_h },
+    vb: { x: 0, y: 0, w: DATA.meta.svg_w, h: DATA.meta.svg_h },
     tblSort: { col: 'isi', dir: -1 },
     tblPeriod: '2026-S1',
     // Excel modal state
@@ -1741,12 +1741,12 @@ const SIT = __SIT_DATA_PAYLOAD__;
     return (metric === 'ine_brecha' || metric === 'ine_sin') && period === '2023';
   }
   function getPeriodsForMetric(metric) {
-    if (metric === 'rb' || metric === 'lp_per_rb') return SIT.meta.periods_rb;
-    if (metric === 'ine_brecha' || metric === 'ine_sin') return SIT.meta.periods_ine || ['2018', '2023'];
+    if (metric === 'rb' || metric === 'lp_per_rb') return DATA.meta.periods_rb;
+    if (metric === 'ine_brecha' || metric === 'ine_sin') return DATA.meta.periods_ine || ['2018', '2023'];
     if (metric === 'bd_score') return ['2018–2026'];
     if (metric === 'edu_ana' || metric === 'eco_ocu') return ['Censo INE'];
     if (metric === 'isi' || metric === 'lp_tot') return ['2026-S1'];
-    return SIT.meta.periods_fx;
+    return DATA.meta.periods_fx;
   }
   function getActivePeriod() {
     const ps = getPeriodsForMetric(state.metric);
@@ -1796,7 +1796,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     if (metric === 'lp_tot') return 'Lugares Poblados (KMZ 2026)';
     if (metric === 'lp_per_rb') return 'Lugares Poblados / Radiobase';
     if (metric === 'op_lib') return 'Líneas fijas · Liberty / Columbus';
-    return 'Líneas fijas · ' + SIT.meta.op_names[parseInt(metric.split('_')[1], 10)];
+    return 'Líneas fijas · ' + DATA.meta.op_names[parseInt(metric.split('_')[1], 10)];
   }
   function fmtMetricVal(v, metric) {
     if (v === null || v === undefined) return 'Sin dato';
@@ -1900,9 +1900,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
     }
     const vals = [];
     if (metric === 'ine_sin' && period === '2023') {
-      for (const d of SIT.deptos) if (d.ine23 && d.ine23.sin > 0) vals.push(d.ine23.sin);
+      for (const d of DATA.deptos) if (d.ine23 && d.ine23.sin > 0) vals.push(d.ine23.sin);
     } else {
-      for (const m of SIT.munis) {
+      for (const m of DATA.munis) {
         const v = getMetricValue(m, metric, period);
         if (v !== null && v > 0) vals.push(v);
       }
@@ -1949,7 +1949,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     svg.setAttribute('viewBox', `${state.vb.x} ${state.vb.y} ${state.vb.w} ${state.vb.h}`);
     const fragM = document.createDocumentFragment();
     const fragCabs = document.createDocumentFragment();
-    for (const m of SIT.munis) {
+    for (const m of DATA.munis) {
       const p = document.createElementNS(NS_SVG, 'path');
       p.setAttribute('d', m.d); p.setAttribute('class', 'muni-path'); p.dataset.id = m.id;
       p.addEventListener('mouseenter', (e) => showTooltipMuni(e, m));
@@ -1971,7 +1971,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     layerMunis.appendChild(fragM); layerCabs.appendChild(fragCabs);
 
     const fragL = document.createDocumentFragment();
-    for (const lk of SIT.lakes) {
+    for (const lk of DATA.lakes) {
       const p = document.createElementNS(NS_SVG, 'path');
       p.setAttribute('d', lk.d); p.setAttribute('class', 'lake-path'); fragL.appendChild(p);
     }
@@ -1979,7 +1979,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
     const fragD = document.createDocumentFragment();
     const fragT = document.createDocumentFragment();
-    for (const d of SIT.deptos) {
+    for (const d of DATA.deptos) {
       const p = document.createElementNS(NS_SVG, 'path');
       p.setAttribute('d', d.d); p.setAttribute('class', 'depto-outline'); deptoPathEls.set(d.id, p); fragD.appendChild(p);
 
@@ -1993,7 +1993,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     }
     layerDeptos.appendChild(fragD); layerLabels.appendChild(fragT);
 
-    const sortedDeptos = [...SIT.deptos].sort((a,b) => a.nom.localeCompare(b.nom, 'es'));
+    const sortedDeptos = [...DATA.deptos].sort((a,b) => a.nom.localeCompare(b.nom, 'es'));
     for (const selId of ['depto-filter', 'tbl-depto']) {
       const sel = document.getElementById(selId);
       for (const d of sortedDeptos) { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.nom; sel.appendChild(opt); }
@@ -2003,8 +2003,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
   function renderSelectedMuniLP(highlightPt=null) {
     layerLp.innerHTML = '';
     if (!state.selectedMuniId) return;
-    const pts = SIT.lp[String(state.selectedMuniId)] || [];
-    const zoomFactor = SIT.meta.svg_w / state.vb.w;
+    const pts = DATA.lp[String(state.selectedMuniId)] || [];
+    const zoomFactor = DATA.meta.svg_w / state.vb.w;
     const baseR = Math.max(0.7, Math.min(2.6, 2.3 / Math.pow(zoomFactor, 0.55)));
     const frag = document.createDocumentFragment();
     const q = norm(state.lpSearchQ);
@@ -2012,7 +2012,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     for (const pt of pts) {
       const [lon, lat, name, catIdx, grpIdx] = pt;
       if (state.lpGroupFilter !== -1 && grpIdx !== state.lpGroupFilter) continue;
-      if (q && !norm(name + ' ' + SIT.meta.lp_cats[catIdx]).includes(q)) continue;
+      if (q && !norm(name + ' ' + DATA.meta.lp_cats[catIdx]).includes(q)) continue;
       const [x, y] = projLonLat(lon, lat);
       const circle = document.createElementNS(NS_SVG, 'circle');
       circle.setAttribute('cx', x.toFixed(1)); circle.setAttribute('cy', y.toFixed(1));
@@ -2040,7 +2040,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
   function applyViewBox() {
     svg.setAttribute('viewBox', `${state.vb.x.toFixed(1)} ${state.vb.y.toFixed(1)} ${state.vb.w.toFixed(1)} ${state.vb.h.toFixed(1)}`);
-    const zoomFactor = SIT.meta.svg_w / state.vb.w;
+    const zoomFactor = DATA.meta.svg_w / state.vb.w;
     layerLabels.style.fontSize = Math.max(4.5, 8.0 / Math.pow(zoomFactor, 0.55)) + 'px';
   }
   function animateViewBox(targetVb, duration=280, onDone=null) {
@@ -2060,17 +2060,17 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const [x1, y1, x2, y2] = bb;
     let bw = Math.max(36, x2 - x1), bh = Math.max(36, y2 - y1);
     let tw = bw * (1 + 2 * padFactor), th = bh * (1 + 2 * padFactor);
-    const aspect = SIT.meta.svg_w / SIT.meta.svg_h;
+    const aspect = DATA.meta.svg_w / DATA.meta.svg_h;
     if (tw / th > aspect) th = tw / aspect; else tw = th * aspect;
     animateViewBox({ x: (x1+x2)/2 - tw/2, y: (y1+y2)/2 - th/2, w: tw, h: th }, 280, () => { if (state.selectedMuniId) renderSelectedMuniLP(); });
   }
-  function resetZoom() { animateViewBox({ x: 0, y: 0, w: SIT.meta.svg_w, h: SIT.meta.svg_h }, 280, () => { if (state.selectedMuniId) renderSelectedMuniLP(); }); }
+  function resetZoom() { animateViewBox({ x: 0, y: 0, w: DATA.meta.svg_w, h: DATA.meta.svg_h }, 280, () => { if (state.selectedMuniId) renderSelectedMuniLP(); }); }
   function zoomAt(factor, clientX, clientY) {
     const rect = svg.getBoundingClientRect();
     const rx = clientX !== undefined ? (clientX - rect.left) / rect.width : 0.5;
     const ry = clientY !== undefined ? (clientY - rect.top) / rect.height : 0.5;
-    const nw = Math.max(35, Math.min(SIT.meta.svg_w * 1.15, state.vb.w * factor));
-    const nh = nw * (SIT.meta.svg_h / SIT.meta.svg_w);
+    const nw = Math.max(35, Math.min(DATA.meta.svg_w * 1.15, state.vb.w * factor));
+    const nh = nw * (DATA.meta.svg_h / DATA.meta.svg_w);
     state.vb = { x: state.vb.x + (state.vb.w - nw) * rx, y: state.vb.y + (state.vb.h - nh) * ry, w: nw, h: nh };
     applyViewBox(); if (state.selectedMuniId) renderSelectedMuniLP();
   }
@@ -2194,7 +2194,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const [lon, lat, name, catIdx, grpIdx] = pt;
     tooltip.innerHTML = `
       <div class="tt-title" style="color:${LP_GRP_COLORS[grpIdx]}">${esc(name)}</div>
-      <div class="tt-dept">Categoría: <strong>${esc(SIT.meta.lp_cats[catIdx])}</strong></div>
+      <div class="tt-dept">Categoría: <strong>${esc(DATA.meta.lp_cats[catIdx])}</strong></div>
       <div style="font-size:11px;color:#cbd5e1;margin-top:4px;font-variant-numeric:tabular-nums;">GPS: ${lat.toFixed(4)}° N, ${Math.abs(lon).toFixed(4)}° W</div>
     `;
     tooltip.style.display = 'block'; moveTooltip(e);
@@ -2214,7 +2214,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const ine23 = isIne23Mode(state.metric, p);
     svg.classList.toggle('depto-level-mode', ine23);
     const scored = [];
-    for (const m of SIT.munis) {
+    for (const m of DATA.munis) {
       const v = getMetricValue(m, state.metric, p);
       if (v !== null) scored.push({ m, v });
     }
@@ -2222,7 +2222,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     activeRankMap = new Map();
     scored.forEach((item, i) => activeRankMap.set(item.m.id, i + 1));
 
-    for (const m of SIT.munis) {
+    for (const m of DATA.munis) {
       const el = muniPathEls.get(m.id);
       el.setAttribute('fill', scale.colorOf(getMetricValue(m, state.metric, p)));
       el.classList.toggle('dimmed', state.deptoFilter !== null && m.did !== state.deptoFilter);
@@ -2231,7 +2231,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     }
     if (state.compareMuniId && muniPathEls.has(state.compareMuniId)) layerMunis.appendChild(muniPathEls.get(state.compareMuniId));
     if (state.selectedMuniId && muniPathEls.has(state.selectedMuniId)) layerMunis.appendChild(muniPathEls.get(state.selectedMuniId));
-    for (const d of SIT.deptos) deptoPathEls.get(d.id).classList.toggle('focused', state.deptoFilter === d.id || state.selectedDeptoId === d.id);
+    for (const d of DATA.deptos) deptoPathEls.get(d.id).classList.toggle('focused', state.deptoFilter === d.id || state.selectedDeptoId === d.id);
 
     // Bottom Legend + Granularity indicator for INE 2018 vs 2023
     document.getElementById('legend-label').textContent = getMetricTitle(state.metric);
@@ -2252,7 +2252,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     } else if (state.metric === 'bd_score') {
       granPill.style.display = 'inline-flex';
       granPill.classList.remove('muni-lvl');
-      granPill.textContent = 'Puntaje 0–100 · Uso Internet 2018 (INE) + Antenas/10k hab 2026 (SIT)';
+      granPill.textContent = 'Puntaje 0–100 · Uso Internet 2018 (INE) + Antenas/10k hab 2026';
     } else if (state.metric === 'edu_ana' || state.metric === 'eco_ocu') {
       granPill.style.display = 'inline-flex';
       granPill.classList.add('muni-lvl');
@@ -2262,8 +2262,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
     }
 
     // KPI Strip
-    const scopeMunis = state.deptoFilter !== null ? munisByDepto.get(state.deptoFilter) : SIT.munis;
-    const scopeDeptos = state.deptoFilter !== null ? [deptoById.get(state.deptoFilter)] : SIT.deptos;
+    const scopeMunis = state.deptoFilter !== null ? munisByDepto.get(state.deptoFilter) : DATA.munis;
+    const scopeDeptos = state.deptoFilter !== null ? [deptoById.get(state.deptoFilter)] : DATA.deptos;
     const scopeScored = state.deptoFilter !== null ? scored.filter(x => x.m.did === state.deptoFilter) : scored;
     const scopeLabel = state.deptoFilter !== null ? deptoById.get(state.deptoFilter).nom : 'Guatemala (340 munis)';
     const topItem = scopeScored[0];
@@ -2322,7 +2322,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       k1Sub = `${fmtInt(lpSum)} lug. ÷ ${fmtInt(rbSum)} RB`;
     } else {
       let sumScope = scopeScored.reduce((s, x) => s + x.v, 0), extraSp = 0;
-      if (state.metric === 'rb') for (const d of SIT.deptos) if (state.deptoFilter === null || d.id === state.deptoFilter) for (const sp of d.sp) if (sp.p === p) extraSp += sp.v;
+      if (state.metric === 'rb') for (const d of DATA.deptos) if (state.deptoFilter === null || d.id === state.deptoFilter) for (const sp of d.sp) if (sp.p === p) extraSp += sp.v;
       k1Val = fmtInt(sumScope + extraSp);
       k1Sub = extraSp > 0 ? `${scopeLabel} (+${extraSp} hist.)` : scopeLabel;
     }
@@ -2423,8 +2423,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
   const searchClear = document.getElementById('search-clear');
   const searchResults = document.getElementById('search-results');
   const searchIndex = [
-    ...SIT.deptos.map(d => ({ type: 'depto', id: d.id, label: d.nom, sub: `${munisByDepto.get(d.id).length} municipios`, key: norm(d.nom) })),
-    ...SIT.munis.map(m => ({ type: 'muni', id: m.id, label: m.nom, sub: `${m.dep} · ISI ${fmtDec(m.eco.isi,1)}`, key: norm(m.nom + ' ' + m.dep + ' ' + m.id) }))
+    ...DATA.deptos.map(d => ({ type: 'depto', id: d.id, label: d.nom, sub: `${munisByDepto.get(d.id).length} municipios`, key: norm(d.nom) })),
+    ...DATA.munis.map(m => ({ type: 'muni', id: m.id, label: m.nom, sub: `${m.dep} · ISI ${fmtDec(m.eco.isi,1)}`, key: norm(m.nom + ' ' + m.dep + ' ' + m.id) }))
   ];
 
   function renderSearch(q) {
@@ -2540,10 +2540,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
     if (state.selectedDeptoId) { renderDeptoInspector(container, deptoById.get(state.selectedDeptoId)); enhanceSpeakBubbles(container); return; }
 
     const ine23 = isIne23Mode(state.metric, activePeriod);
-    const scored = SIT.munis.map(m => ({ m, v: getMetricValue(m, state.metric, activePeriod) }))
+    const scored = DATA.munis.map(m => ({ m, v: getMetricValue(m, state.metric, activePeriod) }))
       .filter(x => x.v !== null).sort((a,b) => b.v - a.v || a.m.nom.localeCompare(b.m.nom, 'es'));
     const top12 = scored.slice(0, 12);
-    const top12Deptos = ine23 ? [...SIT.deptos].sort((a,b) => (state.metric === 'ine_sin' ? b.ine23.sin - a.ine23.sin : b.ine23.br - a.ine23.br)).slice(0, 12) : [];
+    const top12Deptos = ine23 ? [...DATA.deptos].sort((a,b) => (state.metric === 'ine_sin' ? b.ine23.sin - a.ine23.sin : b.ine23.br - a.ine23.br)).slice(0, 12) : [];
 
     container.innerHTML = `
       <div class="ins-header">
@@ -2555,7 +2555,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
         <p style="font-size:12px;color:var(--muted);line-height:1.45;">
           ${ine23
             ? `Mostrando <strong>ENCOVI 2023 del INE</strong> (publicada a nivel de los <strong>22 departamentos</strong>). Mueve la línea de tiempo a <strong>2018</strong> para ver el desglose de los 340 municipios del XII Censo, o haz clic en un municipio/departamento para comparar <strong>2018 vs 2023</strong>.`
-            : `Haz clic en un municipio del mapa para ver su <strong>Semáforo de Saturación Económica (ISI 0–100)</strong>, recomendación práctica de inversión, operadores oficiales SIT y lugares poblados GPS.`
+            : `Haz clic en un municipio del mapa para ver su <strong>Semáforo de Saturación Económica (ISI 0–100)</strong>, recomendación práctica de inversión, operadores de red fija y lugares poblados GPS.`
           }
         </p>
       </div>
@@ -2616,7 +2616,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       <div class="card">
         <div class="card-hd"><h3>Departamentos (22)</h3><span>Clic para enfocar</span></div>
         <div style="display:flex;flex-wrap:wrap;gap:5px;">
-          ${[...SIT.deptos].sort((a,b)=>a.nom.localeCompare(b.nom,'es')).map(d => `<button class="btn-sm" data-depto="${d.id}">${esc(d.nom)}</button>`).join('')}
+          ${[...DATA.deptos].sort((a,b)=>a.nom.localeCompare(b.nom,'es')).map(d => `<button class="btn-sm" data-depto="${d.id}">${esc(d.nom)}</button>`).join('')}
         </div>
       </div>
     `;
@@ -2666,8 +2666,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
   function renderMuniInspector(container, m) {
     const dep = deptoById.get(m.did);
     const activePeriod = getActivePeriod();
-    const pRb = SIT.meta.periods_rb.includes(activePeriod) ? activePeriod : '2026-S1';
-    const pFx = SIT.meta.periods_fx.includes(activePeriod) ? activePeriod : '2026-S1';
+    const pRb = DATA.meta.periods_rb.includes(activePeriod) ? activePeriod : '2026-S1';
+    const pFx = DATA.meta.periods_fx.includes(activePeriod) ? activePeriod : '2026-S1';
     const rbRec = m.rb[pRb] || null, fxRec = m.fx[pFx] || null;
     const rec = getEcoRecommendation(m);
     const gmapsUrl = `https://www.google.com/maps?q=${m.gps[1]},${m.gps[0]}`;
@@ -2675,23 +2675,23 @@ const SIT = __SIT_DATA_PAYLOAD__;
     // Build body based on active municipal sub-tab
     let tabBody = '';
     if (state.muniSubTab === 'datos') {
-      const rbIdx = SIT.meta.periods_rb.indexOf(pRb), prevRb = rbIdx > 0 ? m.rb[SIT.meta.periods_rb[rbIdx - 1]] : null;
-      const fxIdx = SIT.meta.periods_fx.indexOf(pFx), prevFx = fxIdx > 0 ? m.fx[SIT.meta.periods_fx[fxIdx - 1]] : null;
+      const rbIdx = DATA.meta.periods_rb.indexOf(pRb), prevRb = rbIdx > 0 ? m.rb[DATA.meta.periods_rb[rbIdx - 1]] : null;
+      const fxIdx = DATA.meta.periods_fx.indexOf(pFx), prevFx = fxIdx > 0 ? m.fx[DATA.meta.periods_fx[fxIdx - 1]] : null;
       const deltaHtml = (cur, prev, prevPer) => {
         if (cur === null || cur === undefined || !prev) return '';
         const diff = cur - prev;
         if (diff === 0) return `<span class="delta-flat">(= vs ${prevPer})</span>`;
         return `<span class="${diff>0?'delta-up':'delta-down'}">${diff>0?'+':''}${fmtInt(diff)} vs ${prevPer}</span>`;
       };
-      const rbScored = SIT.munis.map(x => [x.id, x.rb[pRb]?.v ?? -1]).filter(x => x[1] >= 0).sort((a,b) => b[1] - a[1]);
+      const rbScored = DATA.munis.map(x => [x.id, x.rb[pRb]?.v ?? -1]).filter(x => x[1] >= 0).sort((a,b) => b[1] - a[1]);
       const rbRank = rbRec ? rbScored.findIndex(x => x[0] === m.id) + 1 : null;
-      const fxScored = SIT.munis.map(x => [x.id, x.fx[pFx]?.t ?? -1]).filter(x => x[1] >= 0).sort((a,b) => b[1] - a[1]);
+      const fxScored = DATA.munis.map(x => [x.id, x.fx[pFx]?.t ?? -1]).filter(x => x[1] >= 0).sort((a,b) => b[1] - a[1]);
       const fxRank = fxRec ? fxScored.findIndex(x => x[0] === m.id) + 1 : null;
 
       let opsHtml = '';
       if (fxRec) {
         const activeOps = [], zeroOps = [];
-        SIT.meta.op_names.forEach((opName, idx) => {
+        DATA.meta.op_names.forEach((opName, idx) => {
           const val = fxRec.v[idx];
           if (val !== null && val > 0) activeOps.push({ name: opName, val, color: OP_COLORS[idx] });
           else if (val === 0) zeroOps.push(opName);
@@ -2706,14 +2706,14 @@ const SIT = __SIT_DATA_PAYLOAD__;
         if (zeroOps.length) opsHtml += `<div class="op-zero-note"><strong>Con 0 líneas:</strong> ${esc(zeroOps.join(', '))}.</div>`;
       }
 
-      const rbSeries = SIT.meta.periods_rb.map(per => m.rb[per] ? m.rb[per].v : null);
-      const fxSeries = SIT.meta.periods_fx.map(per => m.fx[per] ? m.fx[per].t : null);
+      const rbSeries = DATA.meta.periods_rb.map(per => m.rb[per] ? m.rb[per].v : null);
+      const fxSeries = DATA.meta.periods_fx.map(per => m.fx[per] ? m.fx[per].t : null);
 
       // Plain-Spanish narrative strictly derived from this municipality's official numbers
       const topOp = (() => {
         if (!fxRec || fxRec.t === 0) return null;
         let best = null;
-        SIT.meta.op_names.forEach((n, i) => { const v = fxRec.v[i]; if (v > 0 && (!best || v > best.v)) best = { n, v, pct: (v / fxRec.t * 100).toFixed(1) }; });
+        DATA.meta.op_names.forEach((n, i) => { const v = fxRec.v[i]; if (v > 0 && (!best || v > best.v)) best = { n, v, pct: (v / fxRec.t * 100).toFixed(1) }; });
         return best;
       })();
       const rbCount26 = m.rb['2026-S1']?.v ?? 0;
@@ -2733,7 +2733,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       const storyLine4 = `Según el XII Censo del INE (2018), de sus <strong>${fmtInt(m.ine.h)} hogares</strong>, <strong>${fmtInt(m.ine.sin)}</strong> no tienen acceso a internet (<strong>${fmtDec(m.ine.br, 1)}%</strong> de brecha digital). A nivel departamental (${esc(m.dep)}), la <strong>ENCOVI 2023</strong> reporta <strong>${fmtDec(d23.br, 1)}%</strong> de hogares sin internet (<strong>${dbrTxt}</strong> frente a 2018).`;
 
       // National rank by INE digital divide (1 = highest divide)
-      const ineRank = [...SIT.munis].sort((a,b) => b.ine.br - a.ine.br).findIndex(x => x.id === m.id) + 1;
+      const ineRank = [...DATA.munis].sort((a,b) => b.ine.br - a.ine.br).findIndex(x => x.id === m.id) + 1;
 
       tabBody = `
         <!-- Plain-Spanish Narrative Card -->
@@ -2786,7 +2786,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
           </div>
           <div style="border-top:1px dashed #fecdd3;padding-top:7px;margin-top:6px;font-size:11px;">
             <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px;">
-              <span style="font-weight:800;color:#9f1239;font-size:10.5px;">Puntaje de Brecha Digital (0 a 100)<span class="help-q" title="Va de 0 a 100 en 5 pasos: 1) Uso de internet 7+ (INE Censo 2018); 2) Antenas por 10,000 hab (SIT 2026-S1); 3) Posición de 1 a 340 de menor a mayor en cada dato; 4) Promedio de ambas posiciones; 5) El promedio más bajo recibe 100 (atender primero) y el más alto cerca de 0.">?</span></span>
+              <span style="font-weight:800;color:#9f1239;font-size:10.5px;">Puntaje de Brecha Digital (0 a 100)<span class="help-q" title="Va de 0 a 100 en 5 pasos: 1) Uso de internet 7+ (INE Censo 2018); 2) Antenas por 10,000 hab (Boletines 2026-S1); 3) Posición de 1 a 340 de menor a mayor en cada dato; 4) Promedio de ambas posiciones; 5) El promedio más bajo recibe 100 (atender primero) y el más alto cerca de 0.">?</span></span>
               <span class="num" style="font-weight:900;color:#be123c;font-size:13px;">${fmtDec(m.bd.sc, 2)} / 100 <small style="color:var(--muted);font-weight:700;">(#${m.bd.rk}/340)</small></span>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10px;" class="num">
@@ -2849,14 +2849,14 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
         <div class="stat-grid-2">
           <div class="stat-box" data-speak-title="Radiobases · ${esc(m.nom)}" data-speak="${esc(m.nom)} registra ${rbRec ? fmtInt(rbRec.v) + ' antenas celulares o radiobases en ' + pRb + ', ocupando el puesto número ' + rbRank + ' de ' + rbScored.length + ' municipios del país.' : 'sin dato publicado de radiobases en ' + pRb}">
-            <div class="s-lbl"><span>Radiobases<span class="help-q" title="Torres o antenas celulares activas reportadas oficialmente ante la SIT.">?</span></span><span>${pRb}</span></div>
+            <div class="s-lbl"><span>Radiobases<span class="help-q" title="Torres o antenas celulares activas reportadas en los boletines estadísticos del sector.">?</span></span><span>${pRb}</span></div>
             <div class="s-val num">${rbRec ? fmtInt(rbRec.v) : 'Sin dato'}</div>
-            <div class="s-meta">${rbRec ? `Ranking <strong>#${rbRank}</strong> / ${rbScored.length}` : 'No publicado'}${prevRb ? `<br>${deltaHtml(rbRec?.v, prevRb.v, SIT.meta.periods_rb[rbIdx-1])}` : ''}</div>
+            <div class="s-meta">${rbRec ? `Ranking <strong>#${rbRank}</strong> / ${rbScored.length}` : 'No publicado'}${prevRb ? `<br>${deltaHtml(rbRec?.v, prevRb.v, DATA.meta.periods_rb[rbIdx-1])}` : ''}</div>
           </div>
           <div class="stat-box" data-speak-title="Líneas Fijas · ${esc(m.nom)}" data-speak="${esc(m.nom)} suma ${fxRec ? fmtInt(fxRec.t) + ' líneas fijas oficiales en ' + pFx + ', ocupando el puesto número ' + fxRank + ' de los 340 municipios.' : 'sin dato de líneas fijas.'}">
             <div class="s-lbl"><span>Líneas Fijas<span class="help-q" title="Conexiones telefónicas fijas por cable o fibra reportadas por operador.">?</span></span><span>${pFx}</span></div>
             <div class="s-val num">${fxRec ? fmtInt(fxRec.t) : 'Sin dato'}</div>
-            <div class="s-meta">${fxRec ? `Ranking <strong>#${fxRank}</strong> / 340` : '—'}${prevFx ? `<br>${deltaHtml(fxRec?.t, prevFx.t, SIT.meta.periods_fx[fxIdx-1])}` : ''}</div>
+            <div class="s-meta">${fxRec ? `Ranking <strong>#${fxRank}</strong> / 340` : '—'}${prevFx ? `<br>${deltaHtml(fxRec?.t, prevFx.t, DATA.meta.periods_fx[fxIdx-1])}` : ''}</div>
           </div>
         </div>
 
@@ -2867,12 +2867,12 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
         <div class="card">
           <div class="card-hd"><h3>Evolución Radiobases (2016-S2 – 2026-S1)</h3><span>Hoja 09</span></div>
-          ${buildLineChartSVG(SIT.meta.periods_rb, rbSeries, '#0284c7', pRb, 'radiobases')}
+          ${buildLineChartSVG(DATA.meta.periods_rb, rbSeries, '#0284c7', pRb, 'radiobases')}
         </div>
 
         <div class="card">
           <div class="card-hd"><h3>Evolución Líneas Fijas (2022-S2 – 2026-S1)</h3><span>Hoja 08</span></div>
-          ${buildLineChartSVG(SIT.meta.periods_fx, fxSeries, '#0d9488', pFx, 'líneas fijas')}
+          ${buildLineChartSVG(DATA.meta.periods_fx, fxSeries, '#0d9488', pFx, 'líneas fijas')}
         </div>
       `;
     } else if (state.muniSubTab === 'lp') {
@@ -2891,10 +2891,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
         </div>
       `;
     } else {
-      const altNames = [...new Set(SIT.meta.periods_rb.map(per => m.rb[per]?.on).filter(Boolean))];
+      const altNames = [...new Set(DATA.meta.periods_rb.map(per => m.rb[per]?.on).filter(Boolean))];
       let specialNote = '';
       if ((m.id === 1801 || m.id === 701) && dep.sp.length > 0) {
-        specialNote = `<strong>Nota histórica (Hoja 09):</strong> En 2018–2022-S1 la SIT publicó filas separadas para <em>${esc(dep.sp[0].name)}</em> (${dep.sp.map(x=>`${x.p}: ${x.v}`).join(' · ')}). No se suman artificialmente a ${esc(m.nom)}.`;
+        specialNote = `<strong>Nota histórica (Hoja 09):</strong> En 2018–2022-S1 los boletines publicaron filas separadas para <em>${esc(dep.sp[0].name)}</em> (${dep.sp.map(x=>`${x.p}: ${x.v}`).join(' · ')}). No se suman artificialmente a ${esc(m.nom)}.`;
       }
       tabBody = `
         <div class="card" style="background:linear-gradient(135deg,#fff1f2 0%,#ffffff 75%);border-color:#fecdd3;">
@@ -2904,7 +2904,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
           </p>
           <ol style="margin:0 0 7px 16px;font-size:11px;color:var(--ink-2);line-height:1.48;display:flex;flex-direction:column;gap:3px;">
             <li><strong>Uso de internet:</strong> porcentaje de personas de 7 años o más que usó internet (INE, Censo 2018). <em>(${esc(m.nom)}: <strong>${fmtDec(m.bd.uso,1)}%</strong>)</em></li>
-            <li><strong>Antenas por habitante:</strong> antenas de telefonía móvil por cada 10,000 habitantes (SIT, primer semestre de 2026). <em>(${esc(m.nom)}: <strong>${fmtDec(m.bd.ant,2)}</strong>)</em></li>
+            <li><strong>Antenas por habitante:</strong> antenas de telefonía móvil por cada 10,000 habitantes (Boletines estadísticos, primer semestre de 2026). <em>(${esc(m.nom)}: <strong>${fmtDec(m.bd.ant,2)}</strong>)</em></li>
             <li><strong>Posición en cada dato:</strong> se ordenan los 340 municipios de menor a mayor. El que menos usa internet queda en la posición 1; el que menos antenas tiene por habitante, también. <em>(${esc(m.nom)}: pos <strong>${m.bd.ru}</strong> en uso · pos <strong>${m.bd.ra}</strong> en antenas)</em></li>
             <li><strong>Promedio de las dos posiciones:</strong> <em>(<strong>${m.bd.ru}</strong> + <strong>${m.bd.ra}</strong>) ÷ 2 = <strong>${fmtDec(m.bd.avg, 2)}</strong></em></li>
             <li><strong>Puntaje:</strong> el municipio con el promedio más bajo recibe <strong>100</strong> y el del más alto queda cerca de <strong>0</strong>. <em>(${esc(m.nom)}: <strong>${fmtDec(m.bd.sc, 2)} / 100</strong> · prioridad <strong>#${m.bd.rk}</strong> de 340)</em></li>
@@ -2920,7 +2920,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
           <div class="op-list num" style="margin-top:8px;">
             <div class="op-row"><div class="op-top"><span class="op-name">1. Cobertura móvil por comunidad (25%)</span><span class="op-nums">P = ${m.eco.p1}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p1}%;background:#0284c7"></div></div></div>
             <div class="op-row"><div class="op-top"><span class="op-name">2. Conectividad real en hogares INE (25%)</span><span class="op-nums">P = ${m.eco.p2}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p2}%;background:#e11d48"></div></div></div>
-            <div class="op-row"><div class="op-top"><span class="op-name">3. Penetración fija por hogar SIT/INE (20%)</span><span class="op-nums">P = ${m.eco.p3}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p3}%;background:#0d9488"></div></div></div>
+            <div class="op-row"><div class="op-top"><span class="op-name">3. Penetración fija por hogar (20%)</span><span class="op-nums">P = ${m.eco.p3}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p3}%;background:#0d9488"></div></div></div>
             <div class="op-row"><div class="op-top"><span class="op-name">4. Escala absoluta de radiobases (15%)</span><span class="op-nums">P = ${m.eco.p4}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p4}%;background:#6366f1"></div></div></div>
             <div class="op-row"><div class="op-top"><span class="op-name">5. Diversidad competitiva HHI fija (15%)</span><span class="op-nums">P = ${m.eco.p5}</span></div><div class="bar-track"><div class="bar-fill" style="width:${m.eco.p5}%;background:#f59e0b"></div></div></div>
           </div>
@@ -2928,13 +2928,13 @@ const SIT = __SIT_DATA_PAYLOAD__;
         </div>
 
         <div class="audit-box">
-          <div><strong>Trazabilidad Oficial (SIT + INE 2018/2023 + SEGEPLAN + KMZ)</strong></div>
+          <div><strong>Trazabilidad de Fuentes (Boletines 2014–2026 + INE 2018/2023 + SEGEPLAN + KMZ)</strong></div>
           <div class="audit-row"><strong>Brecha Digital 2018 (Municipal):</strong> XII Censo INE (2018) · ${fmtInt(m.ine.h)} hogares (${fmtDec(m.ine.br,2)}% sin internet)</div>
           <div class="audit-row"><strong>Actualización 2023 (Departamental):</strong> ENCOVI 2023 INE (trazabilidad_brecha_digital.xlsx) · ${esc(m.dep)}: ${fmtDec(deptoById.get(m.did).ine23.br,2)}% hogares sin internet · Uso 7+ años: ${fmtDec(deptoById.get(m.did).ine23.uso,1)}%</div>
           <div class="audit-row"><strong>Educación y Economía (INE · ITU):</strong> DatosEstadisticos_tecnologia_educacion_economico.xlsx · Pob. ${fmtInt(m.soc.pob)} · Analf. ${fmtDec(m.soc.pct_ana,2)}% · Ocup. ${fmtDec(m.soc.pct_ocu,2)}%</div>
           <div class="audit-row"><strong>Pobreza Municipal 2023:</strong> SEGEPLAN / Banco Mundial (Mapas de pobreza 2023, cuadro 7.2) · ${m.ine.pobr23 !== null ? fmtDec(m.ine.pobr23,1)+'%' : 'Sin dato'}</div>
-          <div class="audit-row"><strong>Radiobases (${pRb}):</strong> ${rbRec ? `${esc(SIT.meta.pdfs[rbRec.pdf])} · Pág. ${rbRec.pg ?? '—'} · Fila XLSX ${rbRec.r ?? '—'}` : 'Sin registro en Hoja 09.'}</div>
-          <div class="audit-row"><strong>Líneas fijas (${pFx}):</strong> ${fxRec ? `${esc(SIT.meta.pdfs[fxRec.pdf])} · Pág. ${fxRec.pg ?? '—'} · Fila XLSX ${fxRec.r ?? '—'}` : '—'}</div>
+          <div class="audit-row"><strong>Radiobases (${pRb}):</strong> ${rbRec ? `${esc(DATA.meta.pdfs[rbRec.pdf])} · Pág. ${rbRec.pg ?? '—'} · Fila XLSX ${rbRec.r ?? '—'}` : 'Sin registro en Hoja 09.'}</div>
+          <div class="audit-row"><strong>Líneas fijas (${pFx}):</strong> ${fxRec ? `${esc(DATA.meta.pdfs[fxRec.pdf])} · Pág. ${fxRec.pg ?? '—'} · Fila XLSX ${fxRec.r ?? '—'}` : '—'}</div>
           <div class="audit-row"><strong>Geolocalización:</strong> Lugares Poblados 2026.kmz (${fmtInt(m.lp_sum.tot)} sitios) ${m.area !== null ? '· Municipios.kmz ('+m.area+' km²)' : ''}</div>
           ${altNames.length ? `<div class="audit-row"><strong>Variantes históricas PDF (2016–2022):</strong> ${esc(altNames.join(', '))}</div>` : ''}
           ${specialNote ? `<div class="audit-note">${specialNote}</div>` : ''}
@@ -2959,7 +2959,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       </div>
 
       <div class="sub-tabs">
-        <button class="sub-tab ${state.muniSubTab==='datos'?'active':''}" data-sub="datos">Decisión &amp; SIT</button>
+        <button class="sub-tab ${state.muniSubTab==='datos'?'active':''}" data-sub="datos">Decisión &amp; Datos</button>
         <button class="sub-tab ${state.muniSubTab==='lp'?'active':''}" data-sub="lp">Lugares GPS (${fmtInt(m.lp_sum.tot)})</button>
         <button class="sub-tab ${state.muniSubTab==='audit'?'active':''}" data-sub="audit">Fórmula &amp; Auditoría</button>
       </div>
@@ -2994,12 +2994,12 @@ const SIT = __SIT_DATA_PAYLOAD__;
           btn.onclick = () => { state.lpGroupFilter = parseInt(btn.dataset.grp, 10); populateLPList(); renderSelectedMuniLP(); };
         });
         const listEl = document.getElementById('lp-list');
-        const pts = SIT.lp[String(m.id)] || [];
+        const pts = DATA.lp[String(m.id)] || [];
         const q = norm(state.lpSearchQ);
-        const filtered = pts.filter(pt => (state.lpGroupFilter === -1 || pt[4] === state.lpGroupFilter) && (!q || norm(pt[2] + ' ' + SIT.meta.lp_cats[pt[3]]).includes(q)));
+        const filtered = pts.filter(pt => (state.lpGroupFilter === -1 || pt[4] === state.lpGroupFilter) && (!q || norm(pt[2] + ' ' + DATA.meta.lp_cats[pt[3]]).includes(q)));
         const shown = filtered.slice(0, 140);
         listEl.innerHTML = shown.length
-          ? shown.map((pt, i) => `<div class="lp-row" data-idx="${i}"><span class="lp-row-name"><span class="lp-dot-swatch" style="background:${LP_GRP_COLORS[pt[4]]};margin-right:6px;"></span>${esc(pt[2])}</span><span class="lp-row-meta num">${esc(SIT.meta.lp_cats[pt[3]])}</span></div>`).join('') + (filtered.length > 140 ? `<div style="padding:6px;font-size:10.5px;color:var(--muted);text-align:center;">Mostrando 140 de ${filtered.length} (usa el buscador)</div>` : '')
+          ? shown.map((pt, i) => `<div class="lp-row" data-idx="${i}"><span class="lp-row-name"><span class="lp-dot-swatch" style="background:${LP_GRP_COLORS[pt[4]]};margin-right:6px;"></span>${esc(pt[2])}</span><span class="lp-row-meta num">${esc(DATA.meta.lp_cats[pt[3]])}</span></div>`).join('') + (filtered.length > 140 ? `<div style="padding:6px;font-size:10.5px;color:var(--muted);text-align:center;">Mostrando 140 de ${filtered.length} (usa el buscador)</div>` : '')
           : `<div style="padding:10px;font-size:11.5px;color:var(--muted);">Sin lugares poblados con este filtro.</div>`;
         listEl.querySelectorAll('.lp-row').forEach(row => { row.onclick = () => renderSelectedMuniLP(shown[parseInt(row.dataset.idx, 10)]); });
       }
@@ -3061,11 +3061,11 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
       <div class="card">
         <div class="card-hd"><h3>Radiobases (2016-S2 – 2026-S1)</h3><span>Ámbar vs Morado</span></div>
-        ${buildLineChartSVG(SIT.meta.periods_rb, SIT.meta.periods_rb.map(p=>m1.rb[p]?.v??null), '#d97706', pRb, 'radiobases', SIT.meta.periods_rb.map(p=>m2.rb[p]?.v??null), '#7c3aed')}
+        ${buildLineChartSVG(DATA.meta.periods_rb, DATA.meta.periods_rb.map(p=>m1.rb[p]?.v??null), '#d97706', pRb, 'radiobases', DATA.meta.periods_rb.map(p=>m2.rb[p]?.v??null), '#7c3aed')}
       </div>
       <div class="card">
         <div class="card-hd"><h3>Líneas Fijas (2022-S2 – 2026-S1)</h3><span>Ámbar vs Morado</span></div>
-        ${buildLineChartSVG(SIT.meta.periods_fx, SIT.meta.periods_fx.map(p=>m1.fx[p]?.t??null), '#d97706', pFx, 'líneas', SIT.meta.periods_fx.map(p=>m2.fx[p]?.t??null), '#7c3aed')}
+        ${buildLineChartSVG(DATA.meta.periods_fx, DATA.meta.periods_fx.map(p=>m1.fx[p]?.t??null), '#d97706', pFx, 'líneas', DATA.meta.periods_fx.map(p=>m2.fx[p]?.t??null), '#7c3aed')}
       </div>
     `;
     document.getElementById('btn-exit-cmp').onclick = () => { state.compareMode = false; state.compareMuniId = null; updateMapColors(); renderInspector(); };
@@ -3080,8 +3080,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
   function renderDeptoInspector(container, dep) {
     const activePeriod = getActivePeriod();
-    const pRb = SIT.meta.periods_rb.includes(activePeriod) ? activePeriod : '2026-S1';
-    const pFx = SIT.meta.periods_fx.includes(activePeriod) ? activePeriod : '2026-S1';
+    const pRb = DATA.meta.periods_rb.includes(activePeriod) ? activePeriod : '2026-S1';
+    const pFx = DATA.meta.periods_fx.includes(activePeriod) ? activePeriod : '2026-S1';
     const depMunis = munisByDepto.get(dep.id);
     const fxRec = dep.fx[pFx], rbRec = dep.rb[pRb];
     const rbDisplay = rbRec ? rbRec.v : depMunis.reduce((s, m) => s + (m.rb[pRb]?.v || 0), 0);
@@ -3203,7 +3203,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     ctx.fillStyle = '#0284c7';
     ctx.fillRect(0, 86, W, 4);
 
-    let title = 'Mapa Oficial SIT Guatemala', subtitle = 'Datos Oficiales SIT (2014–2026) + Lugares Poblados KMZ 2026';
+    let title = 'Mapa Geoespacial · Guatemala', subtitle = 'Boletines Estadísticos (2014–2026) + Lugares Poblados KMZ 2026';
     if (spec.mode === 'muni') {
       title = `${spec.muni.nom} (${spec.muni.dep}) · Mapa Municipal y Lugares Poblados`;
       subtitle = `INE ${String(spec.muni.id).padStart(4,'0')} · Índice ISI ${fmtDec(spec.muni.eco.isi,1)}/100 · ${fmtInt(spec.muni.lp_sum.tot)} lugares poblados GPS`;
@@ -3212,7 +3212,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       subtitle = `${munisByDepto.get(spec.depto.id).length} municipios · Radiobases, Líneas Fijas e Índice de Saturación Económica`;
     } else if (spec.mode === 'compare') {
       title = `Comparación Territorial: ${spec.munis.map(m => m.nom).join(' vs ')}`;
-      subtitle = `Corte 2026-S1 · Ubicación geográfica, Índice ISI (OCDE + HHI) e infraestructura oficial SIT`;
+      subtitle = `Corte 2026-S1 · Ubicación geográfica, Índice ISI (OCDE + HHI) e infraestructura de telecomunicaciones`;
     } else {
       title = `Guatemala (340 Municipios) · Índice de Saturación Económica ISI (${spec.period})`;
       subtitle = `139 Baja Saturación (Oportunidad) · 161 En Consolidación · 40 Alta Saturación (Polo Maduro)`;
@@ -3234,7 +3234,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     ctx.strokeRect(mapX, mapY, mapW, mapH);
 
     // Determine bounding box in SVG coordinates
-    let bb = [0, 0, SIT.meta.svg_w, SIT.meta.svg_h];
+    let bb = [0, 0, DATA.meta.svg_w, DATA.meta.svg_h];
     if (spec.mode === 'muni') {
       const [x1,y1,x2,y2] = spec.muni.bb;
       const bw = Math.max(45, x2 - x1), bh = Math.max(45, y2 - y1);
@@ -3262,7 +3262,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     ctx.scale(sc, sc);
 
     // Draw all 340 municipalities
-    for (const m of SIT.munis) {
+    for (const m of DATA.munis) {
       const path = new Path2D(m.d);
       if (spec.mode === 'muni') {
         ctx.fillStyle = m.id === spec.muni.id ? '#fef3c7' : (m.did === spec.muni.did ? '#e2e8f0' : '#f1f5f9');
@@ -3280,14 +3280,14 @@ const SIT = __SIT_DATA_PAYLOAD__;
     }
 
     // Lakes
-    for (const lk of SIT.lakes) {
+    for (const lk of DATA.lakes) {
       const path = new Path2D(lk.d);
       ctx.fillStyle = '#7dd3fc'; ctx.fill(path);
       ctx.strokeStyle = '#0284c7'; ctx.lineWidth = Math.max(0.4, 0.7 / sc); ctx.stroke(path);
     }
 
     // Department borders
-    for (const d of SIT.deptos) {
+    for (const d of DATA.deptos) {
       const path = new Path2D(d.d);
       ctx.strokeStyle = (spec.mode === 'depto' && d.id === spec.depto.id) ? '#0f172a' : 'rgba(30,41,59,0.45)';
       ctx.lineWidth = ((spec.mode === 'depto' && d.id === spec.depto.id) ? 2.2 : 1.0) / sc;
@@ -3299,7 +3299,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       const mp = new Path2D(spec.muni.d);
       ctx.strokeStyle = '#d97706'; ctx.lineWidth = 3.2 / sc; ctx.stroke(mp);
       // Plot Lugares Poblados GPS points inside selected muni
-      const pts = SIT.lp[String(spec.muni.id)] || [];
+      const pts = DATA.lp[String(spec.muni.id)] || [];
       for (const pt of pts) {
         const [px, py] = projLonLat(pt[0], pt[1]);
         ctx.beginPath();
@@ -3336,7 +3336,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       // National: crisp department labels
       ctx.textAlign = 'center';
       ctx.font = `bold ${9.5 / sc}px -apple-system, sans-serif`;
-      for (const d of SIT.deptos) {
+      for (const d of DATA.deptos) {
         const nudge = DEPTO_LABEL_NUDGE[d.id] || [0,0];
         ctx.lineWidth = 2.8 / sc; ctx.strokeStyle = 'rgba(255,255,255,0.92)';
         ctx.strokeText(d.nom.toUpperCase(), d.c[0] + nudge[0], d.c[1] + nudge[1]);
@@ -3382,10 +3382,10 @@ const SIT = __SIT_DATA_PAYLOAD__;
       // Mini locator map of Guatemala
       const lmX = rx + 24, lmY = cy - 10, lmW = rw - 48, lmH = 260;
       ctx.fillStyle = '#f1f5f9'; ctx.fillRect(lmX, lmY, lmW, lmH);
-      const lsc = Math.min((lmW - 20) / SIT.meta.svg_w, (lmH - 20) / SIT.meta.svg_h);
-      const loX = lmX + (lmW - SIT.meta.svg_w * lsc) / 2, loY = lmY + (lmH - SIT.meta.svg_h * lsc) / 2;
+      const lsc = Math.min((lmW - 20) / DATA.meta.svg_w, (lmH - 20) / DATA.meta.svg_h);
+      const loX = lmX + (lmW - DATA.meta.svg_w * lsc) / 2, loY = lmY + (lmH - DATA.meta.svg_h * lsc) / 2;
       ctx.save(); ctx.translate(loX, loY); ctx.scale(lsc, lsc);
-      for (const d of SIT.deptos) { const p = new Path2D(d.d); ctx.fillStyle = d.id === m.did ? '#bae6fd' : '#e2e8f0'; ctx.fill(p); ctx.strokeStyle='#fff'; ctx.lineWidth=1/lsc; ctx.stroke(p); }
+      for (const d of DATA.deptos) { const p = new Path2D(d.d); ctx.fillStyle = d.id === m.did ? '#bae6fd' : '#e2e8f0'; ctx.fill(p); ctx.strokeStyle='#fff'; ctx.lineWidth=1/lsc; ctx.stroke(p); }
       const mp = new Path2D(m.d); ctx.fillStyle = '#f59e0b'; ctx.fill(mp);
       ctx.restore();
       cy = lmY + lmH + 28;
@@ -3413,7 +3413,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       });
     } else {
       // Depto or National ISI Legend
-      const scope = spec.mode === 'depto' ? munisByDepto.get(spec.depto.id) : SIT.munis;
+      const scope = spec.mode === 'depto' ? munisByDepto.get(spec.depto.id) : DATA.munis;
       const t0 = scope.filter(m=>m.eco.tier===0).length, t1 = scope.filter(m=>m.eco.tier===1).length, t2 = scope.filter(m=>m.eco.tier===2).length;
       ctx.fillStyle = '#0f172a'; ctx.font = 'bold 18px -apple-system, sans-serif';
       ctx.fillText('Semáforo Económico ISI (0–100)', rx + 20, cy); cy += 28;
@@ -3443,7 +3443,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
     // Footer attribution
     ctx.fillStyle = '#64748b'; ctx.font = '500 11.5px -apple-system, sans-serif';
-    ctx.fillText('Fuente: SIT Guatemala (Boletines Oficiales 2014–2026) · KMZ Lugares Poblados 2026 · Metodología ISI (OCDE) + HHI (DOJ/FTC)', 24, H - 16);
+    ctx.fillText('Fuente: Boletines Estadísticos de Telecomunicaciones (2014–2026) · KMZ Lugares Poblados 2026 · Metodología ISI (OCDE) + HHI (DOJ/FTC)', 24, H - 16);
 
     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
     const buf = await blob.arrayBuffer();
@@ -3456,13 +3456,13 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const mapImg = await renderExportMapPNG({ mode: 'muni', muni: m, period: '2026-S1' });
     const sMap = [
       ['Mapa Geoespacial Oficial · ' + m.nom + ' (' + m.dep + ')'],
-      ['Generado automáticamente desde datos oficiales SIT 2014–2026 + KMZ Lugares Poblados 2026.']
+      ['Generado automáticamente desde datos estadísticos 2014–2026 + KMZ Lugares Poblados 2026.']
     ];
     const s1 = [
       ['Campo', 'Valor Oficial', 'Fuente / Detalle'],
       ['Código INE', String(m.id).padStart(4,'0'), 'División Político-Administrativa'],
-      ['Departamento', m.dep, 'SIT Oficial'],
-      ['Municipio', m.nom, 'SIT Oficial'],
+      ['Departamento', m.dep, 'División territorial oficial'],
+      ['Municipio', m.nom, 'División territorial oficial'],
       ['Latitud GPS', m.gps[1], m.gps[2]==='kmz'?'Lugares Poblados 2026.kmz':'Centroide geométrico'],
       ['Longitud GPS', m.gps[0], m.gps[2]==='kmz'?'Lugares Poblados 2026.kmz':'Centroide geométrico'],
       ['Área Territorial (km²)', m.area ?? 'No disponible (segregado post-KMZ)', 'Municipios.kmz'],
@@ -3478,9 +3478,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Población Alfabeta / Analfabeta (INE)', m.soc.alf + ' / ' + m.soc.ana, fmtDec(m.soc.pct_ana, 2) + '% analfabeta (' + fmtDec(m.soc.pct_alf7, 1) + '% alfabetismo 7+)'],
       ['Población Ocupada (INE)', m.soc.ocu, fmtDec(m.soc.pct_ocu, 2) + '% de ocupación (Enfoque ITU)'],
       ['Población en Pobreza 2023 (%)', m.ine.pobr23 ?? 'Sin dato', 'SEGEPLAN / Banco Mundial (Mapas de pobreza 2023, municipal)'],
-      ['Radiobases (2026-S1)', m.rb['2026-S1']?.v ?? null, 'Hoja 09 SIT'],
-      ['Líneas Fijas Totales (2026-S1)', m.fx['2026-S1']?.t ?? null, 'Hoja 08 SIT'],
-      ['Lugares Poblados por Radiobase', m.eco.lp_rb ?? 'N/A', 'KMZ 2026 / SIT 2026-S1'],
+      ['Radiobases (2026-S1)', m.rb['2026-S1']?.v ?? null, 'Hoja 09 · Radiobases'],
+      ['Líneas Fijas Totales (2026-S1)', m.fx['2026-S1']?.t ?? null, 'Hoja 08 · Líneas fijas'],
+      ['Lugares Poblados por Radiobase', m.eco.lp_rb ?? 'N/A', 'KMZ 2026 / Boletines 2026-S1'],
       ['Crecimiento Radiobases 3 años (%)', m.eco.g3y ?? 'N/A', '2023-S1 a 2026-S1'],
       ['Índice HHI Telefonía Fija (DOJ/FTC)', m.eco.hhi ?? 'Sin líneas fijas', 'Suma de cuotas al cuadrado (0-10,000)'],
       ['Índice de Saturación Económica (ISI 0-100)', m.eco.isi, 'Metodología OCDE (4 pilares percentiles)'],
@@ -3489,25 +3489,25 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Recomendación para ISP / Telecom', rec.forTelco, 'Basado en ISI + HHI + Brecha territorial'],
     ];
 
-    const s2 = [['Período', 'Radiobases', 'Líneas Fijas Total', ...SIT.meta.op_names, 'Boletín PDF (RB)', 'Pág. PDF (RB)', 'Fila XLSX (RB)']];
-    for (const p of SIT.meta.periods_rb) {
+    const s2 = [['Período', 'Radiobases', 'Líneas Fijas Total', ...DATA.meta.op_names, 'Boletín PDF (RB)', 'Pág. PDF (RB)', 'Fila XLSX (RB)']];
+    for (const p of DATA.meta.periods_rb) {
       const rb = m.rb[p], fx = m.fx[p];
       s2.push([
         p, rb ? rb.v : 'Sin dato', fx ? fx.t : 'No aplica',
-        ...(fx ? fx.v.map(v => v === null ? 'N/A' : v) : SIT.meta.op_names.map(() => '')),
-        rb ? SIT.meta.pdfs[rb.pdf] : '', rb?.pg ?? '', rb?.r ?? ''
+        ...(fx ? fx.v.map(v => v === null ? 'N/A' : v) : DATA.meta.op_names.map(() => '')),
+        rb ? DATA.meta.pdfs[rb.pdf] : '', rb?.pg ?? '', rb?.r ?? ''
       ]);
     }
 
     const s3 = [['Nombre Lugar Poblado', 'Categoría Oficial', 'Latitud', 'Longitud']];
-    for (const pt of (SIT.lp[String(m.id)] || [])) {
-      s3.push([pt[2], SIT.meta.lp_cats[pt[3]], pt[1], pt[0]]);
+    for (const pt of (DATA.lp[String(m.id)] || [])) {
+      s3.push([pt[2], DATA.meta.lp_cats[pt[3]], pt[1], pt[0]]);
     }
 
-    XLSXWriter.downloadXLSX(`SIT_Municipio_${m.dep}_${m.nom}.xlsx`.replace(/\s+/g,'_'), [
+    XLSXWriter.downloadXLSX(`Guatemala_Municipio_${m.dep}_${m.nom}.xlsx`.replace(/\s+/g,'_'), [
       { name: 'Resumen_y_Recomendacion', rows: s1 },
       { name: 'Mapa_Visual', rows: sMap, headerRowIdx: 0, image: mapImg },
-      { name: 'Serie_Historica_SIT', rows: s2 },
+      { name: 'Serie_Historica', rows: s2 },
       { name: 'Lugares_Poblados_2026', rows: s3 },
     ]);
   }
@@ -3525,9 +3525,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Indicador Departamental', 'Valor', 'Detalle'],
       ['Departamento', dep.nom, 'Código INE ' + dep.id],
       ['Cantidad de Municipios', depMunis.length, 'Cobertura completa'],
-      ['Período de Corte', period, 'Boletín Oficial SIT'],
-      ['Total Radiobases Oficial', dep.rb[period]?.v ?? depMunis.reduce((s,m)=>s+(m.rb[period]?.v||0),0), 'Hoja 09 SIT'],
-      ['Total Líneas Fijas Oficial', dep.fx[period]?.t ?? null, 'Hoja 08 SIT'],
+      ['Período de Corte', period, 'Boletín Estadístico'],
+      ['Total Radiobases Oficial', dep.rb[period]?.v ?? depMunis.reduce((s,m)=>s+(m.rb[period]?.v||0),0), 'Hoja 09 · Radiobases'],
+      ['Total Líneas Fijas Oficial', dep.fx[period]?.t ?? null, 'Hoja 08 · Líneas fijas'],
       ['Total Hogares Depto (Censo 2018 INE)', dep.ine.h, 'INE Censo 2018 (suma 340 munis)'],
       ['Hogares sin Internet Depto (2018)', dep.ine.sin, fmtDec(dep.ine.br, 2) + '% brecha digital 2018'],
       ['Total Hogares Depto (ENCOVI 2023 INE)', dep.ine23.h, 'INE ENCOVI 2023 (valor expandido departamental)'],
@@ -3544,24 +3544,24 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Municipios Baja Saturación (<45)', depMunis.filter(m=>m.eco.tier===0).length, 'Oportunidad territorial'],
     ];
 
-    const s2 = [['INE','Municipio','Población','Alfabeta','Analfabeta','% Analfabeta','Pob. Ocupada','% Ocupación','Total Hogares (INE)','Hogares con Internet','Hogares sin Internet','% Brecha Digital INE','Puntaje Brecha (0-100)','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados','Lug./RB','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP/Telecom']];
+    const s2 = [['INE','Municipio','Población','Alfabeta','Analfabeta','% Analfabeta','Pob. Ocupada','% Ocupación','Total Hogares (INE)','Hogares con Internet','Hogares sin Internet','% Brecha Digital INE','Puntaje Brecha (0-100)','Radiobases','Líneas Fijas Total', ...DATA.meta.op_names, 'Lugares Poblados','Lug./RB','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP/Telecom']];
     for (const m of [...depMunis].sort((a,b)=>b.eco.isi - a.eco.isi)) {
       const fx = m.fx[period], rec = getEcoRecommendation(m);
       s2.push([
         String(m.id).padStart(4,'0'), m.nom, m.soc.pob, m.soc.alf, m.soc.ana, m.soc.pct_ana, m.soc.ocu, m.soc.pct_ocu, m.ine.h, m.ine.con, m.ine.sin, m.ine.br, m.bd.sc, m.rb[period]?.v ?? 'Sin dato', fx?.t ?? 'N/A',
-        ...(fx ? fx.v.map(v=>v===null?'N/A':v) : SIT.meta.op_names.map(()=>'')),
+        ...(fx ? fx.v.map(v=>v===null?'N/A':v) : DATA.meta.op_names.map(()=>'')),
         m.lp_sum.tot, m.eco.lp_rb ?? 'N/A', m.eco.g3y ?? 'N/A', m.eco.hhi ?? 'Sin red',
         m.eco.isi, rec.shortLabel, rec.forBiz, rec.forTelco
       ]);
     }
 
     const s3 = [['Período', 'Radiobases Depto', 'Líneas Fijas Depto']];
-    for (const p of SIT.meta.periods_rb) {
+    for (const p of DATA.meta.periods_rb) {
       const rbVal = dep.rb[p]?.v ?? depMunis.reduce((s,m)=>s+(m.rb[p]?.v||0),0);
       s3.push([p, rbVal, dep.fx[p]?.t ?? 'No aplica']);
     }
 
-    XLSXWriter.downloadXLSX(`SIT_Departamento_${dep.nom}_${period}.xlsx`.replace(/\s+/g,'_'), [
+    XLSXWriter.downloadXLSX(`Guatemala_Departamento_${dep.nom}_${period}.xlsx`.replace(/\s+/g,'_'), [
       { name: 'Resumen_Departamento', rows: s1 },
       { name: 'Mapa_Visual', rows: sMap, headerRowIdx: 0, image: mapImg },
       { name: 'Municipios_Detalle', rows: s2 },
@@ -3575,7 +3575,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const mapImg = await renderExportMapPNG({ mode: 'compare', munis, period: '2026-S1' });
     const sMap = [
       ['Mapa Comparativo · ' + munis.map(m => m.nom).join(' vs ')],
-      ['Ubicación en Guatemala e indicadores oficiales SIT 2026-S1 + Índice ISI.']
+      ['Ubicación en Guatemala e indicadores de infraestructura 2026-S1 + Índice ISI.']
     ];
     const hdr = ['Indicador', ...munis.map(m => `${m.nom} (${m.dep})`)];
     const s1 = [
@@ -3603,18 +3603,18 @@ const SIT = __SIT_DATA_PAYLOAD__;
       ['Área KMZ (km²)', ...munis.map(m => m.area ?? 'Post-KMZ')],
       ['Latitud GPS', ...munis.map(m => m.gps[1])],
       ['Longitud GPS', ...munis.map(m => m.gps[0])],
-      ...SIT.meta.op_names.map((op, i) => [`Líneas Fijas · ${op} (2026-S1)`, ...munis.map(m => m.fx['2026-S1']?.v[i] ?? 'N/A')]),
+      ...DATA.meta.op_names.map((op, i) => [`Líneas Fijas · ${op} (2026-S1)`, ...munis.map(m => m.fx['2026-S1']?.v[i] ?? 'N/A')]),
       ['Recomendación Empresas', ...munis.map(m => getEcoRecommendation(m).forBiz)],
       ['Recomendación ISP / Telecom', ...munis.map(m => getEcoRecommendation(m).forTelco)],
     ];
 
     const s2 = [['Período', ...munis.map(m => m.nom)]];
-    for (const p of SIT.meta.periods_rb) s2.push([p, ...munis.map(m => m.rb[p]?.v ?? 'Sin dato')]);
+    for (const p of DATA.meta.periods_rb) s2.push([p, ...munis.map(m => m.rb[p]?.v ?? 'Sin dato')]);
 
     const s3 = [['Período', ...munis.map(m => m.nom)]];
-    for (const p of SIT.meta.periods_fx) s3.push([p, ...munis.map(m => m.fx[p]?.t ?? 'Sin dato')]);
+    for (const p of DATA.meta.periods_fx) s3.push([p, ...munis.map(m => m.fx[p]?.t ?? 'Sin dato')]);
 
-    XLSXWriter.downloadXLSX(`SIT_Comparacion_${munis.map(m=>m.nom).join('_vs_')}.xlsx`.replace(/\s+/g,'_').slice(0,80), [
+    XLSXWriter.downloadXLSX(`Guatemala_Comparacion_${munis.map(m=>m.nom).join('_vs_')}.xlsx`.replace(/\s+/g,'_').slice(0,80), [
       { name: 'Comparativo_Directo', rows: s1 },
       { name: 'Mapa_Visual', rows: sMap, headerRowIdx: 0, image: mapImg },
       { name: 'Historico_Radiobases', rows: s2 },
@@ -3623,40 +3623,40 @@ const SIT = __SIT_DATA_PAYLOAD__;
   }
 
   async function exportNationalXLSX(period='2026-S1', customList=null) {
-    const list = customList || SIT.munis;
+    const list = customList || DATA.munis;
     const mapImg = await renderExportMapPNG({ mode: 'national', period });
     const sMap = [
       ['Mapa Nacional de Guatemala (340 Municipios) · Corte ' + period],
       ['Coloreado según el Índice de Saturación Económica ISI (0–100).']
     ];
-    const s1 = [['INE','Departamento','Municipio','Población','Alfabeta','Analfabeta','% Analfabeta','Pob. Ocupada','% Ocupación','Total Hogares (2018)','Hogares con Internet (2018)','Hogares sin Internet (2018)','% Brecha Hogares 2018 (Muni)','Puntaje Brecha (0-100)','% Brecha Hogares 2023 (Depto ENCOVI)','Pobreza 2023 (%)','Radiobases','Líneas Fijas Total', ...SIT.meta.op_names, 'Lugares Poblados 2026','Lug./RB','Área km²','Lat GPS','Lon GPS','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP']];
+    const s1 = [['INE','Departamento','Municipio','Población','Alfabeta','Analfabeta','% Analfabeta','Pob. Ocupada','% Ocupación','Total Hogares (2018)','Hogares con Internet (2018)','Hogares sin Internet (2018)','% Brecha Hogares 2018 (Muni)','Puntaje Brecha (0-100)','% Brecha Hogares 2023 (Depto ENCOVI)','Pobreza 2023 (%)','Radiobases','Líneas Fijas Total', ...DATA.meta.op_names, 'Lugares Poblados 2026','Lug./RB','Área km²','Lat GPS','Lon GPS','Crec. RB 3a (%)','HHI Fijo','ISI (0-100)','Semáforo','Recomendación Empresas','Recomendación ISP']];
     for (const m of list) {
       const fx = m.fx[period], rec = getEcoRecommendation(m), d23 = deptoById.get(m.did).ine23;
       s1.push([
         String(m.id).padStart(4,'0'), m.dep, m.nom, m.soc.pob, m.soc.alf, m.soc.ana, m.soc.pct_ana, m.soc.ocu, m.soc.pct_ocu, m.ine.h, m.ine.con, m.ine.sin, m.ine.br, m.bd.sc, d23.br, m.ine.pobr23 ?? 'Sin dato', m.rb[period]?.v ?? 'Sin dato', fx?.t ?? 'N/A',
-        ...(fx ? fx.v.map(v=>v===null?'N/A':v) : SIT.meta.op_names.map(()=>'')),
+        ...(fx ? fx.v.map(v=>v===null?'N/A':v) : DATA.meta.op_names.map(()=>'')),
         m.lp_sum.tot, m.eco.lp_rb ?? 'N/A', m.area ?? '', m.gps[1], m.gps[0],
         m.eco.g3y ?? 'N/A', m.eco.hhi ?? 'Sin red', m.eco.isi, rec.shortLabel, rec.forBiz, rec.forTelco
       ]);
     }
     const s3 = [['Código Depto','Departamento','Población','Alfabeta','Analfabeta','% Analfabeta','Pob. Ocupada','% Ocupación','Puntaje Brecha Prom.','Hogares 2018 (Censo)','Sin Internet 2018','% Brecha 2018','Hogares 2023 (ENCOVI)','Sin Internet 2023','% Brecha 2023','Cambio Brecha (pp)','Uso Int. 7+ 2018 (%)','Uso Int. 7+ 2023 (%)','Cambio Uso (pp)','Pago Int. 2023 (Q)','Pago Cel. 2023 (Q)','Pobreza ENCOVI 2023 (%)']];
-    for (const d of SIT.deptos) {
+    for (const d of DATA.deptos) {
       s3.push([d.id/100, d.nom, d.soc.pob, d.soc.alf, d.soc.ana, d.soc.pct_ana, d.soc.ocu, d.soc.pct_ocu, d.bd_avg, d.ine.h, d.ine.sin, d.ine.br, d.ine23.h, d.ine23.sin, d.ine23.br, d.ine23.dbr, d.ine.uso, d.ine23.uso, d.ine23.duso, d.ine23.q_int, d.ine23.q_cel, d.ine23.pobr]);
     }
     const s2 = [
       ['Componente Metodológico', 'Fórmula / Definición', 'Justificación y Uso Económico'],
-      ['Cómo se calcula el Puntaje de Brecha Digital (0 a 100)', 'Va de 0 a 100 en 5 pasos: 1) Uso de internet (% personas 7+ años, INE Censo 2018); 2) Antenas por cada 10,000 habitantes (SIT 2026-S1); 3) Posición 1..340 de menor a mayor en cada dato; 4) Promedio de las dos posiciones; 5) El promedio más bajo recibe 100 y el más alto queda cerca de 0.', 'Priorización territorial: más alto = atender primero. 100% alineado con la hoja Brecha digital de trazabilidad_brecha_digital.xlsx.'],
+      ['Cómo se calcula el Puntaje de Brecha Digital (0 a 100)', 'Va de 0 a 100 en 5 pasos: 1) Uso de internet (% personas 7+ años, INE Censo 2018); 2) Antenas por cada 10,000 habitantes (Boletines 2026-S1); 3) Posición 1..340 de menor a mayor en cada dato; 4) Promedio de las dos posiciones; 5) El promedio más bajo recibe 100 y el más alto queda cerca de 0.', 'Priorización territorial: más alto = atender primero. 100% alineado con la hoja Brecha digital de trazabilidad_brecha_digital.xlsx.'],
       ['Educación y Economía (INE · Enfoque ITU)', 'Alfabeta, Analfabeta (% analfabeta = Analfabeta / Población) y Población Ocupada (% ocupación = Ocupada / Población)', 'Fuente oficial: DatosEstadisticos_tecnologia_educacion_economico.xlsx (INE, 340 municipios y 22 departamentos).'],
       ['Brecha Digital en Hogares 2018 (INE)', '(Hogares sin Internet / Total Hogares) × 100', 'Fuente oficial: XII Censo de Población y Vivienda INE (2018), nivel municipal (340 municipios).'],
       ['Brecha Digital en Hogares 2023 (ENCOVI INE)', '(Hogares sin Internet en casa / Total Hogares) × 100', 'Fuente oficial: ENCOVI 2023 del INE (trazabilidad_brecha_digital.xlsx), publicada a nivel departamental (22 departamentos). Sin imputación municipal.'],
       ['Pobreza Municipal 2023 (SEGEPLAN)', 'Población en pobreza (%)', 'SEGEPLAN y Banco Mundial, Mapas de pobreza a nivel municipal 2023, cuadro 7.2.'],
-      ['Índice de Saturación de Infraestructura (ISI)', 'ISI = 0.25·P(RB/LP) + 0.25·P(%ConInternet_INE) + 0.20·P(Fijas/Hogares) + 0.15·P(RB) + 0.15·P(10000 - HHI)', 'Normalización percentil (metodología OCDE) sobre 340 municipios integrando SIT 2026 + KMZ 2026 + XII Censo INE. Escala 0 a 100.'],
+      ['Índice de Saturación de Infraestructura (ISI)', 'ISI = 0.25·P(RB/LP) + 0.25·P(%ConInternet_INE) + 0.20·P(Fijas/Hogares) + 0.15·P(RB) + 0.15·P(10000 - HHI)', 'Normalización percentil (metodología OCDE) sobre 340 municipios integrando Boletines 2026 + KMZ 2026 + XII Censo INE. Escala 0 a 100.'],
       ['Índice Herfindahl-Hirschman (HHI)', 'HHI = Σ (cuota_operador_i %)² en líneas fijas 2026-S1', 'Estándar internacional DOJ/FTC para medir concentración y competencia real (>1,800 altamente concentrado; 10,000 monopolio).'],
       ['Crecimiento 3 años Radiobases', '((RB_2026-S1 - RB_2023-S1) / RB_2023-S1) × 100', 'Indica si los operadores están invirtiendo activamente en el municipio o si el mercado está estancado.'],
       ['Umbrales del Semáforo', '≥ 75 Alta Saturación | 45–74.9 Consolidación | < 45 Baja Saturación', 'Traduce los indicadores técnicos a decisiones claras para empresas (conectividad) e inversionistas ISP/telecom (oportunidad).'],
-      ['Fuentes Oficiales Verificadas', 'SIT Consolidado 2014–2026 + INE Censo 2018 + ENCOVI 2023 + SEGEPLAN 2023 + KMZ 2026', '100% cifras verificadas con conciliación 0 diferencia local en Hoja 15 y 0 diferencia en trazabilidad 2018.'],
+      ['Fuentes Oficiales Verificadas', 'Boletines Consolidados 2014–2026 + INE Censo 2018 + ENCOVI 2023 + SEGEPLAN 2023 + KMZ 2026', '100% cifras verificadas con conciliación 0 diferencia local en Hoja 15 y 0 diferencia en trazabilidad 2018.'],
     ];
-    XLSXWriter.downloadXLSX(`SIT_Guatemala_${list.length}_Municipios_${period}.xlsx`, [
+    XLSXWriter.downloadXLSX(`Guatemala_Nacional_${list.length}_Municipios_${period}.xlsx`, [
       { name: 'Municipios_Consolidado', rows: s1 },
       { name: 'Brecha_2018_vs_2023', rows: s3 },
       { name: 'Mapa_Visual', rows: sMap, headerRowIdx: 0, image: mapImg },
@@ -3668,8 +3668,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
   const excelModal = document.getElementById('excel-modal');
   const expConfigArea = document.getElementById('exp-config-area');
   const expPreview = document.getElementById('exp-sheets-preview');
-  const sortedMunisAlpha = [...SIT.munis].sort((a,b) => a.nom.localeCompare(b.nom,'es') || a.dep.localeCompare(b.dep,'es'));
-  const sortedDeptosAlpha = [...SIT.deptos].sort((a,b) => a.nom.localeCompare(b.nom,'es'));
+  const sortedMunisAlpha = [...DATA.munis].sort((a,b) => a.nom.localeCompare(b.nom,'es') || a.dep.localeCompare(b.dep,'es'));
+  const sortedDeptosAlpha = [...DATA.deptos].sort((a,b) => a.nom.localeCompare(b.nom,'es'));
 
   function openExcelModal(forceMode=null) {
     if (forceMode) state.expMode = forceMode;
@@ -3686,12 +3686,12 @@ const SIT = __SIT_DATA_PAYLOAD__;
     if (state.expMode === 'muni') {
       const defId = state.selectedMuniId || 101;
       expConfigArea.innerHTML = `<div class="exp-field"><label>Selecciona el municipio a exportar:</label><select id="exp-muni-sel">${sortedMunisAlpha.map(m => `<option value="${m.id}" ${m.id===defId?'selected':''}>${esc(m.nom)} (${esc(m.dep)}) — ISI ${fmtDec(m.eco.isi,1)}</option>`).join('')}</select></div>`;
-      expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Resumen_y_Recomendacion</code> (KPIs, GPS, ISI, HHI, Semáforo y recomendación)<br>2. <code>Mapa_Visual</code> (<strong>Mapa cartográfico del municipio + sus puntos GPS incrustado en Excel</strong>)<br>3. <code>Serie_Historica_SIT</code> (Radiobases 2016–2026 + 9 Operadores Fijos 2022–2026 + PDF)<br>4. <code>Lugares_Poblados_2026</code> (Todas las aldeas, caseríos y sitios GPS)`;
+      expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Resumen_y_Recomendacion</code> (KPIs, GPS, ISI, HHI, Semáforo y recomendación)<br>2. <code>Mapa_Visual</code> (<strong>Mapa cartográfico del municipio + sus puntos GPS incrustado en Excel</strong>)<br>3. <code>Serie_Historica</code> (Radiobases 2016–2026 + 9 Operadores Fijos 2022–2026 + PDF)<br>4. <code>Lugares_Poblados_2026</code> (Todas las aldeas, caseríos y sitios GPS)`;
     } else if (state.expMode === 'depto') {
       const defDid = state.selectedDeptoId || state.deptoFilter || 100;
       expConfigArea.innerHTML = `
         <div class="exp-field"><label>Selecciona el departamento:</label><select id="exp-depto-sel">${sortedDeptosAlpha.map(d => `<option value="${d.id}" ${d.id===defDid?'selected':''}>${esc(d.nom)} (${munisByDepto.get(d.id).length} municipios)</option>`).join('')}</select></div>
-        <div class="exp-field"><label>Período de corte:</label><select id="exp-depto-per">${[...SIT.meta.periods_fx].reverse().map(p => `<option value="${p}">${p}</option>`).join('')}</select></div>
+        <div class="exp-field"><label>Período de corte:</label><select id="exp-depto-per">${[...DATA.meta.periods_fx].reverse().map(p => `<option value="${p}">${p}</option>`).join('')}</select></div>
       `;
       expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Resumen_Departamento</code> (Totales oficiales + distribución Semáforo ISI)<br>2. <code>Mapa_Visual</code> (<strong>Mapa del departamento coloreado por Semáforo ISI incrustado en Excel</strong>)<br>3. <code>Municipios_Detalle</code> (Todos los municipios del depto con operadores, ISI y recomendación)<br>4. <code>Historico_Depto</code> (Serie histórica 2016–2026 del departamento)`;
     } else if (state.expMode === 'compare') {
@@ -3721,7 +3721,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       };
       expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Comparativo_Directo</code> (Tabla lado a lado: ISI, HHI, operadores, lugares poblados y recomendación)<br>2. <code>Mapa_Visual</code> (<strong>Mapa de Guatemala destacando los municipios comparados con etiquetas e ISI</strong>)<br>3. <code>Historico_Radiobases</code> (2016-S2 – 2026-S1 comparados)<br>4. <code>Historico_Lineas_Fijas</code> (2022-S2 – 2026-S1 comparados)`;
     } else {
-      expConfigArea.innerHTML = `<div class="exp-field"><label>Período de corte nacional:</label><select id="exp-nat-per">${[...SIT.meta.periods_fx].reverse().map(p => `<option value="${p}">${p} (340 municipios completos)</option>`).join('')}</select></div>`;
+      expConfigArea.innerHTML = `<div class="exp-field"><label>Período de corte nacional:</label><select id="exp-nat-per">${[...DATA.meta.periods_fx].reverse().map(p => `<option value="${p}">${p} (340 municipios completos)</option>`).join('')}</select></div>`;
       expPreview.innerHTML = `<strong>Hojas incluidas en el archivo .xlsx:</strong><br>1. <code>Municipios_Consolidado</code> (340 municipios con operadores, GPS, Lugares Poblados, ISI, HHI y recomendación)<br>2. <code>Mapa_Visual</code> (<strong>Mapa nacional de los 340 municipios coloreado por Semáforo ISI incrustado en Excel</strong>)<br>3. <code>Metodologia_ISI_HHI</code> (Documentación completa de fórmulas y umbrales)`;
     }
   }
@@ -3759,7 +3759,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
   // ===== TABLE VIEW =====
   function initTableView() {
     const pSel = document.getElementById('tbl-period');
-    [...SIT.meta.periods_fx].reverse().forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = `Corte ${p}`; pSel.appendChild(o); });
+    [...DATA.meta.periods_fx].reverse().forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = `Corte ${p}`; pSel.appendChild(o); });
     pSel.value = state.tblPeriod;
     pSel.onchange = () => { state.tblPeriod = pSel.value; renderTable(); };
     document.getElementById('tbl-search').oninput = renderTable;
@@ -3781,7 +3781,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     const did = document.getElementById('tbl-depto').value ? parseInt(document.getElementById('tbl-depto').value, 10) : null;
     const tierVal = document.getElementById('tbl-tier').value;
     const p = state.tblPeriod;
-    let list = SIT.munis.filter(m =>
+    let list = DATA.munis.filter(m =>
       (did === null || m.did === did) &&
       (tierVal === '' || m.eco.tier === parseInt(tierVal, 10)) &&
       (!q || norm(m.nom + ' ' + m.dep).includes(q))
@@ -3830,34 +3830,34 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
   // ===== NATIONAL VIEW =====
   function initNationalView() {
-    const latest = SIT.national.serie[SIT.national.serie.length - 1];
+    const latest = DATA.national.serie[DATA.national.serie.length - 1];
     const kpiData = [
       { lbl: `Usuarios móviles (${latest.p})`, val: fmtInt(latest.moviles), sub: `Prepago ${fmtInt(latest.prepago)} · Pospago ${fmtInt(latest.pospago)}` },
       { lbl: `Líneas fijas (${latest.p})`, val: fmtInt(latest.fijas), sub: `${latest.pct_f}% de fijo+móvil (${fmtInt(latest.total_fm)})` },
       { lbl: `Radiobases (${latest.p})`, val: fmtInt(latest.rb), sub: `Suma exacta 340 municipios` },
       { lbl: `Banda Ancha Fija (${latest.p})`, val: fmtInt(latest.baf), sub: `Tráfico BAF: ${fmtDec(latest.tbaf_eb, 2)} exabytes` },
       { lbl: `Smartphones / ETM (${latest.p})`, val: fmtInt(latest.etm), sub: `Tráfico BAM: ${fmtDec(latest.tbam_nac_eb, 2)} EB` },
-      { lbl: `Brecha Digital 2018 → 2023 (INE)`, val: `${fmtDec(SIT.meta.ine_totals.br, 1)}% → ${fmtDec(SIT.meta.ine23_totals.br, 1)}%`, sub: `ENCOVI 2023: ${fmtDec(SIT.meta.ine23_totals.dbr, 2)} pp · Uso 7+: ${fmtDec(SIT.meta.ine23_totals.uso, 1)}%` },
-      { lbl: `Educación INE · % Analfabeta (ITU)`, val: `${fmtDec(SIT.meta.soc_totals.pct_ana, 2)}%`, sub: `${fmtInt(SIT.meta.soc_totals.ana)} analf. · ${fmtInt(SIT.meta.soc_totals.alf)} alfab.` },
-      { lbl: `Economía INE · % Ocupación (ITU)`, val: `${fmtDec(SIT.meta.soc_totals.pct_ocu, 2)}%`, sub: `${fmtInt(SIT.meta.soc_totals.ocu)} ocupadas de ${fmtInt(SIT.meta.soc_totals.pob)} hab.` },
+      { lbl: `Brecha Digital 2018 → 2023 (INE)`, val: `${fmtDec(DATA.meta.ine_totals.br, 1)}% → ${fmtDec(DATA.meta.ine23_totals.br, 1)}%`, sub: `ENCOVI 2023: ${fmtDec(DATA.meta.ine23_totals.dbr, 2)} pp · Uso 7+: ${fmtDec(DATA.meta.ine23_totals.uso, 1)}%` },
+      { lbl: `Educación INE · % Analfabeta (ITU)`, val: `${fmtDec(DATA.meta.soc_totals.pct_ana, 2)}%`, sub: `${fmtInt(DATA.meta.soc_totals.ana)} analf. · ${fmtInt(DATA.meta.soc_totals.alf)} alfab.` },
+      { lbl: `Economía INE · % Ocupación (ITU)`, val: `${fmtDec(DATA.meta.soc_totals.pct_ocu, 2)}%`, sub: `${fmtInt(DATA.meta.soc_totals.ocu)} ocupadas de ${fmtInt(DATA.meta.soc_totals.pob)} hab.` },
     ];
     document.getElementById('nat-kpis').innerHTML = kpiData.map(k => `<div class="kpi-mini" style="padding:10px 12px;"><span class="lbl">${esc(k.lbl)}</span><span class="val num" style="font-size:19px;">${k.val}</span><span class="sub">${esc(k.sub)}</span></div>`).join('');
 
     const sSel = document.getElementById('nat-series-select');
     function renderNatChart() {
-      const key = sSel.value, labels = SIT.national.serie.map(r => r.p), vals = SIT.national.serie.map(r => r[key]);
+      const key = sSel.value, labels = DATA.national.serie.map(r => r.p), vals = DATA.national.serie.map(r => r[key]);
       document.getElementById('nat-chart-container').innerHTML = buildLineChartSVG(labels, vals, '#0284c7', latest.p, '') +
         `<div class="chart-note">Serie oficial Hoja 01 (${vals.filter(v=>v!==null).length} períodos publicados). Sin imputación de vacíos.</div>`;
     }
     sSel.onchange = renderNatChart; renderNatChart();
 
     const opSel = document.getElementById('nat-op-period');
-    Object.keys(SIT.national.mobile_ops).sort().reverse().forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p; opSel.appendChild(o); });
+    Object.keys(DATA.national.mobile_ops).sort().reverse().forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p; opSel.appendChild(o); });
     function renderNatOps() {
       const p = opSel.value;
-      const mob = (SIT.national.mobile_ops[p]?.['Usuarios móviles en operación'] || []).filter(x => x.op !== 'TOTAL');
-      const fix = (SIT.national.fixed_ops[p] || []).filter(x => x.op !== 'TOTAL').sort((a,b) => b.v - a.v).slice(0, 5);
-      const baf = (SIT.national.internet_etm[p]?.['BAF usuarios'] || []).filter(x => x.op !== 'TOTAL').sort((a,b) => b.v - a.v);
+      const mob = (DATA.national.mobile_ops[p]?.['Usuarios móviles en operación'] || []).filter(x => x.op !== 'TOTAL');
+      const fix = (DATA.national.fixed_ops[p] || []).filter(x => x.op !== 'TOTAL').sort((a,b) => b.v - a.v).slice(0, 5);
+      const baf = (DATA.national.internet_etm[p]?.['BAF usuarios'] || []).filter(x => x.op !== 'TOTAL').sort((a,b) => b.v - a.v);
       const blk = (title, items, col) => !items.length ? '' : `<div><div style="font-size:11px;font-weight:800;color:var(--ink-2);margin-bottom:5px;">${esc(title)}</div><div class="op-list">${items.map(it=>`<div class="op-row"><div class="op-top"><span class="op-name">${esc(it.op)}</span><span class="op-nums num">${fmtInt(it.v)} <small>(${fmtDec(it.pct,2)}%)</small></span></div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(1,it.pct)}%;background:${col}"></div></div></div>`).join('')}</div></div>`;
       document.getElementById('nat-ops-container').innerHTML = blk(`Telefonía Móvil (${p} · Hoja 04)`, mob, '#0284c7') + blk(`Telefonía Fija Top 5 (${p} · Hoja 03)`, fix, '#0d9488') + blk(`Banda Ancha Fija - BAF (${p} · Hoja 07)`, baf, '#6366f1');
     }
@@ -3865,17 +3865,17 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
     const tSearch = document.getElementById('tarifa-search');
     function renderTarifas() {
-      const q = norm(tSearch.value), rows = SIT.national.tarifas_latest.filter(r => !q || norm(r.op + ' ' + r.c).includes(q));
+      const q = norm(tSearch.value), rows = DATA.national.tarifas_latest.filter(r => !q || norm(r.op + ' ' + r.c).includes(q));
       document.getElementById('tarifas-body').innerHTML = rows.map(r => `<tr class="num"><td style="text-align:left;font-weight:600;">${esc(r.op)}</td><td style="text-align:left;white-space:normal;min-width:190px;">${esc(r.c)}</td><td style="font-weight:700;">Q ${fmtDec(r.q,2)}</td><td style="color:var(--muted);">Pág. ${r.pg??'—'}</td></tr>`).join('');
     }
     tSearch.oninput = renderTarifas; renderTarifas();
 
-    document.getElementById('audit-body').innerHTML = [...SIT.national.control_terr].reverse().map(r => `<tr class="num"><td style="text-align:left;font-weight:700;">${esc(r.p)}</td><td style="text-align:left;">${esc(r.mag)}</td><td>${r.nmuni??'—'}</td><td style="font-weight:700;">${fmtInt(r.smuni)}</td><td>${r.tnac!==null?fmtInt(r.tnac):'—'}</td><td>${r.dloc===0?'<span class="pill ok">0</span>':(r.dloc===null?'—':r.dloc)}</td></tr>`).join('');
+    document.getElementById('audit-body').innerHTML = [...DATA.national.control_terr].reverse().map(r => `<tr class="num"><td style="text-align:left;font-weight:700;">${esc(r.p)}</td><td style="text-align:left;">${esc(r.mag)}</td><td>${r.nmuni??'—'}</td><td style="font-weight:700;">${fmtInt(r.smuni)}</td><td>${r.tnac!==null?fmtInt(r.tnac):'—'}</td><td>${r.dloc===0?'<span class="pill ok">0</span>':(r.dloc===null?'—':r.dloc)}</td></tr>`).join('');
 
     const nbBody = document.getElementById('nat-brecha-body');
     if (nbBody) {
-      const sortedDeps = [...SIT.deptos].sort((a,b) => b.ine23.br - a.ine23.br);
-      const t18 = SIT.meta.ine_totals, t23 = SIT.meta.ine23_totals;
+      const sortedDeps = [...DATA.deptos].sort((a,b) => b.ine23.br - a.ine23.br);
+      const t18 = DATA.meta.ine_totals, t23 = DATA.meta.ine23_totals;
       nbBody.innerHTML = sortedDeps.map(d => {
         const dbrCls = d.ine23.dbr <= 0 ? 'ok' : 'danger';
         const dbrS = (d.ine23.dbr >= 0 ? '+' : '') + fmtDec(d.ine23.dbr, 2) + ' pp';
@@ -3906,8 +3906,8 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
     const eduBody = document.getElementById('nat-edu-eco-body');
     if (eduBody) {
-      const sDeps = [...SIT.deptos].sort((a,b) => b.soc.pct_ana - a.soc.pct_ana);
-      const st = SIT.meta.soc_totals;
+      const sDeps = [...DATA.deptos].sort((a,b) => b.soc.pct_ana - a.soc.pct_ana);
+      const st = DATA.meta.soc_totals;
       eduBody.innerHTML = sDeps.map(d => `<tr class="num">
         <td style="text-align:left;font-weight:700;">${esc(d.nom)}</td>
         <td>${fmtInt(d.soc.pob)}</td>
@@ -4194,7 +4194,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
     }
     if (state.view === 'guide') {
       speakSentences([
-        'Bienvenido a la guía inclusiva del Observatorio Geoespacial de la Superintendencia de Telecomunicaciones de Guatemala.',
+        'Bienvenido a la guía inclusiva del Observatorio Geoespacial de Telecomunicaciones de Guatemala.',
         'Esta herramienta reúne los datos oficiales de los 340 municipios y 27 mil 352 comunidades de Guatemala en un mapa fácil de entender.',
         'Las radiobases son las antenas celulares que brindan señal móvil. Las líneas fijas son conexiones por cable o fibra de operadores como TELGUA, COMCEL, Cablenet y Claro.',
         'El Semáforo Económico ISI califica a cada municipio de cero a cien: verde significa baja saturación y gran oportunidad para llevar internet; ámbar indica mercado en consolidación; y rojo indica plaza madura con alta infraestructura instalada.',
@@ -4222,7 +4222,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       return;
     }
     speakSentences([
-      'Observatorio Geoespacial de Guatemala con datos oficiales de la SIT hasta el primer semestre de 2026.',
+      'Observatorio Geoespacial de Guatemala con datos estadísticos del sector hasta el primer semestre de 2026.',
       'A nivel nacional existen 29 mil 186 radiobases, 2 millones 105 mil 12 líneas fijas y 27 mil 352 lugares poblados geolocalizados en los 340 municipios.',
       'Según el Semáforo Económico, 139 municipios presentan baja saturación con alta oportunidad de expansión, 161 están en consolidación y 40 son plazas maduras de alta saturación.',
       'Toca cualquier municipio en el mapa o usa el botón Dictar para decir por ejemplo: Dame los datos de Petén.'
@@ -4325,16 +4325,16 @@ const SIT = __SIT_DATA_PAYLOAD__;
     // 2. Exact matches (respecting explicit "departamento de ..." preference)
     for (const c of candidates) {
       if (preferDepto) {
-        for (const d of SIT.deptos) if (norm(d.nom) === c) return { type: 'depto', item: d };
+        for (const d of DATA.deptos) if (norm(d.nom) === c) return { type: 'depto', item: d };
       }
-      for (const m of SIT.munis) if (norm(m.nom) === c) return { type: 'muni', item: m };
-      for (const d of SIT.deptos) if (norm(d.nom) === c) return { type: 'depto', item: d };
+      for (const m of DATA.munis) if (norm(m.nom) === c) return { type: 'muni', item: m };
+      for (const d of DATA.deptos) if (norm(d.nom) === c) return { type: 'depto', item: d };
     }
 
     // 3. Word-boundary / phrase substring match (longest entity name found inside spoken sentence!)
     const padded = ' ' + rawNorm + ' ';
-    const depInPhrase = SIT.deptos.filter(d => padded.includes(' ' + norm(d.nom) + ' ')).sort((a,b) => b.nom.length - a.nom.length);
-    const muniInPhrase = SIT.munis.filter(m => padded.includes(' ' + norm(m.nom) + ' ')).sort((a,b) => b.nom.length - a.nom.length);
+    const depInPhrase = DATA.deptos.filter(d => padded.includes(' ' + norm(d.nom) + ' ')).sort((a,b) => b.nom.length - a.nom.length);
+    const muniInPhrase = DATA.munis.filter(m => padded.includes(' ' + norm(m.nom) + ' ')).sort((a,b) => b.nom.length - a.nom.length);
 
     if (preferDepto && depInPhrase.length) return { type: 'depto', item: depInPhrase[0] };
     // Check spoken aliases inside full sentence
@@ -4353,9 +4353,9 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
     // 4. Partial fallback on cleaned token (>= 4 chars)
     if (cleaned.length >= 4) {
-      const mSub = SIT.munis.filter(m => norm(m.nom).includes(cleaned)).sort((a,b) => a.nom.length - b.nom.length);
+      const mSub = DATA.munis.filter(m => norm(m.nom).includes(cleaned)).sort((a,b) => a.nom.length - b.nom.length);
       if (mSub.length) return { type: 'muni', item: mSub[0] };
-      const dSub = SIT.deptos.filter(d => norm(d.nom).includes(cleaned)).sort((a,b) => a.nom.length - b.nom.length);
+      const dSub = DATA.deptos.filter(d => norm(d.nom).includes(cleaned)).sort((a,b) => a.nom.length - b.nom.length);
       if (dSub.length) return { type: 'depto', item: dSub[0] };
     }
     return null;
@@ -4418,7 +4418,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
 
     // 3. Whole-country / national summary queries
     if (t.includes('resumen nacional') || t.includes('todo el pais') || t.includes('toda guatemala') || t.includes('panorama nacional')) {
-      if (t.includes('panorama')) { switchView('national'); showCaption('Dictado reconocido', 'Abriendo Panorama Nacional SIT', false); return; }
+      if (t.includes('panorama')) { switchView('national'); showCaption('Dictado reconocido', 'Abriendo Panorama Nacional', false); return; }
       switchView('map');
       state.deptoFilter = null; state.selectedMuniId = null; state.selectedDeptoId = null;
       document.getElementById('depto-filter').value = '';
@@ -4499,7 +4499,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
       return;
     }
     if (location.protocol === 'file:') {
-      showCaption('Abre el enlace HTTPS para usar micrófono', 'Los navegadores bloquean el micrófono en archivos locales (file://). Ábrelo en: https://jaredr0.github.io/mapaton-SIT/', true);
+      showCaption('Abre el enlace HTTPS para usar micrófono', 'Los navegadores bloquean el micrófono en archivos locales (file://). Ábrelo desde el enlace HTTPS publicado en la web.', true);
       captionTimer = setTimeout(() => capBar.classList.remove('open'), 7500);
       return;
     }
@@ -4640,7 +4640,7 @@ const SIT = __SIT_DATA_PAYLOAD__;
 </html>
 """
 
-html_out = HTML_TEMPLATE.replace("__SIT_DATA_PAYLOAD__", data_json)
+html_out = HTML_TEMPLATE.replace("__DATA_PAYLOAD__", data_json)
 for target_name in ["mapa_sit_guatemala.html", "index.html"]:
     p = os.path.join(OUT_DIR, target_name)
     with open(p, "w", encoding="utf-8") as f:
